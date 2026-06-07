@@ -10,6 +10,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
+from sqlalchemy import text, inspect
 from pydantic import BaseModel, validator
 from collections import defaultdict
 import models
@@ -23,11 +24,49 @@ templates = Jinja2Templates(directory="templates")
 
 ADMIN_SECRET = os.environ.get("ADMIN_SECRET", "change_me_in_env")
 
+def ensure_columns():
+    """Auto-migracja: dodaje brakujące kolumny do istniejących tabel.
+    create_all() nie modyfikuje istniejących tabel, więc po dodaniu pola
+    do modelu trzeba dorobić kolumnę ręcznie — to robi to automatycznie."""
+    expected = {
+        "players": [
+            ("full_name", "VARCHAR"),
+            ("favorite_team_points", "INTEGER DEFAULT 0"),
+            ("star_player_points", "INTEGER DEFAULT 0"),
+            ("current_streak", "INTEGER DEFAULT 0"),
+            ("longest_streak", "INTEGER DEFAULT 0"),
+            ("comeback_points", "INTEGER DEFAULT 0"),
+            ("revival_used", "BOOLEAN DEFAULT FALSE"),
+            ("favorite_locked", "BOOLEAN DEFAULT FALSE"),
+            ("is_alive", "BOOLEAN DEFAULT TRUE"),
+            ("shields", "INTEGER DEFAULT 2"),
+        ],
+        "matches": [
+            ("scorers", "JSON DEFAULT '[]'::json"),
+            ("multiplier", "INTEGER DEFAULT 1"),
+        ],
+    }
+    try:
+        insp = inspect(engine)
+        tables = insp.get_table_names()
+        with engine.begin() as conn:
+            for table, cols in expected.items():
+                if table not in tables:
+                    continue
+                existing = {c["name"] for c in insp.get_columns(table)}
+                for name, ddl in cols:
+                    if name not in existing:
+                        conn.execute(text(f'ALTER TABLE {table} ADD COLUMN {name} {ddl}'))
+                        print(f"🔧 Dodano brakującą kolumnę {table}.{name}", flush=True)
+    except Exception as e:
+        print(f"⚠️ ensure_columns: {e}", flush=True)
+
 @app.on_event("startup")
 def startup_event():
     print("⏳ Otwieram port i próbuję połączyć się z bazą...", flush=True)
     try:
         models.Base.metadata.create_all(bind=engine)
+        ensure_columns()
         print("⚽ CONNECTED TO DATABASE!", flush=True)
     except Exception as e:
         print(f"❌ BŁĄD BAZY DANYCH: {e}", flush=True)
@@ -49,6 +88,7 @@ class PlayerCreate(BaseModel):
 class PlayerAuth(BaseModel):
     username: str
     password: str
+    full_name: str = None
 
 class UserPickCreate(BaseModel):
     player_id: int
@@ -118,7 +158,7 @@ def calculate_points_with_bonus(predicted: str, actual: str, match_stage: str, h
         elif (pred_h > pred_a and act_h > act_a) or (pred_h < pred_a and act_h < act_a) or (pred_h == pred_a and act_h == act_a):
             base_points = 1
         else:
-            base_points = -2
+            base_points = -1
 
         # 2. Bonus za wysoką liczbę bramek (tylko przy dokładnym wyniku)
         high_score_bonus = 0
@@ -153,7 +193,7 @@ def calculate_points_with_bonus(predicted: str, actual: str, match_stage: str, h
 
         # 6. Punkty końcowe
         if base_points < 0:
-            # Błędny typ: kara -2 plus bonusy (favorite, star), bez mnożenia
+            # Błędny typ: kara -1 plus bonusy (favorite, star), bez mnożenia
             total_points = base_points + favorite_bonus + star_player_bonus
         else:
             # Trafiony typ: punkty bazowe + bonusy (underdog, high_score, favorite) są mnożone,
@@ -275,6 +315,7 @@ def get_player(player_id: int, db: Session = Depends(get_db)):
     return {
         "id": player.id,
         "username": player.username,
+        "full_name": player.full_name,
         "total_points": player.total_points,
         "correct_predictions": player.correct_predictions,
         "current_streak": player.current_streak,
@@ -295,6 +336,7 @@ def register_user(auth: PlayerAuth, response: Response, db: Session = Depends(ge
     new_player = models.Player(
         username=auth.username,
         password=hashed_password,
+        full_name=(auth.full_name.strip() if auth.full_name else None),
         email=f"{auth.username}@onepick.pl"
     )
     db.add(new_player)
@@ -680,7 +722,7 @@ def admin_panel(request: Request, db: Session = Depends(get_db)):
         <tr class="border-b border-white/5 hover:bg-white/[0.02] text-sm transition">
             <td class="p-3 font-semibold text-white">{p.username}</td>
             <td class="p-3 text-amber-400 font-bold">{p.total_points} pkt</td>
-            <td class="p-3 text-sky-400 font-mono">🧤 {p.shields}</td>
+            <td class="p-3 font-medium text-xs text-gray-300 truncate max-w-[140px]">{p.full_name or '-'}</td>
             <td class="p-3 font-medium text-xs text-gray-400 truncate max-w-[120px]">{p.star_player or '-'}</td>
             <td class="p-3 font-medium text-xs text-gray-400 truncate max-w-[120px]">{p.favorite_team or '-'}</td>
             <td class="p-3 text-right">{status}</td>
@@ -761,7 +803,7 @@ def admin_panel(request: Request, db: Session = Depends(get_db)):
                                     <tr class="border-b border-white/10 text-xs uppercase tracking-wider text-gray-500">
                                         <th class="p-3 font-semibold">Gracz</th>
                                         <th class="p-3 font-semibold">Punkty</th>
-                                        <th class="p-3 font-semibold">Rękawice</th>
+                                        <th class="p-3 font-semibold">Imię i nazwisko</th>
                                         <th class="p-3 font-semibold">Gwiazda</th>
                                         <th class="p-3 font-semibold">Zespół</th>
                                         <th class="p-3 font-semibold text-right">Status</th>
@@ -837,7 +879,7 @@ def admin_panel(request: Request, db: Session = Depends(get_db)):
                     }});
 
                     if (response.ok) {{
-                        alert('Sukces! Wynik wprowadzony, punkty przyznane, rękawice przeliczone.');
+                        alert('Sukces! Wynik wprowadzony, punkty przyznane.');
                         location.reload();
                     }} else {{
                         const errData = await response.json();
