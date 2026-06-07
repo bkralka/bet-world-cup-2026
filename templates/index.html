@@ -268,7 +268,8 @@
                         </span>
                         <button onclick="logout()" class="text-xs font-medium px-3 py-1.5 rounded-lg transition" style="color: var(--text-muted); background: var(--bg-elevated); border: 1px solid var(--border-subtle);">Wyloguj</button>
                     {% else %}
-                        <button onclick="document.getElementById('authModal').style.display='flex'" class="text-xs font-semibold px-4 py-1.5 rounded-lg transition" style="background: var(--accent); color: var(--bg-base);">Zaloguj</button>
+                        <button onclick="openAuth('login')" class="text-xs font-semibold px-4 py-1.5 rounded-lg transition" style="color: var(--text); background: var(--bg-elevated); border: 1px solid var(--border-subtle);">Zaloguj się</button>
+                        <button onclick="openAuth('register')" class="text-xs font-semibold px-4 py-1.5 rounded-lg transition" style="background: var(--accent); color: var(--bg-base);">Zarejestruj się</button>
                     {% endif %}
 
                     <span id="liveBadge" class="px-3 py-1.5 rounded-lg text-xs font-semibold uppercase animate-pulse-slow" style="display:none; background: var(--danger-soft); color: var(--danger); border: 1px solid rgba(248,113,113,0.25); letter-spacing: 0.08em;">● Na żywo</span>
@@ -505,7 +506,7 @@
             <p class="text-[10px] uppercase tracking-wider mt-1" style="color: var(--text-faint);">meczów za nami</p>
         </div>
     </div>
-    <button onclick="document.getElementById('authModal').style.display='flex'" class="font-semibold px-6 py-2.5 rounded-lg text-sm transition" style="background: var(--accent); color: var(--bg-base);">Dołącz do gry →</button>
+    <button onclick="openAuth('register')" class="font-semibold px-6 py-2.5 rounded-lg text-sm transition" style="background: var(--accent); color: var(--bg-base);">Dołącz do gry →</button>
 </div>
 {% endif %}
 </div>
@@ -593,9 +594,9 @@
                                     <span class="text-xs" style="color: var(--text-faint);">Zakończony</span>
                                 {% endif %}
                             {% elif current_player %}
-                                {% set match_started = match.match_date <= now() %}
-                                {% if ns.pick and match_started %}
-                                    {# typ wysłany, mecz w trakcie — podgląd bez edycji #}
+                                {% set betting_closed = match.match_date - timedelta(minutes=10) <= now() %}
+                                {% if ns.pick and betting_closed %}
+                                    {# typ wysłany, obstawianie zamknięte — podgląd bez edycji #}
                                     <span class="text-xs font-semibold px-3 py-1.5 rounded-lg inline-block" style="background: var(--bg-elevated); color: var(--text-muted);">🔒 Twój typ: {{ ns.pick.predicted_result }}</span>
                                 {% elif ns.pick and match.id in upcoming_match_ids %}
                                     {# typ wysłany, można edytować #}
@@ -606,8 +607,8 @@
                                 {% elif match.id in upcoming_match_ids %}
                                     {# brak typu, mecz w puli #}
                                     <button onclick="openPickModal({{ match.id }}, '{{ match.home_team }}', '{{ match.away_team }}')" class="pick-btn px-5 py-2 rounded-lg text-xs transition">Typuj</button>
-                                {% elif match_started %}
-                                    <span class="text-xs" style="color: var(--text-faint);">Mecz w trakcie</span>
+                                {% elif betting_closed %}
+                                    <span class="text-xs" style="color: var(--text-faint);">Obstawianie zamknięte</span>
                                 {% else %}
                                     <span class="text-xs" style="color: var(--text-faint);">Poza pulą</span>
                                 {% endif %}
@@ -622,21 +623,31 @@
         <div id="tab-knockouts" class="tab-content">
             <style>
                 #champion-box .flag-icon { width: 34px !important; height: 26px !important; border-radius: 4px; }
-                .ko-card { background: var(--bg-elevated); border: 1px solid var(--border-subtle); }
+                .ko-card { background: var(--bg-elevated); border: 1px solid var(--border-subtle); transition: border-color .2s, transform .2s; }
+                .ko-card:hover { border-color: var(--border-soft); transform: translateY(-1px); }
+                .ko-pos { display:inline-block; font-size:9px; font-weight:700; line-height:1; padding:2px 4px; border-radius:4px; background: var(--bg-surface); color: var(--text-faint); font-family: ui-monospace, monospace; flex-shrink:0; }
             </style>
 
-            {# makro renderujące pojedynczy mecz pucharowy z wynikiem, flagą i podświetleniem zwycięzcy #}
-            {% macro ko_match(match, gold=false) %}
+            {# makro renderujące pojedynczy mecz pucharowy: pozycje grup, flagi, wynik, podświetlenie zwycięzcy #}
+            {% macro ko_match(match, positions, gold=false) %}
                 {% set parts = match.result.split(':') if match.result else None %}
                 {% set hs = (parts[0]|int) if parts else -1 %}
                 {% set asc = (parts[1]|int) if parts else -1 %}
+                {% set hpos = positions.get(match.home_team) %}
+                {% set apos = positions.get(match.away_team) %}
                 <div class="rounded-xl p-3 ko-card" {% if gold %}style="background: rgba(251,191,36,0.06); border-color: rgba(251,191,36,0.3);"{% endif %}>
                     <div class="flex justify-between items-center text-sm mb-1.5">
-                        <span class="team-name" data-team="{{ match.home_team }}" style="{% if parts and hs > asc %}color: var(--success); font-weight:700;{% else %}font-weight:500;{% endif %}">{{ match.home_team }}</span>
+                        <span class="flex items-center gap-1.5 min-w-0">
+                            {% if hpos %}<span class="ko-pos">{{ hpos }}</span>{% endif %}
+                            <span class="team-name truncate" data-team="{{ match.home_team }}" style="{% if parts and hs > asc %}color: var(--success); font-weight:700;{% else %}font-weight:500;{% endif %}">{{ match.home_team }}</span>
+                        </span>
                         <span class="font-mono ml-2" style="color: {% if parts %}var(--text){% else %}var(--text-faint){% endif %};">{{ parts[0] if parts else '–' }}</span>
                     </div>
                     <div class="flex justify-between items-center text-sm">
-                        <span class="team-name" data-team="{{ match.away_team }}" style="{% if parts and asc > hs %}color: var(--success); font-weight:700;{% else %}font-weight:500;{% endif %}">{{ match.away_team }}</span>
+                        <span class="flex items-center gap-1.5 min-w-0">
+                            {% if apos %}<span class="ko-pos">{{ apos }}</span>{% endif %}
+                            <span class="team-name truncate" data-team="{{ match.away_team }}" style="{% if parts and asc > hs %}color: var(--success); font-weight:700;{% else %}font-weight:500;{% endif %}">{{ match.away_team }}</span>
+                        </span>
                         <span class="font-mono ml-2" style="color: {% if parts %}var(--text){% else %}var(--text-faint){% endif %};">{{ parts[1] if parts else '–' }}</span>
                     </div>
                 </div>
@@ -656,29 +667,32 @@
                 {% endif %}
             {% endif %}
 
+            <div class="px-6 pt-5 pb-1">
+                <p class="text-[11px]" style="color: var(--text-faint);">Oznaczenia: <span class="ko-pos">1A</span> = zwycięzca grupy A, <span class="ko-pos">2B</span> = drugie miejsce grupy B, <span class="ko-pos">3C</span> = trzecie miejsce grupy C (awans z najlepszych trzecich miejsc).</p>
+            </div>
             <div class="table-wrapper p-6 overflow-x-auto">
                 <div class="flex gap-5 min-w-[1000px]">
                     {% if knockout_bracket.round_of_32 %}
                     <div class="flex-1 space-y-2">
                         <h3 class="text-center text-[10px] font-semibold tracking-widest uppercase mb-4" style="color: var(--text-faint);">1/16 finału</h3>
-                        {% for match in knockout_bracket.round_of_32 %}{{ ko_match(match) }}{% endfor %}
+                        {% for match in knockout_bracket.round_of_32 %}{{ ko_match(match, team_positions) }}{% endfor %}
                     </div>
                     {% endif %}
                     <div class="flex-1 space-y-3">
                         <h3 class="text-center text-[10px] font-semibold tracking-widest uppercase mb-4" style="color: var(--text-faint);">1/8 finału</h3>
-                        {% for match in knockout_bracket.round_of_16 %}{{ ko_match(match) }}{% endfor %}
+                        {% for match in knockout_bracket.round_of_16 %}{{ ko_match(match, team_positions) }}{% endfor %}
                     </div>
                     <div class="flex-1 space-y-8 mt-6">
                         <h3 class="text-center text-[10px] font-semibold tracking-widest uppercase mb-4" style="color: var(--text-faint);">Ćwierćfinały</h3>
-                        {% for match in knockout_bracket.quarterfinals %}{{ ko_match(match) }}{% endfor %}
+                        {% for match in knockout_bracket.quarterfinals %}{{ ko_match(match, team_positions) }}{% endfor %}
                     </div>
                     <div class="flex-1 space-y-20 mt-16">
                         <h3 class="text-center text-[10px] font-semibold tracking-widest uppercase mb-4" style="color: var(--text-faint);">Półfinały</h3>
-                        {% for match in knockout_bracket.semifinals %}{{ ko_match(match) }}{% endfor %}
+                        {% for match in knockout_bracket.semifinals %}{{ ko_match(match, team_positions) }}{% endfor %}
                     </div>
                     <div class="flex-1 mt-32">
                         <h3 class="text-center text-[10px] font-semibold tracking-widest uppercase mb-4" style="color: var(--gold);">Finał</h3>
-                        {% for match in knockout_bracket.final %}{{ ko_match(match, gold=true) }}{% endfor %}
+                        {% for match in knockout_bracket.final %}{{ ko_match(match, team_positions, gold=true) }}{% endfor %}
                     </div>
                 </div>
             </div>
@@ -987,17 +1001,18 @@
     <div id="authModal" class="fixed inset-0 flex items-center justify-center z-[300]" style="display: none; background: rgba(11,13,17,0.85); backdrop-filter: blur(8px);">
         <div class="relative flat-card rounded-2xl p-7 max-w-sm w-full mx-4" style="border: 1px solid var(--border-soft);">
             <button onclick="document.getElementById('authModal').style.display='none'" class="absolute top-4 right-4 transition w-7 h-7 flex items-center justify-center rounded-lg" style="color: var(--text-muted); background: var(--bg-elevated);">✕</button>
-            <h2 class="font-display font-bold text-xl text-center mb-6">Dołącz do gry</h2>
+            <h2 id="authTitle" class="font-display font-bold text-xl text-center mb-6">Zaloguj się</h2>
 
             <input type="text" id="authUsername" placeholder="Login (nick)" class="w-full rounded-xl p-3.5 mb-3 outline-none transition" style="background: var(--bg-elevated); border: 1px solid var(--border-subtle); color: var(--text);">
-            <input type="text" id="authFullName" placeholder="Imię i nazwisko (przy rejestracji)" class="w-full rounded-xl p-3.5 mb-3 outline-none transition" style="background: var(--bg-elevated); border: 1px solid var(--border-subtle); color: var(--text);">
+            <input type="text" id="authFullName" placeholder="Imię i nazwisko" class="w-full rounded-xl p-3.5 mb-3 outline-none transition" style="background: var(--bg-elevated); border: 1px solid var(--border-subtle); color: var(--text); display:none;">
             <input type="password" id="authPassword" placeholder="Hasło" class="w-full rounded-xl p-3.5 mb-5 outline-none transition" style="background: var(--bg-elevated); border: 1px solid var(--border-subtle); color: var(--text);">
 
-            <div class="flex gap-3">
-                <button onclick="handleAuth('login')" class="flex-1 font-semibold py-3 rounded-xl transition" style="background: var(--success); color: var(--bg-base);">Zaloguj</button>
-                <button onclick="handleAuth('register')" class="flex-1 font-semibold py-3 rounded-xl transition" style="background: transparent; color: var(--success); border: 1px solid rgba(74,222,128,0.4);">Zarejestruj</button>
-            </div>
+            <button id="authSubmitBtn" onclick="handleAuth(window.authMode || 'login')" class="w-full font-semibold py-3 rounded-xl transition" style="background: var(--success); color: var(--bg-base);">Zaloguj się</button>
             <p id="authError" class="text-xs text-center mt-4 font-medium hidden" style="color: var(--danger);"></p>
+            <p class="text-xs text-center mt-4" style="color: var(--text-faint);">
+                <span id="authSwitchText">Nie masz konta?</span>
+                <button id="authSwitchBtn" onclick="toggleAuthMode()" class="font-semibold ml-1" style="color: var(--success);">Zarejestruj się</button>
+            </p>
         </div>
     </div>
 
@@ -1667,6 +1682,22 @@ function openTeamDetail(name) {
                 alert("Błąd: " + JSON.stringify(err.detail || err));
             }
         };
+
+        function openAuth(mode) {
+            window.authMode = mode;
+            const isReg = mode === 'register';
+            document.getElementById('authTitle').textContent = isReg ? 'Zarejestruj się' : 'Zaloguj się';
+            document.getElementById('authSubmitBtn').textContent = isReg ? 'Zarejestruj się' : 'Zaloguj się';
+            document.getElementById('authFullName').style.display = isReg ? 'block' : 'none';
+            document.getElementById('authSwitchText').textContent = isReg ? 'Masz już konto?' : 'Nie masz konta?';
+            document.getElementById('authSwitchBtn').textContent = isReg ? 'Zaloguj się' : 'Zarejestruj się';
+            document.getElementById('authError').classList.add('hidden');
+            document.getElementById('authModal').style.display = 'flex';
+        }
+
+        function toggleAuthMode() {
+            openAuth((window.authMode === 'register') ? 'login' : 'register');
+        }
 
         async function handleAuth(action) {
             const user = document.getElementById('authUsername').value;

@@ -142,7 +142,7 @@ def get_upcoming_matches(db: Session, limit: int = 5):
     matches = db.query(models.Match).filter(
         models.Match.is_finished == False,
         models.Match.is_locked == False,
-        models.Match.match_date > now
+        models.Match.match_date > now + timedelta(minutes=10)
     ).order_by(models.Match.match_date).limit(limit).all()
     return [m.id for m in matches]
 
@@ -228,7 +228,10 @@ TEAM_TO_GROUP = {
 GROUPS_LIST = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"]
 
 def calculate_group_standings(db: Session):
-    matches = db.query(models.Match).filter(models.Match.is_finished == True).all()
+    matches = db.query(models.Match).filter(
+        models.Match.is_finished == True,
+        models.Match.stage == "group"
+    ).all()
 
     team_stats = defaultdict(lambda: {
         "played": 0, "won": 0, "drawn": 0, "lost": 0,
@@ -489,6 +492,12 @@ def read_dashboard(request: Request, db: Session = Depends(get_db)):
     knockout_bracket = build_knockout_bracket(db)
     upcoming_match_ids = get_upcoming_matches(db, 5)
 
+    # Mapa pozycji w grupie dla każdej drużyny, np. {"Meksyk": "1A", "Czechy": "2A"}
+    team_positions = {}
+    for group, teams in group_standings.items():
+        for idx, t in enumerate(teams):
+            team_positions[t["name"]] = f"{idx + 1}{group}"
+
 
     active_picks = []
     if current_player:
@@ -505,7 +514,8 @@ def read_dashboard(request: Request, db: Session = Depends(get_db)):
             "all_players": all_players, "picks": picks,
             "current_player": current_player, "active_picks": active_picks,
             "group_standings": group_standings, "knockout_bracket": knockout_bracket,
-            "pick_stats": pick_stats, "now": now_utc, "timedelta": timedelta, "upcoming_match_ids": upcoming_match_ids
+            "pick_stats": pick_stats, "now": now_utc, "timedelta": timedelta, "upcoming_match_ids": upcoming_match_ids,
+            "team_positions": team_positions
         }
     )
 
@@ -577,6 +587,10 @@ def create_pick(pick: UserPickCreate, db: Session = Depends(get_db)):
     match = db.query(models.Match).filter(models.Match.id == pick.match_id).first()
     if not match or match.is_locked or match.is_finished:
         raise HTTPException(status_code=400, detail="Mecz jest zablokowany")
+
+    # Deadline: obstawianie zamyka się 10 minut przed pierwszym gwizdkiem
+    if now_utc() >= match.match_date - timedelta(minutes=10):
+        raise HTTPException(status_code=400, detail="Obstawianie zamknięte — zostało mniej niż 10 minut do meczu")
 
     # ----- NOWA LOGIKA: tylko pierwsze 4 nadchodzące mecze -----
     upcoming_ids = get_upcoming_matches(db, limit=5)
