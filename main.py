@@ -16,18 +16,21 @@ import models
 from database import engine, get_db
 from typing import Optional
 
-try:
-    models.Base.metadata.create_all(bind=engine)
-    print("⚽ CONNECTED TO DATABASE!", flush=True)
-except Exception as e:
-    print(f"❌ BŁĄD POŁĄCZENIA Z BAZĄ DANYCH: {e}", flush=True)
-    raise e
 
 app = FastAPI(title="OnePick Cup 2026 API")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
 ADMIN_SECRET = os.environ.get("ADMIN_SECRET", "change_me_in_env")
+
+@app.on_event("startup")
+def startup_event():
+    print("⏳ Otwieram port i próbuję połączyć się z bazą...", flush=True)
+    try:
+        models.Base.metadata.create_all(bind=engine)
+        print("⚽ CONNECTED TO DATABASE!", flush=True)
+    except Exception as e:
+        print(f"❌ BŁĄD BAZY DANYCH: {e}", flush=True)
 
 def hash_password(password: str) -> str:
     return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
