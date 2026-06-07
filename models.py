@@ -7,6 +7,7 @@ class Player(Base):
     __tablename__ = "players"
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String, unique=True, index=True)
+    full_name = Column(String, nullable=True)  # imię i nazwisko (widoczne dla admina i w profilu)
     email = Column(String, unique=True, index=True)
     password = Column(String, nullable=False)  # bcrypt hash
     is_active = Column(Boolean, default=True)

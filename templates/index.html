@@ -550,7 +550,11 @@
                         <div class="flex-1 min-w-[300px]">
                             <div class="flex items-center gap-4 justify-between">
                                 <div class="font-semibold text-sm w-2/5 text-right whitespace-nowrap overflow-hidden text-ellipsis"><span class="team-name" data-team="{{ match.home_team }}">{{ match.home_team }}</span></div>
-                                <span class="text-xs font-medium" style="color: var(--text-faint);">vs</span>
+                                {% if match.is_finished and match.result %}
+                                    <span class="font-mono text-lg font-bold px-1" style="color: var(--text);">{{ match.result }}</span>
+                                {% else %}
+                                    <span class="text-xs font-medium" style="color: var(--text-faint);">vs</span>
+                                {% endif %}
                                 <div class="font-semibold text-sm w-2/5 text-left whitespace-nowrap overflow-hidden text-ellipsis"><span class="team-name" data-team="{{ match.away_team }}">{{ match.away_team }}</span></div>
                             </div>
                             <p class="text-center text-xs mt-2.5" style="color: var(--text-muted);">{{ match.match_date.strftime('%d.%m.%Y · %H:%M') }}</p>
@@ -571,41 +575,43 @@
                             </div>
                             {% endif %}
                         </div>
-                        <div class="min-w-[120px] text-right flex-shrink-0">
-                            {% if match.is_finished %}
-                                <span class="px-4 py-2 rounded-lg text-sm font-mono" style="background: var(--bg-elevated); color: var(--text-muted);">{{ match.result if match.result else '—' }}</span>
-                            {% elif current_player %}
-                                {# znajdź pick użytkownika dla tego meczu #}
-                                {% set user_pick_for_match = none %}
+                        <div class="min-w-[140px] text-right flex-shrink-0">
+                            {# znajdź pick użytkownika (namespace = pewny scope po pętli) #}
+                            {% set ns = namespace(pick=none) %}
+                            {% if current_player %}
                                 {% for pick in picks %}
-                                    {% if pick.player_id == current_player.id and pick.match_id == match.id %}
-                                        {% set user_pick_for_match = pick %}
-                                    {% endif %}
+                                    {% if pick.player_id == current_player.id and pick.match_id == match.id %}{% set ns.pick = pick %}{% endif %}
                                 {% endfor %}
+                            {% endif %}
 
+                            {% if match.is_finished %}
+                                {% if current_player and ns.pick %}
+                                    {% set pts = ns.pick.points_earned %}
+                                    <div class="text-[11px]" style="color: var(--text-faint);">Twój typ: <span style="color: var(--text-muted); font-weight:600;">{{ ns.pick.predicted_result }}</span></div>
+                                    <div class="font-display font-bold text-lg mt-0.5" style="color: {% if pts > 0 %}var(--success){% elif pts < 0 %}var(--danger){% else %}var(--text-muted){% endif %};">{{ '+' if pts > 0 else '' }}{{ pts }} pkt</div>
+                                {% else %}
+                                    <span class="text-xs" style="color: var(--text-faint);">Zakończony</span>
+                                {% endif %}
+                            {% elif current_player %}
                                 {% set match_started = match.match_date <= now() %}
-
-                                {% if user_pick_for_match and match_started %}
-                                    {# Pick wysłany, mecz w trakcie — tylko podgląd, brak edycji #}
-                                    <span class="text-xs font-semibold px-3 py-1.5 rounded-lg inline-block" style="background: var(--bg-elevated); color: var(--text-muted);">🔒 Twój typ: {{ user_pick_for_match.predicted_result }}</span>
-                                {% elif user_pick_for_match and match.id in upcoming_match_ids %}
-                                    {# Pick wysłany, mecz przed startem — można edytować #}
-                                    <button onclick="openPickModal({{ match.id }}, '{{ match.home_team }}', '{{ match.away_team }}', '{{ user_pick_for_match.predicted_result }}')" class="text-xs font-semibold px-3 py-1.5 rounded-lg transition" style="background: var(--success-soft); color: var(--success); border: 1px solid rgba(74,222,128,0.3);">✏️ Edytuj ({{ user_pick_for_match.predicted_result }})</button>
-                                {% elif user_pick_for_match %}
-                                    {# Pick wysłany, ale mecz poza pulą edycji #}
-                                    <span class="text-xs font-semibold px-3 py-1.5 rounded-lg inline-block" style="background: var(--bg-elevated); color: var(--text-muted);">Typ: {{ user_pick_for_match.predicted_result }}</span>
+                                {% if ns.pick and match_started %}
+                                    {# typ wysłany, mecz w trakcie — podgląd bez edycji #}
+                                    <span class="text-xs font-semibold px-3 py-1.5 rounded-lg inline-block" style="background: var(--bg-elevated); color: var(--text-muted);">🔒 Twój typ: {{ ns.pick.predicted_result }}</span>
+                                {% elif ns.pick and match.id in upcoming_match_ids %}
+                                    {# typ wysłany, można edytować #}
+                                    <button onclick="openPickModal({{ match.id }}, '{{ match.home_team }}', '{{ match.away_team }}', '{{ ns.pick.predicted_result }}')" class="text-xs font-semibold px-3 py-1.5 rounded-lg transition" style="background: var(--success-soft); color: var(--success); border: 1px solid rgba(74,222,128,0.3);">✏️ Edytuj ({{ ns.pick.predicted_result }})</button>
+                                {% elif ns.pick %}
+                                    {# typ wysłany, mecz poza pulą edycji #}
+                                    <span class="text-xs font-semibold px-3 py-1.5 rounded-lg inline-block" style="background: var(--bg-elevated); color: var(--text-muted);">Twój typ: {{ ns.pick.predicted_result }}</span>
                                 {% elif match.id in upcoming_match_ids %}
-                                    {# Brak typu, mecz w puli — można typować #}
+                                    {# brak typu, mecz w puli #}
                                     <button onclick="openPickModal({{ match.id }}, '{{ match.home_team }}', '{{ match.away_team }}')" class="pick-btn px-5 py-2 rounded-lg text-xs transition">Typuj</button>
                                 {% elif match_started %}
-                                    {# Brak typu, mecz w trakcie #}
                                     <span class="text-xs" style="color: var(--text-faint);">Mecz w trakcie</span>
                                 {% else %}
-                                    {# Brak typu, mecz poza pulą 4 najbliższych #}
                                     <span class="text-xs" style="color: var(--text-faint);">Poza pulą</span>
                                 {% endif %}
                             {% endif %}
-                            {# Brak else dla niezalogowanego — przycisk "Zaloguj" jest w nawigacji #}
                         </div>
                     </div>
                 </div>
@@ -730,8 +736,9 @@
                          onclick="openPlayerProfile({{ p.id }})"
                          data-username="{{ p.username|lower }}">
                         <div class="flex items-center justify-between mb-2">
-                            <div class="flex items-center gap-2">
-                                <span class="font-semibold text-sm">{{ p.username }}</span>
+                            <div class="flex flex-col">
+                                <span class="font-semibold text-sm">{{ p.full_name if p.full_name else p.username }}</span>
+                                {% if p.full_name %}<span class="text-[10px]" style="color: var(--text-faint);">@{{ p.username }}</span>{% endif %}
                             </div>
                             <span class="font-display font-bold text-base" style="color: var(--success);">{{ p.total_points }}<span class="text-xs ml-1" style="color: var(--text-muted);">pkt</span></span>
                         </div>
@@ -823,7 +830,7 @@
                             </div>
                             <div class="flex justify-between items-center p-3 rounded-lg" style="background: var(--bg-elevated);">
                                 <span class="text-sm" style="color: var(--text-muted);">Błędny zwycięzca</span>
-                                <span class="font-display font-bold text-base" style="color: var(--danger);">−2 pkt</span>
+                                <span class="font-display font-bold text-base" style="color: var(--danger);">−1 pkt</span>
                             </div>
                         </div>
                     </div>
@@ -833,7 +840,7 @@
                         <p class="text-[10px] font-semibold uppercase tracking-wider mb-3" style="color: var(--text-faint);">Jak wygrać</p>
                         <div class="p-4 rounded-xl text-sm leading-relaxed space-y-2" style="background: var(--bg-elevated);">
                             <p>Nikt nie odpada — <strong style='color:var(--success);'>wszyscy grają do końca</strong>.</p>
-                            <p>Każdy mecz to szansa na punkty… albo strata <strong style='color:var(--danger);'>−2</strong> za zły typ.</p>
+                            <p>Każdy mecz to szansa na punkty… albo strata <strong style='color:var(--danger);'>−1</strong> za zły typ.</p>
                             <p>Punkty mogą zejść na minus — <strong>ryzykuj rozważnie</strong>.</p>
                             <p class="pt-1 mt-1 border-t" style="border-color: var(--border-subtle);">Wygrywa najwyższy wynik w rankingu. 🏆</p>
                         </div>
@@ -894,8 +901,8 @@
                 <div class="mt-7 p-4 rounded-xl" style="background: var(--bg-elevated); border-left: 2px solid var(--info);">
                     <p class="text-xs font-semibold uppercase tracking-wider mb-2" style="color: var(--info);">Przykład – kara i bonus</p>
                     <p class="text-sm leading-relaxed">
-                        Twoja ulubiona drużyna: <strong>Francja</strong>. Obstawiasz <strong>0:1</strong> (porażka), a mecz kończy się <strong>2:0</strong> dla Francji. Twój typ jest błędny → <strong>-2 pkt</strong>, ale Francja wygrywa → <strong>+1 pkt</strong> (bonus za ulubioną drużynę).<br>
-                        → <strong style="color: var(--danger);">-2 pkt</strong> + <strong style="color: var(--gold);">+1 pkt</strong> = <strong style="color: var(--success);">-1 pkt</strong> 🧤
+                        Twoja ulubiona drużyna: <strong>Francja</strong>. Obstawiasz <strong>0:1</strong> (porażka), a mecz kończy się <strong>2:0</strong> dla Francji. Twój typ jest błędny → <strong>-1 pkt</strong>, ale Francja wygrywa → <strong>+1 pkt</strong> (bonus za ulubioną drużynę).<br>
+                        → <strong style="color: var(--danger);">-1 pkt</strong> + <strong style="color: var(--gold);">+1 pkt</strong> = <strong style="color: var(--text-muted);">0 pkt</strong>
                     </p>
                 </div>
 
@@ -927,6 +934,7 @@
                             <div class="flex items-center gap-2 mb-1">
                                 <h2 id="pp-username" class="font-display font-bold text-2xl"></h2>
                             </div>
+                            <p id="pp-fullname" class="text-xs" style="color: var(--text-faint);"></p>
                         </div>
                         <div class="text-right">
                             <p class="font-display font-bold text-3xl" style="color: var(--success);" id="pp-points">0</p>
@@ -981,7 +989,8 @@
             <button onclick="document.getElementById('authModal').style.display='none'" class="absolute top-4 right-4 transition w-7 h-7 flex items-center justify-center rounded-lg" style="color: var(--text-muted); background: var(--bg-elevated);">✕</button>
             <h2 class="font-display font-bold text-xl text-center mb-6">Dołącz do gry</h2>
 
-            <input type="text" id="authUsername" placeholder="Login" class="w-full rounded-xl p-3.5 mb-3 outline-none transition" style="background: var(--bg-elevated); border: 1px solid var(--border-subtle); color: var(--text);">
+            <input type="text" id="authUsername" placeholder="Login (nick)" class="w-full rounded-xl p-3.5 mb-3 outline-none transition" style="background: var(--bg-elevated); border: 1px solid var(--border-subtle); color: var(--text);">
+            <input type="text" id="authFullName" placeholder="Imię i nazwisko (przy rejestracji)" class="w-full rounded-xl p-3.5 mb-3 outline-none transition" style="background: var(--bg-elevated); border: 1px solid var(--border-subtle); color: var(--text);">
             <input type="password" id="authPassword" placeholder="Hasło" class="w-full rounded-xl p-3.5 mb-5 outline-none transition" style="background: var(--bg-elevated); border: 1px solid var(--border-subtle); color: var(--text);">
 
             <div class="flex gap-3">
@@ -1407,6 +1416,7 @@
                 const hist = await historyRes.json();
 
                 document.getElementById('pp-username').textContent = p.username;
+                document.getElementById('pp-fullname').textContent = p.full_name || '';
                 document.getElementById('pp-points').textContent = p.total_points;
                 document.getElementById('pp-correct').textContent = p.correct_predictions;
                 document.getElementById('pp-streak').textContent = p.current_streak;
@@ -1661,6 +1671,7 @@ function openTeamDetail(name) {
         async function handleAuth(action) {
             const user = document.getElementById('authUsername').value;
             const pass = document.getElementById('authPassword').value;
+            const fullName = document.getElementById('authFullName').value.trim();
             const err = document.getElementById('authError');
 
             if(!user || !pass) {
@@ -1668,11 +1679,16 @@ function openTeamDetail(name) {
                 err.classList.remove('hidden');
                 return;
             }
+            if(action === 'register' && !fullName) {
+                err.textContent = "Podaj imię i nazwisko!";
+                err.classList.remove('hidden');
+                return;
+            }
 
             const res = await fetch(`/auth/${action}/`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username: user, password: pass })
+                body: JSON.stringify({ username: user, password: pass, full_name: fullName })
             });
 
             if(res.ok) {
@@ -1701,7 +1717,7 @@ function openTeamDetail(name) {
         const stepContent = {
             1: { icon: "🏆", title: "Bet World Cup 2026", subtitle: "Typer Mistrzostw Świata", text: "Typujesz dokładne wyniki meczów mundialu. Trafiasz — zdobywasz punkty. Mylisz zwycięzcę — tracisz punkty. Wygrywa ten, kto uzbiera ich najwięcej." },
             2: { icon: "📋", title: "Zasady", subtitle: "Krótka wersja", items: ["Typuj <strong>dokładny wynik</strong> (np. '2:1')", "Obstawiasz <strong>5 najbliższych meczów</strong> z terminarza", "Typ <strong>edytujesz</strong> aż do gwizdka", "Nikt nie odpada — gra się <strong>na punkty</strong>", "Wygrywa gracz z <strong style='color:var(--gold);'>najwyższym wynikiem</strong>"] },
-            3: { icon: "🎯", title: "Punktacja", subtitle: "Jak zdobywasz punkty", items: ["<strong style='color:var(--success);'>+3 pkt</strong> — dokładny wynik", "<strong>+1 pkt</strong> — dobry zwycięzca / remis", "<strong style='color:var(--danger);'>−2 pkt</strong> — błędnie wytypowany zwycięzca"] },
+            3: { icon: "🎯", title: "Punktacja", subtitle: "Jak zdobywasz punkty", items: ["<strong style='color:var(--success);'>+3 pkt</strong> — dokładny wynik", "<strong>+1 pkt</strong> — dobry zwycięzca / remis", "<strong style='color:var(--danger);'>−1 pkt</strong> — błędnie wytypowany zwycięzca"] },
             4: { icon: "✨", title: "Bonusy", subtitle: "Zaryzykuj, zarób więcej", items: ["Underdog wygrywa → <strong style='color:var(--success);'>+2</strong>", "Underdog remisuje → <strong>+1</strong>", "4 bramki łącznie → <strong>+1</strong>", "5+ bramek łącznie → <strong>+2</strong>", "Faza pucharowa ×1.5 / ×2 / ×3", "Ulubiona drużyna wygrywa → <strong style='color:var(--gold);'>+1</strong>"] },
             5: { icon: "📖", title: "Przykład", subtitle: "Arabia Saudyjska vs Argentyna", text: "Typujesz <strong style='color:var(--success);'>2:1</strong>. Wynik: <strong>2:1</strong>.<br><br>3 (dokładny) + 2 (underdog) = <span style='color:var(--success); font-size:1.5rem; font-weight:700; font-family: DM Sans;'>5 punktów</span>" }
         };
@@ -2025,6 +2041,30 @@ const TEAM_DATA = {
             { name: "Lautaro Martínez", country: "Argentyna", matches: 68, goals: 30, assists: 8, age: 28, height: "174 cm", weight: "72 kg", foot: "Prawa", img: "/static/players/martinez.jpg" },
             { name: "Rafael Leão", country: "Portugalia", matches: 33, goals: 4, assists: 6, age: 26, height: "188 cm", weight: "81 kg", foot: "Prawa", img: "/static/players/leao.jpg" },
             { name: "Cody Gakpo", country: "Holandia", matches: 35, goals: 13, assists: 5, age: 27, height: "193 cm", weight: "76 kg", foot: "Prawa", img: "/static/players/gakpo.jpg" },
+            { name: "Neymar", country: "Brazylia", matches: 128, goals: 79, assists: 58, age: 34, height: "175 cm", weight: "68 kg", foot: "Prawa", img: "/static/players/neymar.jpg" },
+            { name: "Bruno Fernandes", country: "Portugalia", matches: 80, goals: 28, assists: 20, age: 31, height: "179 cm", weight: "69 kg", foot: "Prawa", img: "/static/players/bruno.jpg" },
+            { name: "Pedri", country: "Hiszpania", matches: 30, goals: 4, assists: 4, age: 23, height: "174 cm", weight: "60 kg", foot: "Prawa", img: "/static/players/pedri.jpg" },
+            { name: "Nico Williams", country: "Hiszpania", matches: 25, goals: 6, assists: 5, age: 23, height: "181 cm", weight: "73 kg", foot: "Prawa", img: "/static/players/nicowilliams.jpg" },
+            { name: "Jamal Musiala", country: "Niemcy", matches: 40, goals: 8, assists: 5, age: 23, height: "184 cm", weight: "72 kg", foot: "Prawa", img: "/static/players/musiala.jpg" },
+            { name: "Luka Modrić", country: "Chorwacja", matches: 190, goals: 27, assists: 30, age: 40, height: "172 cm", weight: "66 kg", foot: "Prawa", img: "/static/players/modric.jpg" },
+            { name: "Kevin De Bruyne", country: "Belgia", matches: 110, goals: 30, assists: 50, age: 34, height: "181 cm", weight: "70 kg", foot: "Prawa", img: "/static/players/debruyne.jpg" },
+            { name: "Virgil van Dijk", country: "Holandia", matches: 80, goals: 9, assists: 3, age: 34, height: "193 cm", weight: "92 kg", foot: "Prawa", img: "/static/players/vandijk.jpg" },
+            { name: "Mohamed Salah", country: "Egipt", matches: 100, goals: 60, assists: 40, age: 33, height: "175 cm", weight: "71 kg", foot: "Lewa", img: "/static/players/salah.jpg" },
+            { name: "Son Heung-min", country: "Korea Południowa", matches: 135, goals: 53, assists: 30, age: 33, height: "183 cm", weight: "78 kg", foot: "Obie", img: "/static/players/son.jpg" },
+            { name: "Achraf Hakimi", country: "Maroko", matches: 85, goals: 11, assists: 12, age: 27, height: "181 cm", weight: "73 kg", foot: "Prawa", img: "/static/players/hakimi.jpg" },
+            { name: "Sadio Mané", country: "Senegal", matches: 115, goals: 45, assists: 25, age: 33, height: "175 cm", weight: "69 kg", foot: "Prawa", img: "/static/players/mane.jpg" },
+            { name: "Alexander Isak", country: "Szwecja", matches: 55, goals: 18, assists: 6, age: 26, height: "192 cm", weight: "77 kg", foot: "Prawa", img: "/static/players/isak.jpg" },
+            { name: "Martin Ødegaard", country: "Norwegia", matches: 60, goals: 10, assists: 12, age: 27, height: "178 cm", weight: "68 kg", foot: "Lewa", img: "/static/players/odegaard.jpg" },
+            { name: "Hakan Çalhanoğlu", country: "Turcja", matches: 95, goals: 22, assists: 15, age: 32, height: "178 cm", weight: "76 kg", foot: "Obie", img: "/static/players/calhanoglu.jpg" },
+            { name: "Christian Pulisic", country: "USA", matches: 80, goals: 32, assists: 20, age: 27, height: "177 cm", weight: "73 kg", foot: "Prawa", img: "/static/players/pulisic.jpg" },
+            { name: "Alphonso Davies", country: "Kanada", matches: 55, goals: 16, assists: 16, age: 25, height: "183 cm", weight: "75 kg", foot: "Lewa", img: "/static/players/davies.jpg" },
+            { name: "Riyad Mahrez", country: "Algieria", matches: 95, goals: 30, assists: 25, age: 35, height: "179 cm", weight: "67 kg", foot: "Lewa", img: "/static/players/mahrez.jpg" },
+            { name: "Mehdi Taremi", country: "Iran", matches: 90, goals: 50, assists: 20, age: 33, height: "187 cm", weight: "78 kg", foot: "Prawa", img: "/static/players/taremi.jpg" },
+            { name: "Luis Díaz", country: "Kolumbia", matches: 70, goals: 20, assists: 10, age: 29, height: "178 cm", weight: "73 kg", foot: "Prawa", img: "/static/players/luisdiaz.jpg" },
+            { name: "Takefusa Kubo", country: "Japonia", matches: 40, goals: 8, assists: 6, age: 24, height: "173 cm", weight: "67 kg", foot: "Lewa", img: "/static/players/kubo.jpg" },
+            { name: "Chris Wood", country: "Nowa Zelandia", matches: 85, goals: 45, assists: 10, age: 34, height: "191 cm", weight: "84 kg", foot: "Prawa", img: "/static/players/wood.jpg" },
+            { name: "Matheus Cunha", country: "Brazylia", matches: 25, goals: 5, assists: 4, age: 26, height: "184 cm", weight: "82 kg", foot: "Prawa", img: "/static/players/cunha.jpg" },
+            { name: "Patrik Schick", country: "Czechy", matches: 45, goals: 22, assists: 4, age: 30, height: "191 cm", weight: "73 kg", foot: "Prawa", img: "/static/players/schick.jpg" },
         ];
 
         let spCurrentIdx = 0;
