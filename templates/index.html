@@ -623,32 +623,49 @@
         <div id="tab-knockouts" class="tab-content">
             <style>
                 #champion-box .flag-icon { width: 34px !important; height: 26px !important; border-radius: 4px; }
-                .ko-card { background: var(--bg-elevated); border: 1px solid var(--border-subtle); transition: border-color .2s, transform .2s; }
-                .ko-card:hover { border-color: var(--border-soft); transform: translateY(-1px); }
                 .ko-pos { display:inline-block; font-size:9px; font-weight:700; line-height:1; padding:2px 4px; border-radius:4px; background: var(--bg-surface); color: var(--text-faint); font-family: ui-monospace, monospace; flex-shrink:0; }
+                .bracket-wrap { overflow-x: auto; padding: 4px 4px 8px; }
+                .bracket { display: flex; align-items: stretch; min-width: 1120px; }
+                .ko-round { display: flex; flex-direction: column; flex: 1; min-width: 210px; padding: 0 22px; }
+                .ko-round-body { flex: 1; display: flex; flex-direction: column; justify-content: space-around; }
+                .ko-round-title { text-align:center; font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; padding:8px; border-radius:8px; margin-bottom:16px; background: var(--accent-soft); color: var(--accent); }
+                .ko-round-title.final { background: rgba(251,191,36,0.12); color: var(--gold); }
+                .ko-match { position: relative; margin: 7px 0; }
+                .ko-match::after { content:''; position:absolute; right:-22px; top:50%; width:22px; height:2px; background: var(--border-soft); }
+                .ko-match::before { content:''; position:absolute; left:-22px; top:50%; width:22px; height:2px; background: var(--border-soft); }
+                .bracket > .ko-round:first-child .ko-match::before { display:none; }
+                .bracket > .ko-round:last-child .ko-match::after { display:none; }
+                .ko-card2 { background: var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:9px; overflow:hidden; transition: border-color .2s, transform .2s; }
+                .ko-card2:hover { border-color: var(--border-soft); transform: translateY(-1px); }
+                .ko-date { font-size:9px; color: var(--text-faint); padding:4px 9px; background: var(--bg-surface); border-bottom:1px solid var(--border-subtle); }
+                .ko-row { display:flex; align-items:center; justify-content:space-between; padding:7px 9px; gap:6px; }
+                .ko-row + .ko-row { border-top:1px solid var(--border-subtle); }
             </style>
 
-            {# makro renderujące pojedynczy mecz pucharowy: pozycje grup, flagi, wynik, podświetlenie zwycięzcy #}
+            {# makro: pojedynczy mecz w stylu drabinki (data, pozycje grup, flagi, wynik, podświetlenie zwycięzcy) #}
             {% macro ko_match(match, positions, gold=false) %}
                 {% set parts = match.result.split(':') if match.result else None %}
                 {% set hs = (parts[0]|int) if parts else -1 %}
                 {% set asc = (parts[1]|int) if parts else -1 %}
                 {% set hpos = positions.get(match.home_team) %}
                 {% set apos = positions.get(match.away_team) %}
-                <div class="rounded-xl p-3 ko-card" {% if gold %}style="background: rgba(251,191,36,0.06); border-color: rgba(251,191,36,0.3);"{% endif %}>
-                    <div class="flex justify-between items-center text-sm mb-1.5">
-                        <span class="flex items-center gap-1.5 min-w-0">
-                            {% if hpos %}<span class="ko-pos">{{ hpos }}</span>{% endif %}
-                            <span class="team-name truncate" data-team="{{ match.home_team }}" style="{% if parts and hs > asc %}color: var(--success); font-weight:700;{% else %}font-weight:500;{% endif %}">{{ match.home_team }}</span>
-                        </span>
-                        <span class="font-mono ml-2" style="color: {% if parts %}var(--text){% else %}var(--text-faint){% endif %};">{{ parts[0] if parts else '–' }}</span>
-                    </div>
-                    <div class="flex justify-between items-center text-sm">
-                        <span class="flex items-center gap-1.5 min-w-0">
-                            {% if apos %}<span class="ko-pos">{{ apos }}</span>{% endif %}
-                            <span class="team-name truncate" data-team="{{ match.away_team }}" style="{% if parts and asc > hs %}color: var(--success); font-weight:700;{% else %}font-weight:500;{% endif %}">{{ match.away_team }}</span>
-                        </span>
-                        <span class="font-mono ml-2" style="color: {% if parts %}var(--text){% else %}var(--text-faint){% endif %};">{{ parts[1] if parts else '–' }}</span>
+                <div class="ko-match">
+                    <div class="ko-card2" {% if gold %}style="border-color: rgba(251,191,36,0.4);"{% endif %}>
+                        {% if match.match_date %}<div class="ko-date">{{ match.match_date.strftime('%d.%m · %H:%M') }}</div>{% endif %}
+                        <div class="ko-row">
+                            <span class="flex items-center gap-1.5 min-w-0">
+                                {% if hpos %}<span class="ko-pos">{{ hpos }}</span>{% endif %}
+                                <span class="team-name truncate text-sm" data-team="{{ match.home_team }}" style="{% if parts and hs > asc %}color: var(--success); font-weight:700;{% else %}font-weight:500;{% endif %}">{{ match.home_team }}</span>
+                            </span>
+                            <span class="font-mono text-sm flex-shrink-0" style="color: {% if parts %}var(--text){% else %}var(--text-faint){% endif %};">{{ parts[0] if parts else '–' }}</span>
+                        </div>
+                        <div class="ko-row">
+                            <span class="flex items-center gap-1.5 min-w-0">
+                                {% if apos %}<span class="ko-pos">{{ apos }}</span>{% endif %}
+                                <span class="team-name truncate text-sm" data-team="{{ match.away_team }}" style="{% if parts and asc > hs %}color: var(--success); font-weight:700;{% else %}font-weight:500;{% endif %}">{{ match.away_team }}</span>
+                            </span>
+                            <span class="font-mono text-sm flex-shrink-0" style="color: {% if parts %}var(--text){% else %}var(--text-faint){% endif %};">{{ parts[1] if parts else '–' }}</span>
+                        </div>
                     </div>
                 </div>
             {% endmacro %}
@@ -668,31 +685,31 @@
             {% endif %}
 
             <div class="px-6 pt-5 pb-1">
-                <p class="text-[11px]" style="color: var(--text-faint);">Oznaczenia: <span class="ko-pos">1A</span> = zwycięzca grupy A, <span class="ko-pos">2B</span> = drugie miejsce grupy B, <span class="ko-pos">3C</span> = trzecie miejsce grupy C (awans z najlepszych trzecich miejsc).</p>
+                <p class="text-[11px]" style="color: var(--text-faint);">Oznaczenia: <span class="ko-pos">1A</span> = zwycięzca grupy A, <span class="ko-pos">2B</span> = drugie miejsce grupy B, <span class="ko-pos">3C</span> = trzecie miejsce grupy C.</p>
             </div>
-            <div class="table-wrapper p-6 overflow-x-auto">
-                <div class="flex gap-5 min-w-[1000px]">
+            <div class="bracket-wrap px-4">
+                <div class="bracket">
                     {% if knockout_bracket.round_of_32 %}
-                    <div class="flex-1 space-y-2">
-                        <h3 class="text-center text-[10px] font-semibold tracking-widest uppercase mb-4" style="color: var(--text-faint);">1/16 finału</h3>
-                        {% for match in knockout_bracket.round_of_32 %}{{ ko_match(match, team_positions) }}{% endfor %}
+                    <div class="ko-round">
+                        <div class="ko-round-title">1/16 finału</div>
+                        <div class="ko-round-body">{% for match in knockout_bracket.round_of_32 %}{{ ko_match(match, team_positions) }}{% endfor %}</div>
                     </div>
                     {% endif %}
-                    <div class="flex-1 space-y-3">
-                        <h3 class="text-center text-[10px] font-semibold tracking-widest uppercase mb-4" style="color: var(--text-faint);">1/8 finału</h3>
-                        {% for match in knockout_bracket.round_of_16 %}{{ ko_match(match, team_positions) }}{% endfor %}
+                    <div class="ko-round">
+                        <div class="ko-round-title">1/8 finału</div>
+                        <div class="ko-round-body">{% for match in knockout_bracket.round_of_16 %}{{ ko_match(match, team_positions) }}{% endfor %}</div>
                     </div>
-                    <div class="flex-1 space-y-8 mt-6">
-                        <h3 class="text-center text-[10px] font-semibold tracking-widest uppercase mb-4" style="color: var(--text-faint);">Ćwierćfinały</h3>
-                        {% for match in knockout_bracket.quarterfinals %}{{ ko_match(match, team_positions) }}{% endfor %}
+                    <div class="ko-round">
+                        <div class="ko-round-title">Ćwierćfinał</div>
+                        <div class="ko-round-body">{% for match in knockout_bracket.quarterfinals %}{{ ko_match(match, team_positions) }}{% endfor %}</div>
                     </div>
-                    <div class="flex-1 space-y-20 mt-16">
-                        <h3 class="text-center text-[10px] font-semibold tracking-widest uppercase mb-4" style="color: var(--text-faint);">Półfinały</h3>
-                        {% for match in knockout_bracket.semifinals %}{{ ko_match(match, team_positions) }}{% endfor %}
+                    <div class="ko-round">
+                        <div class="ko-round-title">Półfinał</div>
+                        <div class="ko-round-body">{% for match in knockout_bracket.semifinals %}{{ ko_match(match, team_positions) }}{% endfor %}</div>
                     </div>
-                    <div class="flex-1 mt-32">
-                        <h3 class="text-center text-[10px] font-semibold tracking-widest uppercase mb-4" style="color: var(--gold);">Finał</h3>
-                        {% for match in knockout_bracket.final %}{{ ko_match(match, team_positions, gold=true) }}{% endfor %}
+                    <div class="ko-round">
+                        <div class="ko-round-title final">Finał</div>
+                        <div class="ko-round-body">{% for match in knockout_bracket.final %}{{ ko_match(match, team_positions, gold=true) }}{% endfor %}</div>
                     </div>
                 </div>
             </div>
