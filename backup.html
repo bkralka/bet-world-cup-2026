@@ -1,0 +1,2188 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bet World Cup 2026 — Typer Mistrzostw Świata</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Sans:wght@500;700;800&display=swap');
+
+        :root {
+            --bg-base: #0b0d11;
+            --bg-surface: #14171d;
+            --bg-elevated: #1a1e26;
+            --border-subtle: rgba(255,255,255,0.06);
+            --border-soft: rgba(255,255,255,0.10);
+            --accent: #e88a5b;          
+            --accent-soft: rgba(232,138,91,0.12);
+            --success: #4ade80;         
+            --success-soft: rgba(74,222,128,0.10);
+            --danger: #f87171;          
+            --danger-soft: rgba(248,113,113,0.10);
+            --gold: #fbbf24;
+            --info: #7dd3fc;
+            --text: #f5f5f7;
+            --text-muted: rgba(245,245,247,0.55);
+            --text-faint: rgba(245,245,247,0.35);
+        }
+
+        * { font-family: 'Inter', system-ui, sans-serif; }
+        .font-display { font-family: 'DM Sans', sans-serif; letter-spacing: -0.02em; }
+
+        body {
+            background: #0a0f0f url('/static/background.avif') center / cover no-repeat fixed;
+            color: var(--text);
+            min-height: 100vh;
+            position: relative;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(800px circle at 15% 10%, rgba(232,138,91,0.06), transparent 50%),
+                radial-gradient(700px circle at 85% 90%, rgba(74,222,128,0.05), transparent 50%),
+                rgba(11, 13, 17, 0.82);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .flat-card {
+            background: rgba(20, 23, 29, 0.94);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--border-subtle);
+            transition: border-color 0.2s ease;
+            position: relative;
+            z-index: 1;
+        }
+        .flat-card:hover { border-color: var(--border-soft); }
+
+        .table-wrapper {
+            background: rgba(20, 23, 29, 0.94);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 14px;
+            overflow: hidden;
+            border: 1px solid var(--border-subtle);
+            transition: border-color 0.2s ease;
+        }
+        .table-wrapper:hover { border-color: var(--border-soft); }
+
+        .match-card {
+            background: rgba(20, 23, 29, 0.94);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 12px;
+            border: 1px solid var(--border-subtle);
+            transition: border-color 0.2s ease, background 0.2s ease;
+        }
+        .match-card:hover {
+            border-color: var(--border-soft);
+            background: rgba(26, 30, 38, 0.96);
+        }
+
+        table.min-table th {
+            color: var(--text-faint);
+            font-size: 0.68rem;
+            font-weight: 600;
+            padding: 14px 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        table.min-table td {
+            padding: 14px 8px;
+            font-size: 0.85rem;
+            color: var(--text);
+        }
+        table.min-table tbody tr { transition: background 0.15s; }
+        table.min-table tbody tr:hover { background: rgba(255,255,255,0.02); }
+
+        .history-correct { border-left: 2px solid var(--success); }
+        .history-wrong { border-left: 2px solid var(--danger); }
+
+        .flag-icon {
+            width: 22px;
+            height: 16px;
+            display: inline-block;
+            margin-right: 10px;
+            vertical-align: middle;
+            border-radius: 2px;
+            object-fit: cover;
+        }
+        .team-name {
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+            flex-wrap: wrap;
+        }
+
+        .underdog-badge {
+            display: inline-flex;
+            align-items: center;
+            background: var(--danger-soft);
+            color: var(--danger);
+            font-size: 0.6rem;
+            font-weight: 600;
+            padding: 2px 7px;
+            border-radius: 6px;
+            margin-left: 8px;
+            letter-spacing: 0.04em;
+            vertical-align: middle;
+            border: 1px solid rgba(248,113,113,0.18);
+        }
+        .underdog-badge::before { content: "U"; }
+
+        .favorite-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            background: rgba(251,191,36,0.10);
+            color: var(--gold);
+            font-size: 0.6rem;
+            font-weight: 600;
+            padding: 2px 7px;
+            border-radius: 6px;
+            margin-left: 6px;
+            border: 1px solid rgba(251,191,36,0.20);
+        }
+        .favorite-badge::before { content: "★"; font-size: 0.7rem; }
+
+        .countdown-number {
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 700;
+            color: var(--text);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .tab-btn {
+            position: relative;
+            transition: color 0.15s;
+            color: var(--text-muted) !important;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.85rem;
+            letter-spacing: 0.01em;
+        }
+        .tab-btn:hover { color: var(--text) !important; }
+        .tab-btn.active { color: var(--text) !important; font-weight: 600 !important; }
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -9px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+
+        .tab-content { display: none; animation: fadeIn 0.25s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .pick-btn {
+            transition: all 0.15s;
+            background: var(--success-soft);
+            border: 1px solid rgba(74,222,128,0.30);
+            color: var(--success);
+            font-weight: 600;
+        }
+        .pick-btn:hover {
+            background: var(--success);
+            color: var(--bg-base);
+            border-color: var(--success);
+        }
+
+        .form-icon {
+            display: inline-flex;
+            width: 18px;
+            height: 18px;
+            border-radius: 4px;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            font-weight: 700;
+            margin: 0 1px;
+        }
+        .form-w { background-color: var(--success-soft); color: var(--success); }
+        .form-d { background-color: rgba(125,211,252,0.12); color: var(--info); }
+        .form-l { background-color: var(--danger-soft); color: var(--danger); }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.15); }
+
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        .animate-pulse-slow { animation: pulse 2.5s infinite; }
+
+        .step-dot { transition: all 0.25s ease; }
+        .step-dot.active {
+            background: var(--accent);
+            transform: scale(1.3);
+        }
+        .welcome-step { animation: fadeSlide 0.3s ease-out; }
+        @keyframes fadeSlide {
+            from { opacity: 0; transform: translateX(12px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body class="p-0 m-0">
+
+    <nav class="border-b border-white/5 sticky top-0 z-50" style="background: rgba(11,13,17,0.85); backdrop-filter: blur(14px);">
+        <div class="max-w-7xl mx-auto px-6 py-4">
+            <div class="flex justify-between items-center flex-wrap gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background: var(--accent-soft); border: 1px solid rgba(232,138,91,0.25);">
+                        <span class="text-base">🏆</span>
+                    </div>
+                    <div>
+                        <h1 class="font-display font-bold text-lg tracking-tight">Bet World <span style="color: var(--accent);">Cup 2026</span></h1>
+                        <p class="text-xs" style="color: var(--text-faint);">Zdobądź największą liczbę punktów!</p>
+                    </div>
+                </div>
+                <div class="flex gap-3 items-center">
+                    {% if current_player %}
+                        <span class="text-sm font-medium hidden md:inline-flex items-center gap-1.5" style="color: var(--text-muted);">
+                            Grasz jako:
+                            <span style="color: var(--text);" class="font-semibold">{{ current_player.username }}</span>
+                            {% if current_player.current_streak >= 0 %}
+                                <span class="text-[10px] px-1.5 py-0.5 rounded tracking-wide" style="background: var(--accent-soft); color: var(--accent);">🔥 {{ current_player.current_streak }}</span>
+                            {% endif %}
+                        </span>
+                        <button onclick="logout()" class="text-xs font-medium px-3 py-1.5 rounded-lg transition" style="color: var(--text-muted); background: var(--bg-elevated); border: 1px solid var(--border-subtle);">Wyloguj</button>
+                    {% else %}
+                        <button onclick="document.getElementById('authModal').style.display='flex'" class="text-xs font-semibold px-4 py-1.5 rounded-lg transition" style="background: var(--accent); color: var(--bg-base);">Zaloguj</button>
+                    {% endif %}
+
+                    <span id="liveBadge" class="px-3 py-1.5 rounded-lg text-xs font-semibold uppercase animate-pulse-slow" style="display:none; background: var(--danger-soft); color: var(--danger); border: 1px solid rgba(248,113,113,0.25); letter-spacing: 0.08em;">● Na żywo</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+<main class="max-w-7xl mx-auto px-6 py-10 relative z-10">
+
+        <div class="flex gap-6 border-b mb-8 flex-wrap px-1" style="border-color: var(--border-subtle);">
+            <button class="tab-btn active pb-3 transition" data-tab="home">Home</button>
+            <button class="tab-btn pb-3 transition" data-tab="groups">Grupy</button>
+            <button class="tab-btn pb-3 transition" data-tab="matches">Mecze</button>
+            <button class="tab-btn pb-3 transition" data-tab="knockouts">Drabinka</button>
+            <button class="tab-btn pb-3 transition" data-tab="teams">Drużyny</button>
+            <button class="tab-btn pb-3 transition" data-tab="players">Gracze</button>
+            <button class="tab-btn pb-3 transition" data-tab="history">Moje typy</button>
+            <button class="tab-btn pb-3 transition" data-tab="ranking">Ranking</button>
+            <button class="tab-btn pb-3 transition" data-tab="rules">Zasady</button>
+        </div>
+
+<div id="tab-home" class="tab-content active">
+<div class="grid lg:grid-cols-2 gap-6 mb-10">
+    <div class="flat-card rounded-2xl p-7">
+        <div class="flex justify-between items-start mb-6">
+            <div class="flex flex-col gap-1">
+                <p class="text-[10px] font-semibold uppercase tracking-[0.15em] mb-2" style="color: var(--text-faint);">Gracz</p>
+                <h2 class="font-display text-3xl font-bold tracking-tight">
+                    {% if current_player %}
+                        {{ current_player.username }}
+                    {% else %}
+                        <span style="color: var(--text-faint);">Brak gracza</span>
+                    {% endif %}
+                </h2>
+            </div>
+
+            {% if current_player and current_player.current_streak > 0 %}
+            <div class="flex gap-2 items-center px-3 py-1.5 rounded-lg" style="background: var(--accent-soft); border: 1px solid rgba(232,138,91,0.25);">
+                <span class="text-xs font-semibold tracking-wide" style="color: var(--accent);">🔥 {{ current_player.current_streak }} serii</span>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="grid grid-cols-3 gap-3">
+            <div class="rounded-xl p-4" style="background: var(--bg-elevated); border: 1px solid var(--border-subtle);">
+                <p class="text-[10px] font-medium uppercase tracking-wider mb-2" style="color: var(--text-faint);">Punkty</p>
+                <p class="font-display text-3xl font-bold" style="color: var(--success);">
+                    {{ current_player.total_points if current_player else 0 }}
+                </p>
+            </div>
+
+            <div class="rounded-xl p-4" style="background: var(--bg-elevated); border: 1px solid var(--border-subtle);">
+                <p class="text-[10px] font-medium uppercase tracking-wider mb-2" style="color: var(--text-faint);">Trafione</p>
+                <p class="font-display text-3xl font-bold">
+                    {{ current_player.correct_predictions if current_player else 0 }}
+                </p>
+            </div>
+
+            <div class="rounded-xl p-4" style="background: var(--bg-elevated); border: 1px solid var(--border-subtle);">
+                <p class="text-[10px] font-medium uppercase tracking-wider mb-2" style="color: var(--text-faint);">Seria 🔥</p>
+                <p class="font-display text-3xl font-bold" style="color: var(--accent);">
+                    {{ current_player.current_streak if current_player else 0 }}
+                </p>
+            </div>
+        </div>
+
+
+        {% if current_player and current_player.favorite_team %}
+        <div class="mt-5 pt-5 border-t" style="border-color: var(--border-subtle);">
+            <p class="text-[10px] font-medium uppercase tracking-wider mb-3" style="color: var(--text-faint);">Twoje wybory</p>
+
+        <div>
+            <div class="flex flex-col gap-3">
+                <!-- Kafelek DRUŻYNA -->
+                <div class="rounded-2xl overflow-hidden transition {% if current_player.favorite_locked %}cursor-default{% else %}cursor-pointer hover:opacity-90{% endif %}" style="background: var(--bg-elevated); border: 1px solid var(--border-subtle);"
+                    {% if not current_player.favorite_locked %}onclick="showFavoriteTeamModal()"{% endif %}>
+                    <div class="flex items-center gap-4 p-4">
+                        <div class="relative flex-shrink-0">
+                            <img id="sidebar-fav-flag" src="" class="w-28 h-20 object-cover rounded-xl shadow-md">
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-[10px] font-semibold uppercase tracking-wider mb-0.5" style="color: var(--text-faint);">⭐ Twoja drużyna</p>
+                            <p class="font-display font-bold text-2xl truncate" style="color: var(--gold);">{{ current_player.favorite_team }}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between px-4 py-3" style="background: rgba(251,191,36,0.07); border-top: 1px solid var(--border-subtle);">
+                        <span class="text-xs" style="color: var(--text-muted);">+1 pkt za każdą wygraną</span>
+                        <div class="flex items-baseline gap-1">
+                            <span class="font-display font-bold text-2xl" style="color: var(--gold);">{{ current_player.favorite_team_points }}</span>
+                            <span class="text-[10px] uppercase tracking-wider" style="color: var(--text-faint);">pkt</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Kafelek GWIAZDA -->
+                {% if current_player.star_player %}
+                <div class="rounded-2xl overflow-hidden transition {% if current_player.favorite_locked %}cursor-default{% else %}cursor-pointer hover:opacity-90{% endif %}" style="background: var(--bg-elevated); border: 1px solid var(--border-subtle);"
+                     {% if not current_player.favorite_locked %}onclick="showStarPlayerModal()"{% endif %}>
+                    <div class="flex items-center gap-4 p-4">
+                        <div class="w-24 h-28 rounded-xl overflow-hidden shadow-md flex-shrink-0" style="background: var(--bg-surface);">
+                            <img id="sidebar-star-img" src="" class="w-full h-full object-cover object-top" style="display: none;">
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-[10px] font-semibold uppercase tracking-wider mb-0.5" style="color: var(--text-faint);">🏃 Twoja gwiazda</p>
+                            <p class="font-display font-bold text-2xl leading-tight" id="sidebar-star-name">{{ current_player.star_player }}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between px-4 py-3" style="background: rgba(251,191,36,0.07); border-top: 1px solid var(--border-subtle);">
+                        <span class="text-xs" style="color: var(--text-muted);">+1 pkt za każdego gola</span>
+                        <div class="flex items-baseline gap-1">
+                            <span class="font-display font-bold text-2xl" style="color: var(--gold);">{{ current_player.star_player_points }}</span>
+                            <span class="text-[10px] uppercase tracking-wider" style="color: var(--text-faint);">pkt</span>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        </div>
+        {% else %}
+        <div class="mt-5 pt-5 border-t" style="border-color: var(--border-subtle);">
+            <div class="rounded-xl p-4 text-center" style="background: var(--bg-elevated); border: 1px solid var(--border-subtle);">
+                <p class="text-sm font-semibold mb-1">Gotowy do gry?</p>
+                <p class="text-xs mb-3" style="color: var(--text-muted);">Wybierz drużynę i gwiazdę, by zdobyć bonusy.</p>
+                <button onclick="showFavoriteTeamModal()" class="font-semibold px-4 py-2 rounded-lg text-sm transition" style="background: var(--gold); color: var(--bg-base);">
+                    <span>Wybierz teraz</span>
+                </button>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="flat-card rounded-2xl p-7 flex flex-col justify-center">
+        <p class="text-[10px] font-semibold uppercase tracking-[0.15em] mb-3 text-center" style="color: var(--text-faint);">Następny mecz za</p>
+        <div id="countdown-container">
+            <div id="next-match-info" class="mb-6 text-center">
+                <p class="text-sm font-semibold" id="next-match-teams">Ładowanie...</p>
+            </div>
+            <div class="countdown flex justify-center gap-5 text-center">
+                <div>
+                    <div class="countdown-number text-4xl" id="days">00</div>
+                    <p class="text-[10px] mt-1" style="color: var(--text-faint);">dni</p>
+                </div>
+                <div class="text-4xl" style="color: var(--text-faint);">:</div>
+                <div>
+                    <div class="countdown-number text-4xl" id="hours">00</div>
+                    <p class="text-[10px] mt-1" style="color: var(--text-faint);">godz</p>
+                </div>
+                <div class="text-4xl" style="color: var(--text-faint);">:</div>
+                <div>
+                    <div class="countdown-number text-4xl" id="minutes">00</div>
+                    <p class="text-[10px] mt-1" style="color: var(--text-faint);">min</p>
+                </div>
+                <div class="text-4xl" style="color: var(--text-faint);">:</div>
+                <div>
+                    <div class="countdown-number text-4xl" id="seconds">00</div>
+                    <p class="text-[10px] mt-1" style="color: var(--text-faint);">sek</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-6 pt-5 border-t" style="border-color: var(--border-subtle);">
+            <div class="flex items-center gap-2 mb-3">
+                <span class="text-sm" style="color: var(--text-muted);">♫</span>
+                <p class="text-[10px] font-medium uppercase tracking-wider" style="color: var(--text-faint);">Playlista</p>
+            </div>
+            <iframe data-testid="embed-iframe" style="border-radius:12px" src="https://open.spotify.com/embed/playlist/2DUuRUBdKxgUmYczGN28XF?utm_source=generator&theme=0" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+        </div>
+    </div>
+</div>
+
+{% if current_player %}
+<div class="grid lg:grid-cols-2 gap-6 mb-10">
+    <!-- Twoja pozycja w rankingu -->
+    <div class="flat-card rounded-2xl p-7">
+        <p class="text-[10px] font-semibold uppercase tracking-[0.15em] mb-3" style="color: var(--text-faint);">Twoja pozycja</p>
+        {% set ns = namespace(pos=0, found=false, prev_points=none) %}
+        {% for p in all_players %}
+            {% if not ns.found %}
+                {% set ns.pos = ns.pos + 1 %}
+                {% if p.id == current_player.id %}
+                    {% set ns.found = true %}
+                {% else %}
+                    {% set ns.prev_points = p.total_points %}
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+        <div class="flex items-end gap-3">
+            <span class="font-display text-5xl font-bold" style="color: var(--accent);">#{{ ns.pos }}</span>
+            <span class="text-sm mb-2" style="color: var(--text-muted);">z {{ all_players|length }} {% if all_players|length == 1 %}gracza{% else %}graczy{% endif %}</span>
+        </div>
+        {% if ns.pos == 1 %}
+            <p class="text-sm mt-3" style="color: var(--gold);">🏆 Prowadzisz w rankingu — tak trzymaj!</p>
+        {% elif ns.prev_points is not none %}
+            <p class="text-sm mt-3" style="color: var(--text-muted);">
+                Brakuje Ci <span class="font-semibold" style="color: var(--success);">{{ ns.prev_points - current_player.total_points }} pkt</span> do wyprzedzenia gracza przed Tobą
+            </p>
+        {% endif %}
+    </div>
+
+    <!-- Twoje aktywne typy -->
+    <div class="flat-card rounded-2xl p-7">
+        <div class="flex items-center justify-between mb-3">
+            <p class="text-[10px] font-semibold uppercase tracking-[0.15em]" style="color: var(--text-faint);">Twoje aktywne typy</p>
+            <span class="text-[10px] px-2 py-0.5 rounded" style="background: var(--bg-elevated); color: var(--text-muted);">{{ active_picks|length }} {% if active_picks|length == 1 %}typ{% elif active_picks|length in [2,3,4] %}typy{% else %}typów{% endif %}</span>
+        </div>
+        {% if active_picks %}
+        <div class="space-y-2">
+            {% for pick in active_picks|sort(attribute='match.match_date') %}
+            <div class="flex items-center justify-between p-2.5 rounded-lg" style="background: var(--bg-elevated);">
+                <span class="text-sm truncate">{{ pick.match.home_team }} <span style="color: var(--text-faint);">vs</span> {{ pick.match.away_team }}</span>
+                <span class="font-mono font-bold text-sm ml-2 flex-shrink-0" style="color: var(--success);">{{ pick.predicted_result }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-sm py-6 text-center" style="color: var(--text-faint);">Nie masz jeszcze typów.<br>Wejdź w zakładkę „Mecze" i obstaw nadchodzące spotkania!</p>
+        {% endif %}
+    </div>
+</div>
+{% else %}
+<!-- Gość: puls turnieju + zachęta -->
+{% set finished_count = matches|selectattr('is_finished')|list|length %}
+<div class="flat-card rounded-2xl p-7 mb-10 text-center">
+    <p class="text-[10px] font-semibold uppercase tracking-[0.15em] mb-4" style="color: var(--text-faint);">Puls turnieju</p>
+    <div class="grid grid-cols-2 gap-4 mb-6">
+        <div>
+            <p class="font-display text-3xl font-bold">{{ all_players|length }}</p>
+            <p class="text-[10px] uppercase tracking-wider mt-1" style="color: var(--text-faint);">graczy łącznie</p>
+        </div>
+        <div>
+            <p class="font-display text-3xl font-bold" style="color: var(--accent);">{{ finished_count }}</p>
+            <p class="text-[10px] uppercase tracking-wider mt-1" style="color: var(--text-faint);">meczów za nami</p>
+        </div>
+    </div>
+    <button onclick="document.getElementById('authModal').style.display='flex'" class="font-semibold px-6 py-2.5 rounded-lg text-sm transition" style="background: var(--accent); color: var(--bg-base);">Dołącz do gry →</button>
+</div>
+{% endif %}
+</div>
+
+        <div id="tab-groups" class="tab-content">
+            <div class="grid lg:grid-cols-2 gap-6">
+                {% for group, teams in group_standings.items() %}
+                <div class="table-wrapper p-1">
+                    <table class="w-full min-table table-fixed">
+                        <thead>
+                            <tr>
+                                <th class="text-left w-2/5 pl-4">Grupa {{ group }}</th>
+                                <th class="text-center">M</th>
+                                <th class="text-center">Pkt</th>
+                                <th class="text-center">G+/-</th>
+                                <th class="text-center pr-2">Forma</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for team in teams %}
+                            <tr>
+                                <td class="font-medium whitespace-nowrap overflow-hidden text-ellipsis pl-4"><span class="team-name" data-team="{{ team.name }}">{{ team.name }}</span></td>
+                                <td class="text-center" style="color: var(--text-muted);">{{ team.played }}</td>
+                                <td class="text-center font-semibold" style="color: var(--success);">{{ team.points }}</td>
+                                <td class="text-center font-medium" style="color: {% if team.goal_diff >= 0 %}var(--success){% else %}var(--danger){% endif %};">{{ team.goal_diff }}</td>
+                                <td class="text-center pt-3 pb-3 pr-2">{% for c in team.form_str %}<span class="form-icon form-{% if c == 'W' %}w{% elif c == 'D' %}d{% else %}l{% endif %}">{{ c }}</span>{% endfor %}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div id="tab-matches" class="tab-content">
+            <div class="space-y-3">
+                {% set future_matches = matches %}
+                {% for match in future_matches[:15] %}
+                <div class="match-card p-5">
+                    <div class="flex flex-wrap items-center gap-4">
+                        <div class="flex-1 min-w-[300px]">
+                            <div class="flex items-center gap-4 justify-between">
+                                <div class="font-semibold text-sm w-2/5 text-right whitespace-nowrap overflow-hidden text-ellipsis"><span class="team-name" data-team="{{ match.home_team }}">{{ match.home_team }}</span></div>
+                                <span class="text-xs font-medium" style="color: var(--text-faint);">vs</span>
+                                <div class="font-semibold text-sm w-2/5 text-left whitespace-nowrap overflow-hidden text-ellipsis"><span class="team-name" data-team="{{ match.away_team }}">{{ match.away_team }}</span></div>
+                            </div>
+                            <p class="text-center text-xs mt-2.5" style="color: var(--text-muted);">{{ match.match_date.strftime('%d.%m.%Y · %H:%M') }}</p>
+
+                            {% set stats = pick_stats.get(match.id, {'home': 0, 'draw': 0, 'away': 0, 'total': 0}) %}
+                            {% if stats.total > 0 %}
+                            <div class="mt-3 px-8">
+                                <div class="flex justify-between text-[10px] mb-1" style="color: var(--text-faint);">
+                                    <span>{{ (stats.home / stats.total * 100)|round|int }}% {{ match.home_team[:3] | upper }}</span>
+                                    <span>{{ (stats.draw / stats.total * 100)|round|int }}% X</span>
+                                    <span>{{ (stats.away / stats.total * 100)|round|int }}% {{ match.away_team[:3] | upper }}</span>
+                                </div>
+                                <div class="flex h-1 rounded-full overflow-hidden" style="background: var(--bg-elevated);">
+                                    <div style="width: {{ (stats.home / stats.total) * 100 }}%; background: var(--success);"></div>
+                                    <div style="width: {{ (stats.draw / stats.total) * 100 }}%; background: var(--info);"></div>
+                                    <div style="width: {{ (stats.away / stats.total) * 100 }}%; background: var(--accent);"></div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="min-w-[120px] text-right flex-shrink-0">
+                            {% if match.is_finished %}
+                                <span class="px-4 py-2 rounded-lg text-sm font-mono" style="background: var(--bg-elevated); color: var(--text-muted);">{{ match.result if match.result else '—' }}</span>
+                            {% elif current_player %}
+                                {# znajdź pick użytkownika dla tego meczu #}
+                                {% set user_pick_for_match = none %}
+                                {% for pick in picks %}
+                                    {% if pick.player_id == current_player.id and pick.match_id == match.id %}
+                                        {% set user_pick_for_match = pick %}
+                                    {% endif %}
+                                {% endfor %}
+
+                                {% set match_started = match.match_date <= now() %}
+
+                                {% if user_pick_for_match and match_started %}
+                                    {# Pick wysłany, mecz w trakcie — tylko podgląd, brak edycji #}
+                                    <span class="text-xs font-semibold px-3 py-1.5 rounded-lg inline-block" style="background: var(--bg-elevated); color: var(--text-muted);">🔒 Twój typ: {{ user_pick_for_match.predicted_result }}</span>
+                                {% elif user_pick_for_match and match.id in upcoming_match_ids %}
+                                    {# Pick wysłany, mecz przed startem — można edytować #}
+                                    <button onclick="openPickModal({{ match.id }}, '{{ match.home_team }}', '{{ match.away_team }}', '{{ user_pick_for_match.predicted_result }}')" class="text-xs font-semibold px-3 py-1.5 rounded-lg transition" style="background: var(--success-soft); color: var(--success); border: 1px solid rgba(74,222,128,0.3);">✏️ Edytuj ({{ user_pick_for_match.predicted_result }})</button>
+                                {% elif user_pick_for_match %}
+                                    {# Pick wysłany, ale mecz poza pulą edycji #}
+                                    <span class="text-xs font-semibold px-3 py-1.5 rounded-lg inline-block" style="background: var(--bg-elevated); color: var(--text-muted);">Typ: {{ user_pick_for_match.predicted_result }}</span>
+                                {% elif match.id in upcoming_match_ids %}
+                                    {# Brak typu, mecz w puli — można typować #}
+                                    <button onclick="openPickModal({{ match.id }}, '{{ match.home_team }}', '{{ match.away_team }}')" class="pick-btn px-5 py-2 rounded-lg text-xs transition">Typuj</button>
+                                {% elif match_started %}
+                                    {# Brak typu, mecz w trakcie #}
+                                    <span class="text-xs" style="color: var(--text-faint);">Mecz w trakcie</span>
+                                {% else %}
+                                    {# Brak typu, mecz poza pulą 4 najbliższych #}
+                                    <span class="text-xs" style="color: var(--text-faint);">Poza pulą</span>
+                                {% endif %}
+                            {% endif %}
+                            {# Brak else dla niezalogowanego — przycisk "Zaloguj" jest w nawigacji #}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div id="tab-knockouts" class="tab-content">
+            <style>
+                #champion-box .flag-icon { width: 34px !important; height: 26px !important; border-radius: 4px; }
+                .ko-card { background: var(--bg-elevated); border: 1px solid var(--border-subtle); }
+            </style>
+
+            {# makro renderujące pojedynczy mecz pucharowy z wynikiem, flagą i podświetleniem zwycięzcy #}
+            {% macro ko_match(match, gold=false) %}
+                {% set parts = match.result.split(':') if match.result else None %}
+                {% set hs = (parts[0]|int) if parts else -1 %}
+                {% set asc = (parts[1]|int) if parts else -1 %}
+                <div class="rounded-xl p-3 ko-card" {% if gold %}style="background: rgba(251,191,36,0.06); border-color: rgba(251,191,36,0.3);"{% endif %}>
+                    <div class="flex justify-between items-center text-sm mb-1.5">
+                        <span class="team-name" data-team="{{ match.home_team }}" style="{% if parts and hs > asc %}color: var(--success); font-weight:700;{% else %}font-weight:500;{% endif %}">{{ match.home_team }}</span>
+                        <span class="font-mono ml-2" style="color: {% if parts %}var(--text){% else %}var(--text-faint){% endif %};">{{ parts[0] if parts else '–' }}</span>
+                    </div>
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="team-name" data-team="{{ match.away_team }}" style="{% if parts and asc > hs %}color: var(--success); font-weight:700;{% else %}font-weight:500;{% endif %}">{{ match.away_team }}</span>
+                        <span class="font-mono ml-2" style="color: {% if parts %}var(--text){% else %}var(--text-faint){% endif %};">{{ parts[1] if parts else '–' }}</span>
+                    </div>
+                </div>
+            {% endmacro %}
+
+            {# wyłonienie mistrza z finału #}
+            {% set champion = None %}
+            {% set runnerup = None %}
+            {% if knockout_bracket.final and knockout_bracket.final[0].result %}
+                {% set fp = knockout_bracket.final[0].result.split(':') %}
+                {% if fp[0]|int >= fp[1]|int %}
+                    {% set champion = knockout_bracket.final[0].home_team %}
+                    {% set runnerup = knockout_bracket.final[0].away_team %}
+                {% else %}
+                    {% set champion = knockout_bracket.final[0].away_team %}
+                    {% set runnerup = knockout_bracket.final[0].home_team %}
+                {% endif %}
+            {% endif %}
+
+            <div class="table-wrapper p-6 overflow-x-auto">
+                <div class="flex gap-5 min-w-[1000px]">
+                    {% if knockout_bracket.round_of_32 %}
+                    <div class="flex-1 space-y-2">
+                        <h3 class="text-center text-[10px] font-semibold tracking-widest uppercase mb-4" style="color: var(--text-faint);">1/16 finału</h3>
+                        {% for match in knockout_bracket.round_of_32 %}{{ ko_match(match) }}{% endfor %}
+                    </div>
+                    {% endif %}
+                    <div class="flex-1 space-y-3">
+                        <h3 class="text-center text-[10px] font-semibold tracking-widest uppercase mb-4" style="color: var(--text-faint);">1/8 finału</h3>
+                        {% for match in knockout_bracket.round_of_16 %}{{ ko_match(match) }}{% endfor %}
+                    </div>
+                    <div class="flex-1 space-y-8 mt-6">
+                        <h3 class="text-center text-[10px] font-semibold tracking-widest uppercase mb-4" style="color: var(--text-faint);">Ćwierćfinały</h3>
+                        {% for match in knockout_bracket.quarterfinals %}{{ ko_match(match) }}{% endfor %}
+                    </div>
+                    <div class="flex-1 space-y-20 mt-16">
+                        <h3 class="text-center text-[10px] font-semibold tracking-widest uppercase mb-4" style="color: var(--text-faint);">Półfinały</h3>
+                        {% for match in knockout_bracket.semifinals %}{{ ko_match(match) }}{% endfor %}
+                    </div>
+                    <div class="flex-1 mt-32">
+                        <h3 class="text-center text-[10px] font-semibold tracking-widest uppercase mb-4" style="color: var(--gold);">Finał</h3>
+                        {% for match in knockout_bracket.final %}{{ ko_match(match, gold=true) }}{% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            {# Zwycięzca + mecz o 3. miejsce #}
+            <div class="px-6 pb-6 flex flex-col md:flex-row gap-4 justify-center items-stretch">
+                {% if champion %}
+                <div id="champion-box" class="flex-1 max-w-md rounded-2xl p-6 flex items-center gap-4" style="background: linear-gradient(135deg, rgba(251,191,36,0.16), rgba(251,191,36,0.04)); border: 1px solid rgba(251,191,36,0.4);">
+                    <div class="text-4xl">🏆</div>
+                    <div>
+                        <p class="text-[10px] font-bold uppercase tracking-widest mb-1" style="color: var(--gold);">Mistrz Świata 2026</p>
+                        <p class="team-name font-display font-bold text-2xl" data-team="{{ champion }}" style="color: var(--gold);">{{ champion }}</p>
+                        <p class="text-xs mt-1" style="color: var(--text-faint);">Finalista: <span class="team-name" data-team="{{ runnerup }}">{{ runnerup }}</span></p>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if knockout_bracket.third_place and knockout_bracket.third_place[0].result %}
+                {% set tp = knockout_bracket.third_place[0] %}
+                {% set tpp = tp.result.split(':') %}
+                <div class="flex-1 max-w-md rounded-2xl p-5" style="background: rgba(205,127,50,0.08); border: 1px solid rgba(205,127,50,0.3);">
+                    <p class="text-[10px] font-bold uppercase tracking-widest mb-3 flex items-center gap-1.5" style="color: #cd7f32;">🥉 Mecz o 3. miejsce</p>
+                    <div class="flex justify-between items-center text-sm mb-1.5">
+                        <span class="team-name" data-team="{{ tp.home_team }}" style="{% if tpp[0]|int > tpp[1]|int %}color: var(--success); font-weight:700;{% else %}font-weight:500;{% endif %}">{{ tp.home_team }}</span>
+                        <span class="font-mono">{{ tpp[0] }}</span>
+                    </div>
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="team-name" data-team="{{ tp.away_team }}" style="{% if tpp[1]|int > tpp[0]|int %}color: var(--success); font-weight:700;{% else %}font-weight:500;{% endif %}">{{ tp.away_team }}</span>
+                        <span class="font-mono">{{ tpp[1] }}</span>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div id="tab-teams" class="tab-content">
+            <div class="table-wrapper p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="font-display font-bold text-base">Wszystkie drużyny</h3>
+                    <p class="text-xs" style="color: var(--text-faint);">Kliknij drużynę, by zobaczyć szczegóły</p>
+                </div>
+                <div id="teams-grid" class="space-y-7"></div>
+            </div>
+        </div>
+
+        <div id="tab-players" class="tab-content">
+            <div class="table-wrapper p-6">
+                <div class="flex items-center justify-between mb-5">
+                    <h3 class="font-display font-bold text-base">Wszyscy gracze</h3>
+                    <input id="players-search" type="text" placeholder="Szukaj…" class="px-3 py-1.5 rounded-lg text-xs outline-none w-48" style="background: var(--bg-elevated); border: 1px solid var(--border-subtle); color: var(--text);">
+                </div>
+                <div id="players-list" class="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {% for p in all_players %}
+                    <div class="player-card rounded-xl p-4 cursor-pointer transition" style="background: var(--bg-elevated); border: 1px solid var(--border-subtle);"
+                         onclick="openPlayerProfile({{ p.id }})"
+                         data-username="{{ p.username|lower }}">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center gap-2">
+                                <span class="font-semibold text-sm">{{ p.username }}</span>
+                            </div>
+                            <span class="font-display font-bold text-base" style="color: var(--success);">{{ p.total_points }}<span class="text-xs ml-1" style="color: var(--text-muted);">pkt</span></span>
+                        </div>
+                        <div class="flex items-center gap-3 text-xs" style="color: var(--text-muted);">
+                            {% if p.favorite_team %}
+                            <span class="flex items-center gap-1" style="color: var(--gold);">★ {{ p.favorite_team }}</span>
+                            {% endif %}
+                            {% if p.star_player %}
+                            <span class="flex items-center gap-1">⚡ {{ p.star_player.split()[-1] }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="flex items-center gap-3 mt-2 text-[10px]" style="color: var(--text-faint);">
+                            <span>🔥 {{ p.current_streak }} serii</span>
+                            <span>✓ {{ p.correct_predictions }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-history" class="tab-content">
+            <div class="table-wrapper p-1 overflow-x-auto">
+                <h3 class="font-display font-bold text-base p-5 pb-2">Moja historia typów</h3>
+                {% if current_player %}
+                    <div id="history-container"><div class="text-center py-10 text-sm" style="color: var(--text-faint);">Ładowanie historii...</div></div>
+                {% else %}
+                    <p class="text-center py-10 text-sm" style="color: var(--text-faint);">Zaloguj się, by zobaczyć typy.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div id="tab-ranking" class="tab-content">
+            <div class="table-wrapper p-1">
+                <h3 class="font-display font-bold text-base p-5 pb-2">Ranking wszystkich graczy</h3>
+                <div class="divide-y" style="border-color: var(--border-subtle);">
+                    {% for player in all_players %}
+                    <div class="flex justify-between items-center p-4 transition rounded-lg" onmouseover="this.style.background='var(--bg-elevated)'" onmouseout="this.style.background='transparent'">
+                        <div class="flex items-center gap-4">
+                            <span class="w-6 font-display font-bold text-center text-sm" style="color: {% if loop.index <= 3 %}var(--gold){% else %}var(--text-muted){% endif %};">{{ loop.index }}</span>
+                            <span class="font-semibold text-sm cursor-pointer" onclick="openPlayerProfile({{ player.id }})">{{ player.username }}</span>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <span class="text-xs font-semibold whitespace-nowrap px-2 py-1 rounded" style="background: var(--accent-soft); color: var(--accent);" title="Aktualna seria">🔥 {{ player.current_streak }}</span>
+                            <span class="text-xs font-medium whitespace-nowrap px-2 py-1 rounded hidden sm:inline" style="background: var(--bg-elevated); color: var(--text-muted);" title="Trafione typy">{{ player.correct_predictions }} ✓</span>
+                            <span class="font-mono font-bold text-base" style="color: var(--success);">{{ player.total_points }} <span class="text-xs" style="color: var(--text-muted);">pkt</span></span>
+                        </div>
+                    </div>
+                    {% else %}
+                    <p class="text-center py-10 text-sm" style="color: var(--text-faint);">Brak graczy w rankingu</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-rules" class="tab-content">
+            <div class="table-wrapper p-7">
+                <h3 class="font-display font-bold text-xl mb-1">Jak grać?</h3>
+                <p class="text-sm mb-7" style="color: var(--text-muted);">Wszystko, co musisz wiedzieć przed startem.</p>
+
+                <!-- GŁÓWNA ZASADA -->
+                <div class="rounded-xl p-5 mb-7" style="background: var(--bg-elevated); border-left: 2px solid var(--accent);">
+                    <p class="text-xs font-semibold uppercase tracking-wider mb-2" style="color: var(--accent);">główna zasada</p>
+                    <p class="text-sm leading-relaxed">Typujesz <strong>dokładny wynik</strong> meczów mundialu. Trafienie daje punkty, błędne wskazanie zwycięzcy je odbiera. <br> Nikt nie odpada — gra trwa do końca turnieju. <strong>Wygrywa gracz z największą liczbą punktów.</strong></p>
+                </div>
+
+                <div class="mb-7">
+                    <p class="text-[10px] font-semibold uppercase tracking-wider mb-3" style="color: var(--text-faint);">Typowanie meczów</p>
+                    <div class="p-4 rounded-xl text-sm leading-relaxed space-y-2.5" style="background: var(--bg-elevated);">
+                        <p>🎯 Aktywne okno typowania to zawsze <strong style="color: var(--accent);">5 najbliższych meczów</strong>. Gdy jeden się kończy, wskakuje kolejny. Nie musisz obstawiać wszystkich — typuj te, których jesteś pewny!</p>
+                        <p>✏️ Swobodna <strong>edycja</strong> typu aż do pierwszego gwizdka.</p>
+                        <p>🔒 Po starcie meczu typ zostaje <strong style="color: var(--danger);">zablokowany</strong>.</p>
+                        <p>📋 Zawsze typujesz dokładny wynik, np. <strong>2:1</strong>. Liczy się przede wszystkim trafienie rozstrzygnięcia (kto wygra lub remis) — pomyłka co do zwycięzcy kosztuje punkty.</p>
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-5">
+                    <!-- PUNKTACJA -->
+                    <div>
+                        <p class="text-[10px] font-semibold uppercase tracking-wider mb-3" style="color: var(--text-faint);">Punktacja</p>
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center p-3 rounded-lg" style="background: var(--bg-elevated);">
+                                <span class="text-sm">Dokładny wynik</span>
+                                <span class="font-display font-bold text-base" style="color: var(--success);">+3 pkt</span>
+                            </div>
+                            <div class="flex justify-between items-center p-3 rounded-lg" style="background: var(--bg-elevated);">
+                                <span class="text-sm">Dobry zwycięzca / remis, zły wynik</span>
+                                <span class="font-display font-bold text-base">+1 pkt</span>
+                            </div>
+                            <div class="flex justify-between items-center p-3 rounded-lg" style="background: var(--bg-elevated);">
+                                <span class="text-sm" style="color: var(--text-muted);">Błędny zwycięzca</span>
+                                <span class="font-display font-bold text-base" style="color: var(--danger);">−2 pkt</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- JAK WYGRAĆ -->
+                    <div>
+                        <p class="text-[10px] font-semibold uppercase tracking-wider mb-3" style="color: var(--text-faint);">Jak wygrać</p>
+                        <div class="p-4 rounded-xl text-sm leading-relaxed space-y-2" style="background: var(--bg-elevated);">
+                            <p>Nikt nie odpada — <strong style='color:var(--success);'>wszyscy grają do końca</strong>.</p>
+                            <p>Każdy mecz to szansa na punkty… albo strata <strong style='color:var(--danger);'>−2</strong> za zły typ.</p>
+                            <p>Punkty mogą zejść na minus — <strong>ryzykuj rozważnie</strong>.</p>
+                            <p class="pt-1 mt-1 border-t" style="border-color: var(--border-subtle);">Wygrywa najwyższy wynik w rankingu. 🏆</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BONUSY -->
+                <div class="mt-7">
+                    <p class="text-[10px] font-semibold uppercase tracking-wider mb-1" style="color: var(--text-faint);">Bonusy punktowe</p>
+                    <p class="text-xs mb-3" style="color: var(--text-faint);">Doliczane do trafionego typu. Bonusy za liczbę bramek liczą się tylko przy trafionym dokładnym wyniku.</p>
+                    <div class="grid md:grid-cols-2 gap-2">
+                        <div class="flex justify-between items-center p-3 rounded-lg" style="background: var(--bg-elevated);"><span class="text-sm">🐺 Underdog (U) wygrywa</span><span class="font-display font-bold text-sm" style="color: var(--success);">+2</span></div>
+                        <div class="flex justify-between items-center p-3 rounded-lg" style="background: var(--bg-elevated);"><span class="text-sm">🐺 Underdog (U) remisuje</span><span class="font-display font-bold text-sm">+1</span></div>
+                        <div class="flex justify-between items-center p-3 rounded-lg" style="background: var(--bg-elevated);"><span class="text-sm">⚽ 4 bramki łącznie</span><span class="font-display font-bold text-sm">+1</span></div>
+                        <div class="flex justify-between items-center p-3 rounded-lg" style="background: var(--bg-elevated);"><span class="text-sm">🔥 5+ bramek łącznie</span><span class="font-display font-bold text-sm">+2</span></div>
+                        <div class="flex justify-between items-center p-3 rounded-lg" style="background: var(--bg-elevated);"><span class="text-sm">⭐ Ulubiona drużyna wygrywa</span><span class="font-display font-bold text-sm" style="color: var(--gold);">+1</span></div>
+                        <div class="flex justify-between items-center p-3 rounded-lg" style="background: var(--bg-elevated);"><span class="text-sm">🏃 Twoja gwiazda strzela gola</span><span class="font-display font-bold text-sm" style="color: var(--gold);">+1 / gol</span></div>
+                    </div>
+                </div>
+
+                <!-- MNOŻNIKI -->
+                <div class="mt-7">
+                    <p class="text-[10px] font-semibold uppercase tracking-wider mb-1" style="color: var(--text-faint);">Mnożniki fazy pucharowej</p>
+                    <p class="text-xs mb-3" style="color: var(--text-faint);">W fazie pucharowej punkty (bez bonusu za gwiazdę) są mnożone — im dalej, tym więcej.</p>
+                    <div class="grid grid-cols-4 gap-2">
+                        <div class="text-center p-3 rounded-lg" style="background: var(--bg-elevated);"><p class="text-[10px]" style="color: var(--text-muted);">Faza grupowa</p><p class="font-display font-bold text-base" style="color: var(--text-muted);">×1</p></div>
+                        <div class="text-center p-3 rounded-lg" style="background: var(--bg-elevated);"><p class="text-[10px]" style="color: var(--text-muted);">Ćwierćfinał</p><p class="font-display font-bold text-base" style="color: var(--success);">×1.5</p></div>
+                        <div class="text-center p-3 rounded-lg" style="background: var(--bg-elevated);"><p class="text-[10px]" style="color: var(--text-muted);">Półfinał</p><p class="font-display font-bold text-base">×2</p></div>
+                        <div class="text-center p-3 rounded-lg" style="background: var(--bg-elevated);"><p class="text-[10px]" style="color: var(--text-muted);">Finał</p><p class="font-display font-bold text-base" style="color: var(--gold);">×3</p></div>
+                    </div>
+                </div>
+
+                <!-- SERIA + WYBORY -->
+                <div class="mt-7">
+                    <p class="text-[10px] font-semibold uppercase tracking-wider mb-3" style="color: var(--text-faint);">Dodatkowo</p>
+                    <div class="grid md:grid-cols-2 gap-5">
+                        <div class="p-4 rounded-xl text-sm leading-relaxed space-y-2" style="background: var(--bg-elevated);">
+                            <p class="font-semibold" style="color: var(--accent);">🔥 Seria (streak)</p>
+                            <p style="color: var(--text-muted);">Licznik trafień z rzędu, pokazywany przy Twoim nicku. Pomyłka zeruje serię.</p>
+                        </div>
+                        <div class="p-4 rounded-xl text-sm leading-relaxed space-y-2" style="background: var(--bg-elevated);">
+                            <p class="font-semibold" style="color: var(--gold);">⭐ Ulubiona drużyna i gwiazda</p>
+                            <p style="color: var(--text-muted);">Na starcie wybierasz ulubioną drużynę (+1 pkt za jej wygraną) i gwiazdę (+1 pkt za jej gola). <strong>Wybór jest jednorazowy</strong> — przemyśl go!</p>
+                        </div>
+                    </div>
+                </div>
+
+                                <!-- PRZYKŁAD 1: DOKŁADNY WYNIK + UNDERDOG + GWIAZDA -->
+                <div class="mt-7 p-4 rounded-xl" style="background: var(--bg-elevated); border-left: 2px solid var(--success);">
+                    <p class="text-xs font-semibold uppercase tracking-wider mb-2" style="color: var(--success);">Przykład – dokładny wynik</p>
+                    <p class="text-sm leading-relaxed">
+                        Mecz <strong>Arabia Saudyjska (U) 2:1 Argentyna</strong>, Twój typ: <strong>2:1</strong>, Bramkę strzela Twoja gwiazda – Messi.<br>
+                        → 3 pkt (dokładny wynik) + 2 pkt (wygrana underdoga) + 1 pkt (gwiazda) = <strong style="color:var(--success);">6 punktów</strong> 🎉
+                    </p>
+                </div>
+
+                <!-- PRZYKŁAD 2: BŁĘDNY TYP + BONUS ZA ULUBIONĄ DRUŻYNĘ -->
+                <div class="mt-7 p-4 rounded-xl" style="background: var(--bg-elevated); border-left: 2px solid var(--info);">
+                    <p class="text-xs font-semibold uppercase tracking-wider mb-2" style="color: var(--info);">Przykład – kara i bonus</p>
+                    <p class="text-sm leading-relaxed">
+                        Twoja ulubiona drużyna: <strong>Francja</strong>. Obstawiasz <strong>0:1</strong> (porażka), a mecz kończy się <strong>2:0</strong> dla Francji. Twój typ jest błędny → <strong>-2 pkt</strong>, ale Francja wygrywa → <strong>+1 pkt</strong> (bonus za ulubioną drużynę).<br>
+                        → <strong style="color: var(--danger);">-2 pkt</strong> + <strong style="color: var(--gold);">+1 pkt</strong> = <strong style="color: var(--success);">-1 pkt</strong> 🧤
+                    </p>
+                </div>
+
+                <!-- PRZYKŁAD 3: FAZA PUCHAROWA (mnożnik) + WIELE BRAMEK GWIAZDY -->
+                <div class="mt-7 p-4 rounded-xl" style="background: var(--bg-elevated); border-left: 2px solid var(--gold);">
+                    <p class="text-xs font-semibold uppercase tracking-wider mb-2" style="color: var(--gold);">Przykład – faza pucharowa</p>
+                    <p class="text-sm leading-relaxed">
+                        Ćwierćfinał (mnożnik ×1.5): <strong>Holandia 3:2 Hiszpania</strong>, Twój typ: <strong>3:2</strong> (dokładny wynik). Twoja gwiazda – <strong>Gakpo</strong> strzela 2 gole. Łączna liczba bramek: 5 → +2 pkt (bonus za 5+ goli).<br>
+                        → (3 pkt + 2 pkt) ×1.5 = 7.5 → <strong>7 pkt</strong> (zaokrąglenie w dół) + 2 pkt (gwiazda) = <strong style="color:var(--success);">9 punktów</strong> 🚀
+                    </p>
+                </div>
+
+                <p class="text-center text-xs mt-7" style="color: var(--text-faint);">Powodzenia — niech wygra najlepszy typer! 🏆</p>
+            </div>
+        </div>
+    </main>
+
+    <div id="playerProfileModal" class="fixed inset-0 flex items-center justify-center z-[400] overflow-y-auto py-6" style="display:none; background: rgba(11,13,17,0.85); backdrop-filter: blur(8px);">
+        <div class="relative w-full max-w-2xl mx-4">
+            <div class="flex justify-between items-center mb-3 px-1">
+                <p class="font-display font-bold text-base">Profil gracza</p>
+                <button onclick="closePlayerProfile()" class="w-8 h-8 flex items-center justify-center rounded-lg" style="color: var(--text-muted); background: var(--bg-surface); border: 1px solid var(--border-subtle);">✕</button>
+            </div>
+
+            <div class="rounded-2xl overflow-hidden" style="background: var(--bg-surface); border: 1px solid var(--border-soft);">
+                <div class="p-5 border-b" style="border-color: var(--border-subtle);">
+                    <div class="flex items-start justify-between mb-3">
+                        <div>
+                            <div class="flex items-center gap-2 mb-1">
+                                <h2 id="pp-username" class="font-display font-bold text-2xl"></h2>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-display font-bold text-3xl" style="color: var(--success);" id="pp-points">0</p>
+                            <p class="text-[10px] uppercase tracking-wider" style="color: var(--text-faint);">punkty łącznie</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-2 text-center">
+                        <div class="rounded-lg p-2" style="background: var(--bg-elevated);"><p class="font-display font-bold text-sm" id="pp-correct">0</p><p class="text-[9px] uppercase" style="color: var(--text-faint);">Trafione</p></div>
+                        <div class="rounded-lg p-2" style="background: var(--bg-elevated);"><p class="font-display font-bold text-sm" style="color: var(--accent);" id="pp-streak">0</p><p class="text-[9px] uppercase" style="color: var(--text-faint);">Seria</p></div>
+                        <div class="rounded-lg p-2" style="background: var(--bg-elevated);"><p class="font-display font-bold text-sm" id="pp-longest">0</p><p class="text-[9px] uppercase" style="color: var(--text-faint);">Rekord serii</p></div>
+                    </div>
+                </div>
+
+                <div class="p-5 grid grid-cols-2 gap-3 border-b" style="border-color: var(--border-subtle);">
+                    <div class="rounded-lg p-3" style="background: var(--bg-elevated);">
+                        <p class="text-[10px] font-semibold uppercase tracking-wider mb-1" style="color: var(--text-faint);">Ulubiona drużyna</p>
+                        <p id="pp-team" class="font-semibold text-sm" style="color: var(--gold);">—</p>
+                    </div>
+                    <div class="rounded-lg p-3" style="background: var(--bg-elevated);">
+                        <p class="text-[10px] font-semibold uppercase tracking-wider mb-1" style="color: var(--text-faint);">Gwiazda</p>
+                        <p id="pp-star" class="font-semibold text-sm">—</p>
+                    </div>
+                </div>
+
+                <div class="p-5">
+                    <p class="text-[10px] font-semibold uppercase tracking-wider mb-3" style="color: var(--text-faint);">Historia typów</p>
+                    <div id="pp-history" class="space-y-1 max-h-96 overflow-y-auto">
+                        <p class="text-xs" style="color: var(--text-faint);">Ładowanie...</p>
+                    </div>
+                    <p class="text-[10px] mt-3 italic" style="color: var(--text-faint);"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="pickModal" class="fixed inset-0 flex items-center justify-center z-[200] hidden p-4" style="background: rgba(11,13,17,0.85); backdrop-filter: blur(8px);">
+        <div class="flat-card rounded-2xl p-7 w-full max-w-sm" style="border: 1px solid var(--border-soft);">
+            <h3 class="font-display font-bold text-xl mb-1 text-center">Typuj wynik</h3>
+            <p class="text-sm text-center mb-6" id="modalTeams" style="color: var(--text-muted);">Ładowanie...</p>
+            <input type="text" id="scoreInput" placeholder="2:1" class="w-full rounded-xl px-4 py-5 text-center text-4xl font-bold font-mono outline-none transition-all" style="background: var(--bg-elevated); border: 1px solid var(--border-subtle); color: var(--text);">
+            <div class="flex gap-3 mt-6">
+                <button id="confirmPick" class="flex-1 font-semibold py-3 rounded-xl transition" style="background: var(--accent); color: var(--bg-base);">Zapisz</button>
+                <button id="closeModal" class="flex-1 font-semibold py-3 rounded-xl transition" style="background: var(--bg-elevated); color: var(--text-muted); border: 1px solid var(--border-subtle);">Anuluj</button>
+            </div>
+            <p class="text-center text-xs mt-4" style="color: var(--text-faint);">Format: 2:1</p>
+        </div>
+    </div>
+
+    <div id="authModal" class="fixed inset-0 flex items-center justify-center z-[300]" style="display: none; background: rgba(11,13,17,0.85); backdrop-filter: blur(8px);">
+        <div class="relative flat-card rounded-2xl p-7 max-w-sm w-full mx-4" style="border: 1px solid var(--border-soft);">
+            <button onclick="document.getElementById('authModal').style.display='none'" class="absolute top-4 right-4 transition w-7 h-7 flex items-center justify-center rounded-lg" style="color: var(--text-muted); background: var(--bg-elevated);">✕</button>
+            <h2 class="font-display font-bold text-xl text-center mb-6">Dołącz do gry</h2>
+
+            <input type="text" id="authUsername" placeholder="Login" class="w-full rounded-xl p-3.5 mb-3 outline-none transition" style="background: var(--bg-elevated); border: 1px solid var(--border-subtle); color: var(--text);">
+            <input type="password" id="authPassword" placeholder="Hasło" class="w-full rounded-xl p-3.5 mb-5 outline-none transition" style="background: var(--bg-elevated); border: 1px solid var(--border-subtle); color: var(--text);">
+
+            <div class="flex gap-3">
+                <button onclick="handleAuth('login')" class="flex-1 font-semibold py-3 rounded-xl transition" style="background: var(--success); color: var(--bg-base);">Zaloguj</button>
+                <button onclick="handleAuth('register')" class="flex-1 font-semibold py-3 rounded-xl transition" style="background: transparent; color: var(--success); border: 1px solid rgba(74,222,128,0.4);">Zarejestruj</button>
+            </div>
+            <p id="authError" class="text-xs text-center mt-4 font-medium hidden" style="color: var(--danger);"></p>
+        </div>
+    </div>
+
+<div id="teamDetailModal" class="fixed inset-0 flex items-center justify-center z-[400] p-4" style="display:none; background: rgba(11,13,17,0.9); backdrop-filter: blur(10px);">
+    <div class="relative w-full max-w-5xl mx-auto">
+        <div class="flex justify-between items-center mb-2 px-1">
+            <div>
+                <p class="font-display font-bold text-sm tracking-tight">Karta drużyny</p>
+                <p class="text-[11px]" style="color: var(--text-faint);" id="teamDetailSubtitle"></p>
+            </div>
+            <button onclick="closeTeamDetail()" class="transition w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white/10" style="color: var(--text-muted); background: var(--bg-surface); border: 1px solid var(--border-subtle);">✕</button>
+        </div>
+
+        <div id="teamDetailCard" class="rounded-xl overflow-hidden flex flex-col md:flex-row shadow-2xl" style="background: var(--bg-surface); border: 1px solid var(--border-soft);">
+            
+            <div class="w-full md:w-[32%] flex flex-col border-b md:border-b-0 md:border-r" style="border-color: var(--border-subtle);">
+                <div class="relative h-24 flex items-center justify-center overflow-hidden flex-shrink-0" style="background: var(--bg-elevated);">
+                    <img id="td-flag-bg" src="" alt="" class="absolute inset-0 w-full h-full object-cover opacity-10 scale-110" style="filter:blur(4px);">
+                    <div class="relative z-10 flex items-center gap-3 mt-2">
+                        <img id="td-flag" src="" alt="" class="w-12 h-9 object-cover rounded shadow" style="border: 1px solid var(--border-soft);">
+                        <div>
+                            <p id="td-name" class="font-display font-bold text-xl tracking-tight leading-none"></p>
+                            <p id="td-group" class="text-[10px] font-bold uppercase tracking-widest mt-1" style="color: var(--accent);"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-4 flex-1 space-y-3 text-xs">
+                    <div class="flex items-center justify-between p-2.5 rounded-lg" style="background: linear-gradient(135deg, rgba(251,191,36,0.1), rgba(251,191,36,0.02)); border: 1px solid rgba(251,191,36,0.15);">
+                        <span class="text-[11px] font-bold uppercase tracking-wider shadow-sm" style="color: var(--gold);">Ranking FIFA:</span>
+                        <span class="text-xl font-display font-bold text-gold" id="td-fifa-rank">-</span>
+                    </div>
+
+                    <div class="grid grid-cols-5 gap-1 text-center bg-white/[0.01] p-1.5 rounded-lg border border-white/5">
+                        <div><p class="font-bold" id="td-p">0</p><p class="text-[8px] uppercase text-white/40">Mecze</p></div>
+                        <div><p class="font-bold text-success" id="td-w">0</p><p class="text-[8px] uppercase text-white/40">Wyg</p></div>
+                        <div><p class="font-bold text-info" id="td-d">0</p><p class="text-[8px] uppercase text-white/40">Rem</p></div>
+                        <div><p class="font-bold text-danger" id="td-l">0</p><p class="text-[8px] uppercase text-white/40">Por</p></div>
+                        <div><p class="font-bold text-gold" id="td-g">0</p><p class="text-[8px] uppercase text-white/40">Gole</p></div>
+                    </div>
+
+                    <div class="p-2.5 rounded-lg" style="background: var(--bg-elevated);">
+                        <p class="text-[9px] font-medium uppercase tracking-wider mb-0.5 text-white/40">Styl gry</p>
+                        <p class="text-[11px] leading-relaxed text-white/70" id="td-style"></p>
+                    </div>
+
+                    <div class="p-2.5 rounded-lg" style="background: var(--bg-elevated);">
+                        <p class="text-[9px] font-medium uppercase tracking-wider mb-0.5 text-white/40">Sparingi przed MŚ</p>
+                        <div id="td-friendlies" class="text-[11px] text-white/70"></div>
+                    </div>
+
+                    <div class="flex items-center justify-between bg-white/[0.02] p-2 rounded-lg border border-white/5">
+                        <span class="text-[10px] uppercase tracking-wider text-white/40">Szansa na tytuł:</span>
+                        <span class="font-display font-bold text-gold text-sm" id="td-odds-text">0%</span>
+                        <div class="hidden"><div id="td-odds-bar"></div></div>
+                    </div>
+
+                    <div class="p-2.5 rounded-lg text-[11px]" style="background: var(--accent-soft); border: 1px solid rgba(232,138,91,0.15);">
+                        <p id="td-funfact" style="color: var(--text-muted);"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="w-full md:w-[68%] relative p-4 md:p-5" style="background: var(--bg-base);">
+                <div class="flex items-center justify-between border-b pb-2 mb-4" style="border-color: var(--border-subtle);">
+                    <h4 class="font-display font-bold text-lg text-white leading-none">Oficjalny Skład na MŚ 2026</h4>
+                    <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-white/5 text-white/50">26 ZAWODNIKÓW</span>
+                </div>
+                
+                <div id="td-squad-container"></div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+    <div id="welcomeModal" class="fixed inset-0 flex items-center justify-center z-[200] transition-all duration-500" style="display: none; background: rgba(11,13,17,0.92); backdrop-filter: blur(10px);">
+        <div class="relative flat-card rounded-2xl p-0 max-w-xl w-full mx-4 overflow-hidden" style="border: 1px solid var(--border-soft);">
+            <button id="closeWelcomeModalX" class="absolute top-4 right-4 transition w-7 h-7 flex items-center justify-center rounded-lg z-10" style="color: var(--text-muted); background: var(--bg-elevated);">✕</button>
+            <div id="welcomeContent" class="p-6 pt-5 mt-4" style="min-height: 320px;"></div>
+            <div class="px-6 pb-5">
+                <div class="flex justify-center gap-1.5 mb-4">
+                    <div class="step-dot w-1.5 h-1.5 rounded-full" style="background: var(--accent);" data-step="1"></div>
+                    <div class="step-dot w-1.5 h-1.5 rounded-full" style="background: var(--border-soft);" data-step="2"></div>
+                    <div class="step-dot w-1.5 h-1.5 rounded-full" style="background: var(--border-soft);" data-step="3"></div>
+                    <div class="step-dot w-1.5 h-1.5 rounded-full" style="background: var(--border-soft);" data-step="4"></div>
+                    <div class="step-dot w-1.5 h-1.5 rounded-full" style="background: var(--border-soft);" data-step="5"></div>
+                </div>
+                <div class="flex gap-3">
+                    <button id="welcomePrevBtn" class="flex-1 font-medium py-2.5 rounded-lg transition text-sm disabled:opacity-30 disabled:cursor-not-allowed" style="background: var(--bg-elevated); color: var(--text-muted);" disabled>← Wstecz</button>
+                    <button id="welcomeNextBtn" class="flex-1 font-semibold py-2.5 rounded-lg transition text-sm" style="background: var(--accent); color: var(--bg-base);">Dalej →</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+        <!-- ======================= MODAL WYBORU ULUBIONEJ DRUŻYNY ======================= -->
+    <div id="favoriteTeamModal" class="fixed inset-0 flex items-center justify-center z-[200] hidden p-4" style="background: rgba(11,13,17,0.92); backdrop-filter: blur(10px);">
+        <div class="relative max-w-3xl w-full">
+            <div class="flex justify-end mb-2">
+                <button onclick="closeFavModal()" class="w-8 h-8 flex items-center justify-center rounded-lg" style="color: var(--text-muted); background: var(--bg-surface); border: 1px solid var(--border-subtle);">✕</button>
+            </div>
+            <div class="flat-card rounded-2xl overflow-hidden" style="border: 1px solid var(--border-soft); background: var(--bg-surface);">
+                <div class="p-6">
+                    <h2 class="font-display font-bold text-2xl text-center mb-1">Wybierz swoją drużynę</h2>
+                    <p class="text-xs text-center mb-5" style="color: var(--text-muted);">Twoja ulubiona drużyna da Ci +1 pkt za każdą jej wygraną</p>
+
+                    <div class="relative flex items-center justify-between gap-3">
+                        <button onclick="favNav(-1)" class="w-10 h-10 rounded-full flex items-center justify-center transition hover:bg-white/5" style="background: var(--bg-elevated); border: 1px solid var(--border-subtle); color: var(--text);">←</button>
+                        <div id="favTeamCard" class="flex-1 transition-all duration-200">
+                            <div class="flex flex-col md:flex-row gap-6 items-center">
+                                <div class="relative">
+                                    <img id="favTeamFlag" src="" class="w-28 h-20 object-cover rounded-xl shadow-lg" style="border: 1px solid var(--border-soft);">
+                                    <div id="favWorldCupBadge" class="absolute -top-2 -right-2 text-lg hidden"></div>
+                                </div>
+                                <div class="flex-1 text-center md:text-left">
+                                    <div class="flex items-center justify-center md:justify-start gap-2 mb-1">
+                                        <h3 id="favTeamName" class="font-display font-bold text-2xl"></h3>
+                                        <span id="favTeamGroup" class="text-xs px-2 py-0.5 rounded-full" style="background: var(--accent-soft); color: var(--accent);"></span>
+                                    </div>
+                                    <div class="grid grid-cols-5 gap-1 text-center max-w-md mx-auto md:mx-0">
+                                        <div><p class="text-sm font-bold" id="fav-stat-p">0</p><p class="text-[9px] uppercase" style="color: var(--text-faint);">Mecze</p></div>
+                                        <div><p class="text-sm font-bold text-success" id="fav-stat-w">0</p><p class="text-[9px] uppercase" style="color: var(--text-faint);">Zwyc.</p></div>
+                                        <div><p class="text-sm font-bold text-info" id="fav-stat-d">0</p><p class="text-[9px] uppercase" style="color: var(--text-faint);">Remisy</p></div>
+                                        <div><p class="text-sm font-bold text-danger" id="fav-stat-l">0</p><p class="text-[9px] uppercase" style="color: var(--text-faint);">Porażki</p></div>
+                                    </div>
+                                    <div class="mt-3 text-left">
+                                        <p class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-faint);">Styl gry</p>
+                                        <p id="fav-style" class="text-xs mt-1" style="color: var(--text-muted);"></p>
+                                    </div>
+                                    <div class="mt-3">
+                                        <div class="flex justify-between text-[10px] mb-1"><span>Szansa na tytuł</span><span id="fav-odds-text" class="font-bold" style="color: var(--gold);">0%</span></div>
+                                        <div class="h-1.5 rounded-full overflow-hidden" style="background: var(--bg-elevated);"><div id="fav-odds-bar" class="h-full rounded-full transition-all duration-500" style="width:0%; background: linear-gradient(90deg, var(--success), var(--gold));"></div></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="favNav(1)" class="w-10 h-10 rounded-full flex items-center justify-center transition hover:bg-white/5" style="background: var(--bg-elevated); border: 1px solid var(--border-subtle); color: var(--text);">→</button>
+                    </div>
+                    <div class="text-center mt-4">
+                        <span id="favTeamCounter" class="text-xs" style="color: var(--text-faint);">1 / 48</span>
+                    </div>
+
+                    <div class="mt-2 flex justify-between items-center">
+                        <span class="text-[9px] font-medium uppercase tracking-wider" style="color: var(--text-faint);">Ranking FIFA</span>
+                        <span id="fav-fifa-rank" class="text-xs font-semibold" style="color: var(--gold);">-</span>
+                    </div>
+
+                    <div class="flex justify-center gap-3 mt-6">
+                        <button id="favSelectBtn" class="font-semibold px-6 py-2.5 rounded-xl transition text-sm" style="background: var(--accent); color: var(--bg-base);">Wybierz tę drużynę</button>
+                        <button onclick="closeFavModal()" class="font-semibold px-6 py-2.5 rounded-xl transition text-sm" style="background: var(--bg-elevated); color: var(--text-muted); border: 1px solid var(--border-subtle);">Anuluj</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ======================= MODAL WYBORU GWIAZDY ======================= -->
+    <div id="starPlayerModal" class="fixed inset-0 flex items-center justify-center z-[200] hidden p-4" style="background: rgba(11,13,17,0.92); backdrop-filter: blur(10px);">
+        <div class="relative max-w-3xl w-full">
+            <div class="flex justify-end mb-2">
+                <button onclick="document.getElementById('starPlayerModal').style.display='none'" class="w-8 h-8 flex items-center justify-center rounded-lg" style="color: var(--text-muted); background: var(--bg-surface); border: 1px solid var(--border-subtle);">✕</button>
+            </div>
+            <div class="flat-card rounded-2xl overflow-hidden" style="border: 1px solid var(--border-soft); background: var(--bg-surface);">
+                <div class="p-6">
+                    <h2 class="font-display font-bold text-2xl text-center mb-1">Wybierz swoją gwiazdę</h2>
+                    <p class="text-xs text-center mb-5" style="color: var(--text-muted);">Każdy gol tego piłkarza w meczu, który typujesz, da Ci +1 pkt</p>
+
+                    <div class="relative flex items-center justify-between gap-3">
+                        <button onclick="spNav(-1)" class="w-10 h-10 rounded-full flex items-center justify-center transition hover:bg-white/5" style="background: var(--bg-elevated); border: 1px solid var(--border-subtle); color: var(--text);">←</button>
+                        <div id="spCard" class="flex-1 transition-all duration-200">
+                            <div class="flex flex-col md:flex-row gap-6 items-center">
+                            <div class="relative">
+                                <img id="sp-img" src="" class="w-48 h-48 md:w-56 md:h-56 rounded-2xl object-cover shadow-lg border-2" style="border-color: var(--accent); background: var(--bg-elevated); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3);">
+                            </div>
+                                <div class="flex-1">
+                                    <div class="flex items-center justify-center md:justify-start gap-3 mb-2">
+                                        <h3 id="sp-name" class="font-display font-bold text-2xl"></h3>
+                                        <img id="sp-flag" src="" class="w-6 h-4 object-cover rounded">
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-x-6 gap-y-1 text-sm">
+                                        <div><span class="text-muted">Kraj:</span> <strong id="sp-country"></strong></div>
+                                        <div><span class="text-muted">Wiek:</span> <strong id="sp-age"></strong></div>
+                                        <div><span class="text-muted">Wzrost:</span> <strong id="sp-height"></strong></div>
+                                        <div><span class="text-muted">Waga:</span> <strong id="sp-weight"></strong></div>
+                                        <div><span class="text-muted">Noga:</span> <strong id="sp-foot"></strong></div>
+                                    </div>
+                                    <div class="grid grid-cols-3 gap-2 text-center mt-4">
+                                        <div class="rounded-lg p-2" style="background: var(--bg-elevated);"><p class="text-sm font-bold" id="sp-matches">0</p><p class="text-[9px] uppercase">Mecze</p></div>
+                                        <div class="rounded-lg p-2" style="background: var(--bg-elevated);"><p class="text-sm font-bold" style="color: var(--success);" id="sp-goals">0</p><p class="text-[9px] uppercase">Gole</p></div>
+                                        <div class="rounded-lg p-2" style="background: var(--bg-elevated);"><p class="text-sm font-bold" style="color: var(--info);" id="sp-assists">0</p><p class="text-[9px] uppercase">Asysty</p></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="spNav(1)" class="w-10 h-10 rounded-full flex items-center justify-center transition hover:bg-white/5" style="background: var(--bg-elevated); border: 1px solid var(--border-subtle); color: var(--text);">→</button>
+                    </div>
+                    <div class="text-center mt-4">
+                        <span id="sp-counter" class="text-xs" style="color: var(--text-faint);">1 / 18</span>
+                    </div>
+                    <div class="flex justify-center gap-3 mt-6">
+                        <button id="spSelectFinalBtn" class="font-semibold px-6 py-2.5 rounded-xl transition text-sm" style="background: var(--accent); color: var(--bg-base);">Zapisz i kontynuuj</button>
+                        <button onclick="document.getElementById('starPlayerModal').style.display='none'" class="font-semibold px-6 py-2.5 rounded-xl transition text-sm" style="background: var(--bg-elevated); color: var(--text-muted); border: 1px solid var(--border-subtle);">Anuluj</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const FLAG_BASE_URL = "https://cdn.jsdelivr.net/npm/flag-icons@6.6.6/flags/4x3/";
+        const FLAG_CODES = {
+            "Meksyk": "mx", "Korea Południowa": "kr", "RPA": "za", "Czechy": "cz",
+            "Kanada": "ca", "Szwajcaria": "ch", "Katar": "qa", "Bośnia i Hercegowina": "ba",
+            "Brazylia": "br", "Maroko": "ma", "Szkocja": "gb-sct", "Haiti": "ht",
+            "USA": "us", "Australia": "au", "Paragwaj": "py", "Turcja": "tr",
+            "Niemcy": "de", "Ekwador": "ec", "WKS": "ci", "Curacao": "cw",
+            "Holandia": "nl", "Japonia": "jp", "Tunezja": "tn", "Szwecja": "se",
+            "Belgia": "be", "Iran": "ir", "Egipt": "eg", "Nowa Zelandia": "nz",
+            "Hiszpania": "es", "Urugwaj": "uy", "Arabia Saudyjska": "sa", "RZP": "cv",
+            "Francja": "fr", "Senegal": "sn", "Norwegia": "no", "Irak": "iq",
+            "Argentyna": "ar", "Austria": "at", "Algieria": "dz", "Jordania": "jo",
+            "Portugalia": "pt", "Kolumbia": "co", "Uzbekistan": "uz", "DR Konga": "cd",
+            "Anglia": "gb-eng", "Chorwacja": "hr", "Panama": "pa", "Ghana": "gh"
+        };
+
+        const UNDERDOG_TEAMS_SET = new Set([
+            "Haiti", "Curacao", "RPA", "Bośnia i Hercegowina",
+            "Nowa Zelandia", "Arabia Saudyjska", "RZP", "Irak",
+            "Jordania", "Uzbekistan", "DR Konga", "Panama"
+        ]);
+
+        function isUnderdog(teamName) { return UNDERDOG_TEAMS_SET.has(teamName); }
+
+        function addUnderdogBadge(element, teamName) {
+            if (isUnderdog(teamName) && !element.querySelector('.underdog-badge')) {
+                const badge = document.createElement('span');
+                badge.className = 'underdog-badge';
+                badge.title = 'Underdog — win or draw earns bonus points!';
+                element.appendChild(badge);
+            }
+        }
+
+        function addAllFlags() {
+            document.querySelectorAll('.team-name').forEach(el => {
+                const teamName = el.getAttribute('data-team') || el.textContent.trim();
+                if (teamName) {
+                    if (!el.querySelector('img')) {
+                        const code = FLAG_CODES[teamName];
+                        if (code) {
+                            const img = document.createElement('img');
+                            img.src = `${FLAG_BASE_URL}${code}.svg`;
+                            img.className = 'flag-icon';
+                            img.alt = teamName;
+                            img.onerror = function() { this.style.display = 'none'; };
+                            el.insertBefore(img, el.firstChild);
+                        }
+                    }
+                    addUnderdogBadge(el, teamName);
+                }
+            });
+        }
+
+        async function addFavoriteBadges() {
+            const playerId = {{ current_player.id if current_player else 0 }};
+            if (!playerId) return;
+            try {
+                const res = await fetch(`/players/${playerId}`);
+                const player = await res.json();
+                if (player.favorite_team) {
+                    document.querySelectorAll('.team-name').forEach(el => {
+                        const teamName = el.getAttribute('data-team') || el.textContent.trim();
+                        if (teamName === player.favorite_team && !el.querySelector('.favorite-badge')) {
+                            const badge = document.createElement('span');
+                            badge.className = 'favorite-badge';
+                            badge.title = 'Twoja ulubiona drużyna! +1 pkt za wygraną.';
+                            el.appendChild(badge);
+                        }
+                    });
+                }
+            } catch(e) {}
+        }
+
+        let countdownInterval = null;
+        let nextMatchTimestamp = null;
+
+        async function fetchNextMatch() {
+            try {
+                const response = await fetch('/next-match/');
+                const data = await response.json();
+                if (data.has_next) {
+                    const homeCode = FLAG_CODES[data.home_team];
+                    const awayCode = FLAG_CODES[data.away_team];
+                    const homeFlag = homeCode ? `<img src="${FLAG_BASE_URL}${homeCode}.svg" class="flag-icon" style="width:16px;height:12px;margin-right:6px;" onerror="this.style.display='none'">` : '';
+                    const awayFlag = awayCode ? `<img src="${FLAG_BASE_URL}${awayCode}.svg" class="flag-icon" style="width:16px;height:12px;margin-left:6px;margin-right:0;" onerror="this.style.display='none'">` : '';
+                    document.getElementById('next-match-teams').innerHTML = `<span class="team-name font-semibold" data-team="${data.home_team}">${homeFlag}${data.home_team}</span><span class="mx-3 text-xs" style="color: var(--text-faint);">vs</span><span class="team-name font-semibold" data-team="${data.away_team}">${data.away_team}${awayFlag}</span>`;
+                    const totalSecondsLeft = data.days * 86400 + data.hours * 3600 + data.minutes * 60 + (data.seconds || 0);
+                    nextMatchTimestamp = Date.now() + totalSecondsLeft * 1000;
+                    const liveBadge = document.getElementById('liveBadge');
+                    if (liveBadge) liveBadge.style.display = totalSecondsLeft < 7200 ? 'inline' : 'none';
+                } else {
+                    nextMatchTimestamp = null;
+                    document.getElementById('next-match-teams').innerHTML = 'Turniej zakończony 🏆';
+                    ['days','hours','minutes','seconds'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = '00'; });
+                    const liveBadge = document.getElementById('liveBadge');
+                    if (liveBadge) liveBadge.style.display = 'none';
+                    if (countdownInterval) clearInterval(countdownInterval);
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        function tickCountdown() {
+            if (!nextMatchTimestamp) return;
+            const diff = Math.max(0, Math.floor((nextMatchTimestamp - Date.now()) / 1000));
+            const d = Math.floor(diff / 86400);
+            const h = Math.floor((diff % 86400) / 3600);
+            const m = Math.floor((diff % 3600) / 60);
+            const s = diff % 60;
+            const el = (id) => document.getElementById(id);
+            if(el('days'))    el('days').textContent    = String(d).padStart(2, '0');
+            if(el('hours'))   el('hours').textContent   = String(h).padStart(2, '0');
+            if(el('minutes')) el('minutes').textContent = String(m).padStart(2, '0');
+            if(el('seconds')) el('seconds').textContent = String(s).padStart(2, '0');
+            if (diff === 0) fetchNextMatch();
+        }
+
+        async function updateCountdown() {
+            await fetchNextMatch();
+            tickCountdown();
+        }
+
+        async function loadHistory() {
+            const playerId = {{ current_player.id if current_player else 0 }};
+            if (!playerId) return;
+            try {
+                const response = await fetch(`/players/${playerId}/history/`);
+                const history = await response.json();
+                const container = document.getElementById('history-container');
+                if (history.length === 0) {
+                    container.innerHTML = `<div class="text-center py-10 text-sm" style="color: var(--text-faint);">Brak typów. Wybierz mecz!</div>`;
+                    return;
+                }
+
+                let html = `<table class="w-full min-table table-fixed"><thead><tr><th class="text-left w-2/5 pl-4">Mecz</th><th class="text-center">Data</th><th class="text-center">Typ</th><th class="text-center">Wynik</th><th class="text-center pr-2">Punkty</th></tr></thead><tbody>`;
+                for (const pick of history) {
+                    const isCorrect = pick.is_correct === true;
+                    const statusClass = pick.is_finished ? (isCorrect ? 'history-correct' : 'history-wrong') : '';
+                    const pointsStyle = pick.points_earned === 3 ? 'color: var(--success);' : (pick.points_earned > 0 ? '' : 'color: var(--danger);');
+                    const homeCode = FLAG_CODES[pick.home_team];
+                    const awayCode = FLAG_CODES[pick.away_team];
+                    const homeFlag = homeCode ? `<img src="${FLAG_BASE_URL}${homeCode}.svg" class="flag-icon" style="width:16px;height:12px;margin-right:6px;" onerror="this.style.display='none'">` : '';
+                    const awayFlag = awayCode ? `<img src="${FLAG_BASE_URL}${awayCode}.svg" class="flag-icon" style="width:16px;height:12px;margin-left:6px;margin-right:0;" onerror="this.style.display='none'">` : '';
+
+                    html += `<tr class="${statusClass}">`;
+                    html += `<td class="font-medium whitespace-nowrap overflow-hidden text-ellipsis pl-4">${homeFlag} ${pick.home_team} <span style="color: var(--text-faint);" class="text-xs mx-1">vs</span> ${pick.away_team} ${awayFlag}</td>`;
+                    html += `<td class="text-center text-xs" style="color: var(--text-muted);">${new Date(pick.match_date).toLocaleDateString('pl-PL')}</td>`;
+                    html += `<td class="text-center font-mono font-bold text-sm" style="color: var(--success);">${pick.predicted_result}</td>`;
+                    html += `<td class="text-center font-mono text-sm" style="color: var(--text-muted);">${pick.actual_result || '—'}</td>`;
+                    html += `<td class="text-center font-display font-bold text-base pr-2" style="${pointsStyle}">${pick.points_earned || 0}</td>`;
+                    html += `</tr>`;
+                }
+                html += '</tbody></table>';
+                container.innerHTML = html;
+            } catch (e) { console.error(e); }
+        }
+
+        function activateTab(tabName) {
+            const btn = document.querySelector(`.tab-btn[data-tab="${tabName}"]`);
+            const content = document.getElementById(`tab-${tabName}`);
+            if (!btn || !content) return false;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+            content.classList.add('active');
+            if (tabName === 'history') loadHistory();
+            if (tabName === 'teams') renderTeamsGrid();
+            return true;
+        }
+
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tab = btn.dataset.tab;
+                activateTab(tab);
+                // zapamiętaj aktywną zakładkę, by przetrwała odświeżenie strony
+                history.replaceState(null, '', '#' + tab);
+            });
+        });
+
+        // Po załadowaniu strony przywróć zakładkę z adresu (#mecze itd.)
+        (function restoreTabFromHash() {
+            const tab = window.location.hash.replace('#', '');
+            if (tab && tab !== 'home') activateTab(tab);
+        })();
+
+        // ------------------ PLAYER PROFILES ------------------
+        document.getElementById('players-search')?.addEventListener('input', (e) => {
+            const q = e.target.value.toLowerCase();
+            document.querySelectorAll('#players-list .player-card').forEach(card => {
+                const name = card.dataset.username;
+                card.style.display = name.includes(q) ? '' : 'none';
+            });
+        });
+
+        async function openPlayerProfile(playerId) {
+            const m = document.getElementById('playerProfileModal');
+            m.style.display = 'flex';
+
+            try {
+                const [profileRes, historyRes] = await Promise.all([
+                    fetch(`/players/${playerId}/public`),
+                    fetch(`/players/${playerId}/picks/public`),
+                ]);
+                const p = await profileRes.json();
+                const hist = await historyRes.json();
+
+                document.getElementById('pp-username').textContent = p.username;
+                document.getElementById('pp-points').textContent = p.total_points;
+                document.getElementById('pp-correct').textContent = p.correct_predictions;
+                document.getElementById('pp-streak').textContent = p.current_streak;
+                document.getElementById('pp-longest').textContent = p.longest_streak;
+                document.getElementById('pp-team').textContent = p.favorite_team || '—';
+                document.getElementById('pp-star').textContent = p.star_player || '—';
+
+                const container = document.getElementById('pp-history');
+                if (!hist.length) { container.innerHTML = '<p class="text-xs" style="color: var(--text-faint);">Brak typów.</p>'; return; }
+
+                container.innerHTML = hist.map(h => {
+                    const dateStr = new Date(h.match_date).toLocaleDateString('pl-PL');
+                    const pickDisplay = h.hidden
+                        ? `<span style="color: var(--text-faint); font-style: italic;">ukryty</span>`
+                        : `<span class="font-mono font-bold" style="color: var(--success);">${h.predicted_result || '—'}</span>`;
+                    const resultDisplay = h.actual_result
+                        ? `<span class="font-mono" style="color: var(--text-muted);">${h.actual_result}</span>`
+                        : `<span style="color: var(--text-faint);">—</span>`;
+                    const ptsStyle = h.points_earned === 3 ? 'color: var(--success);'
+                        : (h.points_earned > 0 ? '' : (h.is_finished ? 'color: var(--danger);' : 'color: var(--text-faint);'));
+                    const borderColor = h.is_finished
+                        ? (h.is_correct ? 'var(--success)' : 'var(--danger)')
+                        : 'transparent';
+
+                    return `<div class="flex items-center justify-between text-xs p-2 rounded" style="background: var(--bg-elevated); border-left: 2px solid ${borderColor};">
+                        <div class="flex-1 truncate">
+                            <span class="font-medium">${h.home_team}</span>
+                            <span style="color: var(--text-faint);"> vs </span>
+                            <span class="font-medium">${h.away_team}</span>
+                        </div>
+                        <div class="flex items-center gap-3 ml-3">
+                            <span style="color: var(--text-faint);" class="text-[10px]">${dateStr}</span>
+                            ${pickDisplay}
+                            ${resultDisplay}
+                            <span class="font-display font-bold text-sm w-8 text-right" style="${ptsStyle}">${h.points_earned || 0}</span>
+                        </div>
+                    </div>`;
+                }).join('');
+            } catch (e) { console.error(e); }
+        }
+
+        function closePlayerProfile() { document.getElementById('playerProfileModal').style.display = 'none'; }
+
+        // ------------------ TEAMS GRID ------------------
+        const GROUPS_ORDER = ["A","B","C","D","E","F","G","H","I","J","K","L"];
+
+        function renderTeamsGrid() {
+            const container = document.getElementById('teams-grid');
+            if (container.dataset.rendered) return;
+            container.dataset.rendered = '1';
+
+            const byGroup = {};
+            GROUPS_ORDER.forEach(g => byGroup[g] = []);
+            Object.entries(TEAM_DATA).forEach(([name, d]) => {
+                if (byGroup[d.group]) byGroup[d.group].push(name);
+            });
+
+            let html = '';
+            GROUPS_ORDER.forEach(group => {
+                const teams = byGroup[group];
+                if (!teams.length) return;
+                html += `
+                <div>
+                    <p class="text-[10px] font-medium uppercase tracking-[0.15em] mb-3" style="color: var(--text-faint);">
+                        Grupa ${group}
+                    </p>
+                    <div class="grid grid-cols-4 gap-2.5">
+                        ${teams.map(name => {
+                            const code = FLAG_CODES[name];
+                            const flagUrl = code ? `${FLAG_BASE_URL}${code}.svg` : '';
+                            const isUD = UNDERDOG_TEAMS_SET.has(name);
+                            return `
+                            <button onclick="openTeamDetail('${name.replace(/'/g, "\\'")}')"
+                                class="group relative rounded-xl overflow-hidden transition-all duration-200 hover:scale-[1.03]"
+                                style="aspect-ratio: 4/3; background: var(--bg-elevated); border: 1px solid var(--border-subtle);"
+                                onmouseover="this.style.borderColor='var(--border-soft)'"
+                                onmouseout="this.style.borderColor='var(--border-subtle)'">
+                                ${flagUrl ? `<img src="${flagUrl}" alt="${name}" class="absolute inset-0 w-full h-full object-cover opacity-15 group-hover:opacity-25 transition scale-110" style="filter:blur(2px);">` : ''}
+                                <div class="absolute inset-0 bg-gradient-to-t from-[var(--bg-elevated)] via-transparent to-transparent"></div>
+                                <div class="relative z-10 h-full flex flex-col items-center justify-center gap-1 p-2">
+                                    ${flagUrl ? `<img src="${flagUrl}" alt="${name}" class="w-9 h-6 object-cover rounded">` : '<div class="w-9 h-6 rounded" style="background: var(--bg-surface);"></div>'}
+                                    <p class="font-medium text-[10px] text-center leading-tight mt-1">${name}</p>
+                                    ${isUD ? `<span class="text-[9px] font-semibold" style="color: var(--danger);">underdog</span>` : ''}
+                                </div>
+                            </button>`;
+                        }).join('')}
+                    </div>
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+function openTeamDetail(name) {
+    const d = TEAM_DATA[name];
+    if (!d) return;
+    const code = FLAG_CODES[name];
+    const flagUrl = code ? `${FLAG_BASE_URL}${code}.svg` : '';
+
+    document.getElementById('td-flag-bg').src = flagUrl;
+    document.getElementById('td-flag').src = flagUrl;
+    document.getElementById('td-flag').alt = name;
+    document.getElementById('td-name').textContent = name;
+    document.getElementById('td-group').textContent = 'Grupa ' + d.group;
+    document.getElementById('teamDetailSubtitle').textContent = d.achievement || '';
+    document.getElementById('td-p').textContent = d.p;
+    document.getElementById('td-w').textContent = d.w;
+    document.getElementById('td-d').textContent = d.d;
+    document.getElementById('td-l').textContent = d.l;
+    document.getElementById('td-g').textContent = d.g;
+    document.getElementById('td-style').textContent = d.style;
+    document.getElementById('td-funfact').textContent = d.fun_fact;
+    document.getElementById('td-odds-text').textContent = d.odds + '%';
+    document.getElementById('td-fifa-rank').textContent = d.fifa_rank;
+
+    // Mecze towarzyskie
+    const friendliesDiv = document.getElementById('td-friendlies');
+    const fr = FRIENDLIES[name] || [];
+    if (fr.length) {
+        friendliesDiv.innerHTML = fr.map(f =>
+            `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border-subtle);">
+                <span style="color:var(--accent);font-size:11px;">⚽</span>
+                <span>${f}</span>
+            </div>`
+        ).join('');
+    } else {
+        friendliesDiv.innerHTML = '<span style="color: var(--text-faint); font-style:italic;">Brak danych</span>';
+    }
+
+   document.getElementById('td-odds-bar').style.width = '0%';
+    setTimeout(() => { document.getElementById('td-odds-bar').style.width = d.odds + '%'; }, 80);
+
+    // ============================================
+    // PREMIUM DESIGN SKŁADU NA MŚ
+    // ============================================
+// ============================================
+    // ULTRA-KOMPAKTOWY DESIGN TABLICY TAKTYCZNEJ (2x2)
+    // ============================================
+    const squadContainer = document.getElementById('td-squad-container');
+    const squad = SQUADS[name];
+
+    if (squad) {
+        // Wymuszamy płaski układ 2 kolumn dla formacji obok siebie
+        squadContainer.className = "grid grid-cols-1 sm:grid-cols-2 gap-3";
+        squadContainer.innerHTML = ''; 
+        
+        const formatSection = (title, players, icon, colorHex) => {
+            if (!players || players.length === 0) return '';
+            
+            const playerRows = players.map(p => {
+                const match = p.match(/(.+?)\s*\((.+?)\)/);
+                let playerName = p;
+                let club = '';
+                if (match) {
+                    playerName = match[1];
+                    club = match[2];
+                }
+                
+                return `
+                    <div class="flex items-center justify-between py-0.5 px-1.5 rounded bg-white/[0.01]" 
+                         style="border: 1px solid rgba(255,255,255,0.03); border-left: 2px solid ${colorHex};">
+                        <span class="font-medium text-[11px] text-white/80 truncate mr-1">${playerName}</span>
+                        ${club ? `<span class="text-[9px] text-white/30 truncate max-w-[85px]">${club.split(' ')[0]}</span>` : ''}
+                    </div>
+                `;
+            }).join('');
+
+            return `
+                <div class="p-2.5 rounded-xl bg-white/[0.01]" style="border: 1px solid var(--border-subtle);">
+                    <div class="flex items-center gap-1.5 mb-1.5 border-b pb-1" style="border-color: rgba(255,255,255,0.04);">
+                        <span class="text-xs">${icon}</span>
+                        <span class="text-[10px] font-bold uppercase tracking-widest" style="color: ${colorHex};">${title}</span>
+                        <span class="text-[9px] font-mono ml-auto text-white/30">${players.length}</span>
+                    </div>
+                    <div class="grid grid-cols-1 gap-0.5">
+                        ${playerRows}
+                    </div>
+                </div>
+            `;
+        };
+
+        squadContainer.innerHTML += formatSection('Bramkarze', squad["Bramkarze"], '🧤', '#fbbf24'); 
+        squadContainer.innerHTML += formatSection('Napastnicy', squad["Napastnicy"], '🎯', '#e88a5b'); 
+        squadContainer.innerHTML += formatSection('Obrońcy', squad["Obrońcy"], '🛡️', '#7dd3fc');    
+        squadContainer.innerHTML += formatSection('Pomocnicy', squad["Pomocnicy"], '👟', '#4ade80');  
+    } else {
+        squadContainer.className = "";
+        squadContainer.innerHTML = `
+            <div class="text-center py-10 text-xs text-white/30">
+                <p class="font-bold">Skład niedostępny</p>
+            </div>
+        `;
+    }
+
+    const modal = document.getElementById('teamDetailModal');
+    modal.style.display = 'flex';
+    modal.scrollTop = 0;
+}
+
+        function closeTeamDetail() {
+            document.getElementById('teamDetailModal').style.display = 'none';
+        }
+
+        // ------------------ PREDICT MODAL ------------------
+        let selectedMatchId = null;
+        const pickModal = document.getElementById('pickModal');
+        const scoreInput = document.getElementById('scoreInput');
+
+        function openPickModal(matchId, homeTeam, awayTeam, currentPick = '') {
+            selectedMatchId = matchId;
+            const homeCode = FLAG_CODES[homeTeam];
+            const awayCode = FLAG_CODES[awayTeam];
+            const homeFlag = homeCode ? `<img src="${FLAG_BASE_URL}${homeCode}.svg" class="flag-icon" style="width:18px;height:13px;margin-right:6px;" onerror="this.style.display='none'">` : '';
+            const awayFlag = awayCode ? `<img src="${FLAG_BASE_URL}${awayCode}.svg" class="flag-icon" style="width:18px;height:13px;margin-left:6px;margin-right:0;" onerror="this.style.display='none'">` : '';
+            document.getElementById('modalTeams').innerHTML = `<span class="team-name" data-team="${homeTeam}">${homeFlag}${homeTeam}</span><span class="mx-3 text-xs" style="color: var(--text-faint);">vs</span><span class="team-name" data-team="${awayTeam}">${awayTeam}${awayFlag}</span>`;
+            
+            scoreInput.value = currentPick; 
+            pickModal.classList.remove('hidden');
+            setTimeout(() => scoreInput.focus(), 100);
+        }
+
+        document.getElementById('closeModal').onclick = () => pickModal.classList.add('hidden');
+        document.getElementById('confirmPick').onclick = async () => {
+            if(!selectedMatchId) return;
+            const predicted = scoreInput.value.trim();
+            if(!predicted.match(/^\d{1,2}:\d{1,2}$/)) {
+                alert("Format: 2:1 (maks. dwie cyfry)"); return;
+            }
+            const [h, a] = predicted.split(':').map(Number);
+            if (h > 20 || a > 20) {
+                alert("Wynik wygląda za wysoko (maks. 20)"); return;
+            }
+            const playerId = {{ current_player.id if current_player else 0 }};
+            if(!playerId) return;
+
+            const res = await fetch("/picks/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ player_id: playerId, match_id: parseInt(selectedMatchId), predicted_result: predicted })
+            });
+            if(res.ok) {
+                // zostań na bieżącej zakładce po odświeżeniu (np. „Mecze")
+                const activeTab = document.querySelector('.tab-btn.active')?.dataset.tab;
+                if (activeTab) history.replaceState(null, '', '#' + activeTab);
+                location.reload();
+            }
+            else {
+                const err = await res.json();
+                alert("Błąd: " + JSON.stringify(err.detail || err));
+            }
+        };
+
+        async function handleAuth(action) {
+            const user = document.getElementById('authUsername').value;
+            const pass = document.getElementById('authPassword').value;
+            const err = document.getElementById('authError');
+
+            if(!user || !pass) {
+                err.textContent = "Wypełnij login i hasło!";
+                err.classList.remove('hidden');
+                return;
+            }
+
+            const res = await fetch(`/auth/${action}/`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username: user, password: pass })
+            });
+
+            if(res.ok) {
+                location.reload();
+            } else {
+                const data = await res.json();
+                err.textContent = data.detail;
+                err.classList.remove('hidden');
+            }
+        }
+
+        async function logout() {
+            await fetch('/auth/logout/', { method: "POST" });
+            location.reload();
+        }
+
+        document.addEventListener('keydown', (e) => { 
+            if(e.key === 'Escape') {
+                pickModal.classList.add('hidden');
+                closeTeamDetail();
+                closePlayerProfile();
+            } 
+        });
+
+        // ------------------ WELCOME LOGIC ------------------
+        const stepContent = {
+            1: { icon: "🏆", title: "Bet World Cup 2026", subtitle: "Typer Mistrzostw Świata", text: "Typujesz dokładne wyniki meczów mundialu. Trafiasz — zdobywasz punkty. Mylisz zwycięzcę — tracisz punkty. Wygrywa ten, kto uzbiera ich najwięcej." },
+            2: { icon: "📋", title: "Zasady", subtitle: "Krótka wersja", items: ["Typuj <strong>dokładny wynik</strong> (np. '2:1')", "Obstawiasz <strong>5 najbliższych meczów</strong> z terminarza", "Typ <strong>edytujesz</strong> aż do gwizdka", "Nikt nie odpada — gra się <strong>na punkty</strong>", "Wygrywa gracz z <strong style='color:var(--gold);'>najwyższym wynikiem</strong>"] },
+            3: { icon: "🎯", title: "Punktacja", subtitle: "Jak zdobywasz punkty", items: ["<strong style='color:var(--success);'>+3 pkt</strong> — dokładny wynik", "<strong>+1 pkt</strong> — dobry zwycięzca / remis", "<strong style='color:var(--danger);'>−2 pkt</strong> — błędnie wytypowany zwycięzca"] },
+            4: { icon: "✨", title: "Bonusy", subtitle: "Zaryzykuj, zarób więcej", items: ["Underdog wygrywa → <strong style='color:var(--success);'>+2</strong>", "Underdog remisuje → <strong>+1</strong>", "4 bramki łącznie → <strong>+1</strong>", "5+ bramek łącznie → <strong>+2</strong>", "Faza pucharowa ×1.5 / ×2 / ×3", "Ulubiona drużyna wygrywa → <strong style='color:var(--gold);'>+1</strong>"] },
+            5: { icon: "📖", title: "Przykład", subtitle: "Arabia Saudyjska vs Argentyna", text: "Typujesz <strong style='color:var(--success);'>2:1</strong>. Wynik: <strong>2:1</strong>.<br><br>3 (dokładny) + 2 (underdog) = <span style='color:var(--success); font-size:1.5rem; font-weight:700; font-family: DM Sans;'>5 punktów</span>" }
+        };
+
+        let currentStep = 1;
+
+        function renderStep(step) {
+            const content = stepContent[step];
+            const container = document.getElementById('welcomeContent');
+            let html = `<div class="welcome-step" data-step="${step}">
+                <div class="text-center mb-5">
+                    <div class="text-4xl mb-3">${content.icon}</div>
+                    <h2 class="font-display text-2xl font-bold tracking-tight">${content.title}</h2>
+                    <p class="text-xs mt-1" style="color: var(--text-faint);">${content.subtitle}</p>
+                </div>`;
+            if (content.text) {
+                html += `<div class="rounded-xl p-5 text-center" style="background: var(--bg-elevated);"><p class="text-sm leading-relaxed" style="color: var(--text-muted);">${content.text}</p></div>`;
+            } else {
+                html += `<div class="rounded-xl p-5 space-y-2.5" style="background: var(--bg-elevated);">${content.items.map(item => `<div class="text-sm flex items-start gap-2" style="color: var(--text-muted);"><span style="color: var(--accent);">·</span><span>${item}</span></div>`).join('')}</div>`;
+            }
+            html += `</div>`;
+            container.innerHTML = html;
+
+            document.querySelectorAll('.step-dot').forEach((dot, idx) => {
+                if (idx + 1 === step) {
+                    dot.classList.add('active');
+                    dot.style.background = 'var(--accent)';
+                } else {
+                    dot.classList.remove('active');
+                    dot.style.background = 'var(--border-soft)';
+                }
+            });
+
+            const prevBtn = document.getElementById('welcomePrevBtn');
+            const nextBtn = document.getElementById('welcomeNextBtn');
+            prevBtn.disabled = (step === 1);
+            nextBtn.innerHTML = (step === 5) ? 'Zacznij grać →' : 'Dalej →';
+        }
+
+        function closeWelcomeAndCheckFav() {
+            document.getElementById('welcomeModal').style.display = 'none';
+            localStorage.setItem('welcomeShown', 'true');
+            checkFavoriteTeam();
+        }
+
+        document.getElementById('welcomeNextBtn').onclick = () => { if (currentStep < 5) { currentStep++; renderStep(currentStep); } else if (currentStep === 5) { closeWelcomeAndCheckFav(); } };
+        document.getElementById('welcomePrevBtn').onclick = () => { if (currentStep > 1) { currentStep--; renderStep(currentStep); } };
+        document.getElementById('closeWelcomeModalX').onclick = closeWelcomeAndCheckFav;
+
+        if (!localStorage.getItem('welcomeShown')) {
+            document.getElementById('welcomeModal').style.display = 'flex';
+            renderStep(currentStep);
+        }
+
+// ========================================================
+// MECZE TOWARZYSKIE PRZED MŚ — WPISZ TUTAJ
+// Dla każdej drużyny dopisz listę sparingów. Format dowolny,
+// np. "2:1 Niemcy", "Polska 3:0 Szkocja". Zostaw [] albo pomiń
+// drużynę, jeśli nie chcesz nic pokazywać.
+// ========================================================
+const FRIENDLIES = {
+    // ===== Wyniki sparingów przed MŚ 2026 (źródło: football365, maj–czerwiec 2026) =====
+    // Format z perspektywy danej drużyny: "wynik_drużyny:wynik_rywala Rywal"
+
+    // Grupa A
+    "Meksyk": ["5:1 Serbia", "1:0 Australia", "2:0 Ghana", "1:1 Belgia", "0:0 Portugalia"],
+    "Korea Południowa": ["1:0 Salwador", "5:0 Trynidad i Tobago", "0:1 Austria", "0:4 WKS"],
+    "RPA": ["1:1 Jamajka" ,"0:0 Nikaragua", "1:2 Panama", "1:1 Panama"],
+    "Czechy": ["3:1 Gwatemala", "2:1 Kosowo"],
+
+    // Grupa B
+    "Kanada": ["1:1 Irlandia", "2:0 Uzbekistan", "0:0 Uzbekistan", "2:2 Islandia", "1:0 Gwatemala"],
+    "Szwajcaria": ["1:1 Australia", "4:1 Jordania", "0:0 Norwegia", "3:4 Niemcy"],
+    "Katar": ["0:0 Salwador", "0:1 Irlandia"],
+    "Bośnia i Hercegowina": ["1:1 Panama", "0:0 Macedonia Północna"],
+
+    // Grupa C
+    "Brazylia": ["2:1 Egipt", "6:2 Panama", "3:1 Chorwacja", "1:2 Francja"],
+    "Maroko": ["4:0 Madagaskar", "5:0 Burundi", "2:1 Paragwaj", "1:1 Ekwador"],
+    "Szkocja": ["4:0 Boliwia", "4:1 Curacao", "0:1 WKS", "0:1 Japonia"],
+    "Haiti": ["1:2 Peru", "4:0 Nowa Zelandia", "1:1 Islandia", "0:1 Tunezja"],
+
+    // Grupa D
+    "USA": ["1:2 Niemcy", "3:2 Senegal", "0:2 Portugalia", "2:5 Belgia"],
+    "Australia": ["1:1 Szwajcaria", "0:1 Meksyk"],
+    "Paragwaj": ["4:0 Nikaragua", "1:2 Maroko", "1:0 Grecja"],
+    "Turcja": ["2:1 Wenezuela", "4:0 Macedonia Północna"],
+
+    // Grupa E
+    "Niemcy": ["2:1 USA", "4:0 Finlandia", "2:1 Ghana", "4:3 Szwajcaria"],
+    "Ekwador": ["2:1 Arabia Saudyjska", "1:1 Holadnia", "1:1 Maroko"],
+    "WKS": ["2:1 Francja", "1:0 Szkocja", "4:0 Korea Południowa"],
+    "Curacao": ["4:0 Aruba", "1:4 Szkocja"],
+
+    // Grupa F
+    "Holandia": ["0:1 Algieria", "1:1 Ekwador", "2:1 Norwegia"],
+    "Japonia": ["1:0 Islandia", "1:0 Anglia", "1:0 Szkocja"],
+    "Tunezja": ["0:5 Belgia", "0:1 Austria", "0:0 Kanada", "1:0 Haiti"],
+    "Szwecja": ["2:2 Grecja", "1:3 Norwegia",],
+
+    // Grupa G
+    "Belgia": ["5:0 Tunezja", "2:0 Chorwacja", "1:1 Meksyk", "5:2 USA"],
+    "Iran": ["2:0 Mali", "3:1 Gambia", "5:0 Kostaryka", "1:2 Nigeria"],
+    "Egipt": ["1:2 Brazylia", "1:0 Rosja", "0:0 Hiszpania", "4:0 Arabia Saudyjska"],
+    "Nowa Zelandia": ["0:1 Anglia", "0:4 Haiti"],
+
+    // Grupa H
+    "Hiszpania": ["1:1 Irak", "0:0 Egipt", "3:0 Serbia"],
+    "Urugwaj": ["1:1 Anglia", "0:0 Algieria"],
+    "Arabia Saudyjska": ["3:0 Portoryko", "1:2 Ekwador", "1:2 Serbia", "0:4 Egipt"],
+    "RZP": ["3:0 Bermudy","3:0 Serbia"],
+
+    // Grupa I
+    "Francja": ["1:2 Wybrzeże Kości Słoniowej", "3:1 Kolumbia", "2:1 Brazylia"],
+    "Senegal": ["2:3 USA", "3:1 Gambia", "2:0 Peru"],
+    "Norwegia": ["3:1 Szwecja", "0:0 Szwajcaria", "1:2 Holandia"],
+    "Irak": ["1:1 Hiszpania", "1:0 Andora"],
+
+    // Grupa J
+    "Argentyna": ["2:0 Honduras", "5:0 Zambia", "2:1 Mauretania"],
+    "Austria": ["1:0 Tunezja", "1:0 Korea Południowa", "5:1 Ghana"],
+    "Algieria": ["1:0 Holandia", "0:0 Urugwaj", "7:0 Gwatemala"],
+    "Jordania": ["1:4 Szwajcaria", "2:2 Nigeria", "2:2 Kostaryka"],
+
+    // Grupa K
+    "Portugalia": ["2:1 Chile", "2:0 USA", "0:0 Meksyk"],
+    "Kolumbia": ["3:1 Kostaryka", "1:3 Francja", "1:2 Chorwacja"],
+    "Uzbekistan": ["0:2 Kanada",],
+    "DR Konga": ["0:0 Dania"],
+
+    // Grupa L
+    "Anglia": ["1:0 Nowa Zelandia", "0:1 Japonia", "1:1 Urugwaj"],
+    "Chorwacja": ["0:2 Belgia", "1:3 Brazylia", "2:1 Kolumbia"],
+    "Panama": ["1:1 Bośnia", "4:2 Dominikana", "2:6 Brazylia", "2:1 RPA", "1:1 RPA"],
+    "Ghana": ["1:1 Walia", "0:2 Meksyk", "1:2 Niemcy", "1:5 Austria"],
+};
+
+
+// ========================================================
+// SKŁADY DRUŻYN NA MŚ 2026
+// ========================================================
+const SQUADS = {
+    "Czechy": { "Bramkarze": ["Matej Kovar (PSV Eindhoven)", "Jindrich Stanek (Slavia Praga)", "Lukas Hornicek (Braga)"], "Obrońcy": ["Vladimir Coufal (TSG Hoffenheim)", "Tomas Holes (Slavia Praga)", "Ladislav Krejci (Wolverhampton Wanderers)", "David Zima (Slavia Praga)", "Jaroslav Zeleny (Sparta Praga)", "David Jurasek (Slavia Praga)", "David Doudera (Slavia Praga)", "Robin Hranac (TSG Hoffenheim)", "Stepan Chaloupek (Slavia Praga)"], "Pomocnicy": ["Tomas Soucek (West Ham United)", "Vladimir Darida (Hradec Kralove)", "Lukas Provod (Slavia Praga)", "Michal Sadilek (Slavia Praga)", "Pavel Sulc (Lyon)", "Lukas Cerv (Viktoria Pilzno)", "Hugo Sochurek (Sparta Praga)", "Alexandr Sojka (Viktoria Pilzno)", "Denis Visinsky (Viktoria Pilzno)"], "Napastnicy": ["Patrik Schick (Bayer Leverkusen)", "Adam Hlozek (TSG Hoffenheim)", "Jan Kuchta (Sparta Praga)", "Mojmir Chytil (Slavia Praga)", "Tomas Chory (Slavia Praga)"] },
+    "Korea Południowa": { "Bramkarze": ["Kim Seung-gyu (FC Tokyo)", "Jo Hyeon-woo (Ulsan HD)", "Song Bum-keun (Jeonbuk)"], "Obrońcy": ["Kim Min-jae (Bayern Monachium)", "Kim Moon-hwan (Daejeon)", "Seol Young-woo (Crvena zvezda)", "Cho Wi-je (Jeonbuk)", "Lee Tae-seok (Austria Wiedeń)", "Park Jin-seob (Zhejiang)", "Kim Tae-hyeon (Kashima)", "Lee Han-beom (Midtjylland)", "Jes Castrop (Gladbach)", "Lee Ki-hyuk (Gangwon)"], "Pomocnicy": ["Lee Jae-sung (Mainz)", "Hwang Hee-chan (Wolverhampton)", "Hwang In-beom (Feyenoord)", "Lee Kang-in (PSG)", "Paik Seung-ho (Birmingham)", "Kim Jin-gyu (Jeonbuk)", "Lee Dong-gyeong (Ulsan HD)", "Bae Jun-ho (Stoke)", "Eom Ji-sung (Swansea)", "Yang Hyun-jun (Celtic)"], "Napastnicy": ["Son Heung-min (Los Angeles FC)", "Cho Gue-sung (Midtjylland)", "Oh Hyeon-gyu (Besiktas)"] },
+    "Meksyk": { "Bramkarze": ["Guillermo Ochoa (AEL Limassol)", "Raul Rangel (Guadalajara)", "Carlos Acevedo (Santos Laguna)"], "Obrońcy": ["Jesus Gallardo (Toluca)", "Cesar Montes (Lokomotiw Moskwa)", "Jorge Sanchez (PAOK)", "Johan Vasquez (Genoa)", "Israel Reyes (America)", "Mateo Chavez (AZ)"], "Pomocnicy": ["Edson Alvarez (Fenerbahce)", "Orbelin Pineda (AEK Athens)", "Roberto Alvarado (Guadalajara)", "Luis Romo (Guadalajara)", "Luis Chavez (Dynamo Moskwa)", "Erik Lira (Cruz Azul)", "Gilberto Mora (Tijuana)", "Brian Gutierrez (Guadalajara)", "Obed Vargas (Atletico Madryt)", "Alvaro Fidalgo (Real Betis)"], "Napastnicy": ["Raul Jimenez (Fulham)", "Alexis Vega (Toluca)", "Santiago Gimenez (AC Milan)", "Cesar Huerta (Anderlecht)", "Julian Quinones (Al-Qadsiah)", "Guillermo Martinez (UNAM)", "Armando Gonzalez (Guadalajara)"] },
+    "RPA": { "Bramkarze": ["Ronwen Williams (Mamelodi Sundowns)", "Ricardo Goss (Siwelele)", "Sipho Chaine (Orlando Pirates)"], "Obrońcy": ["Aubrey Modiba (Mamelodi)", "Khuliso Mudau (Mamelodi)", "Nkosinathi Sibisi (Orlando)", "Mbekezeli Mbokazi (Chicago)", "Ime Okon (Hannover 96)", "Samukele Kabini (Molde)", "Khulumani Ndamane (Mamelodi)", "Thabang Matuludi (Polokwane)", "Kamogelo Sebelebele (Orlando)", "Bradley Cross (Kaizer Chiefs)", "Olwethu Makhanya (Philadelphia)"], "Pomocnicy": ["Teboho Mokoena (Mamelodi)", "Sphephelo Sithole (Tondela)", "Thalente Mbatha (Orlando Pirates)", "Jayden Adams (Mamelodi)"], "Napastnicy": ["Themba Zwane (Mamelodi)", "Lyle Foster (Burnley)", "Evidence Makgopa (Orlando Pirates)", "Oswin Appollis (Orlando)", "Iqraam Rayners (Mamelodi)", "Relebohile Mofokeng (Orlando)", "Thapelo Maseko (AEL Limassol)", "Tshepang Moremi (Orlando)"] },
+    "Bośnia i Hercegowina": { "Bramkarze": ["Nikola Vasilj (St. Pauli)", "Martin Zlomislić (Rijeka)", "Mladen Jurkas (Borac Banja Luka)"], "Obrońcy": ["Saed Kolasinac (Atalanta)", "Dennis Hadzikadunić (Sampdoria)", "Amar Dedić (Benfica)", "Nikola Katić (Schalke 04)", "Tarik Muharemović (Sassuolo)", "Nihad Mujakić (Gaziantep)", "Stjepan Radeljić (Rijeka)", "Nidal Celik (Lens)"], "Pomocnicy": ["Amir Hadziahmetović (Hull City)", "Benjamin Tahirović (Broendby)", "Armin Gigović (Young Boys)", "Dzenis Burnić (Karlsruher SC)", "Ivan Basić (Astana)", "Esmir Bajraktarević (PSV Eindhoven)", "Amar Memić (Viktoria Pilzno)", "Ivan Sunjić (Pafos)", "Kerim Alajbegović (RB Salzburg)", "Ermin Mahmić (Slovan Liberec)"], "Napastnicy": ["Edin Dzeko (Schalke 04)", "Ermedin Demirović (VfB Stuttgart)", "Samed Bazdar (Jagiellonia Białystok)", "Haris Tabaković (Gladbach)", "Jovo Lukić (Universitatea Cluj)"] },
+    "Kanada": { "Bramkarze": ["Dayne St. Clair (Inter Miami)", "Maxime Crepeau (Orlando City)", "Owen Goodman (Barnsley)"], "Obrońcy": ["Alistair Johnston (Celtic)", "Luc de Fougerolles (Dender)", "Alfie Jones (Middlesbrough)", "Joel Waterman (Chicago Fire)", "Derek Cornelius (Rangers)", "Moise Bombito (Nice)", "Alphonso Davies (Bayern Monachium)", "Richie Laryea (Toronto FC)", "Niko Sigur (Hajduk Split)"], "Pomocnicy": ["Mathieu Choiniere (LAFC)", "Stephen Eustaquio (LAFC)", "Ismael Kone (Sassuolo)", "Liam Millar (Hull City)", "Jacob Shaffelburg (LAFC)", "Tajon Buchanan (Villarreal)", "Ali Ahmed (Norwich City)", "Jonathan Osorio (Toronto FC)", "Nathan Saliba (Anderlecht)"], "Napastnicy": ["Cyle Larin (Southampton)", "Jonathan David (Juventus)", "Tani Oluwaseyi (Villarreal)", "Promise David (Union SG)"] },
+    "Katar": { "Bramkarze": ["Mahmud Abunada (Al-Rayyan)", "Salah Zakaria (Al-Duhail)", "Meshaal Barsham (Al-Sadd)"], "Obrońcy": ["Pedro Miguel (Al-Sadd)", "Lucas Mendes (Al-Wakrah)", "Issa Laye (Al-Arabi)", "Jassem Gaber (Al-Rayyan)", "Ayoub Al-Oui (Al-Gharafa)", "Homam Al-Amin (Cultural Leonesa)", "Boualem Khoukhi (Al-Sadd)", "Sultan Al-Brake (Al-Duhail)", "Al-Hashmi Al-Hussain (Al-Arabi)"], "Pomocnicy": ["Abdulaziz Hatem (Al-Rayyan)", "Karim Boudiaf (Al-Duhail)", "Ahmed Al-Ganehi (Al-Gharafa)", "Ahmed Fathy (Al-Arabi)", "Assim Madibo (Al-Wakrah)"], "Napastnicy": ["Ahmed Alaaeldin (Al-Rayyan)", "Edmilson Junior (Al-Duhail)", "Mohammed Muntari (Al-Gharafa)", "Hassan Al-Haydos (Al-Sadd)", "Akram Afif (Al-Sadd)", "Yusuf Abdurisag (Al-Wakrah)", "Almoez Ali (Al-Duhail)", "Tahsin Jamshid (Al-Duhail)", "Mohamed Al-Mannai (Al-Shamal)"] },
+    "Szwajcaria": { "Bramkarze": ["Gregor Kobel (BVB)", "Yvon Mvogo (Lorient)", "Marvin Keller (Young Boys)"], "Obrońcy": ["Miro Muheim (HSV)", "Silvan Widmer (Mainz 05)", "Nico Elvedi (Gladbach)", "Manuel Akanji (Inter)", "Ricardo Rodriguez (Betis)", "Eray Comert (Valencia)", "Aurele Amenda (Eintracht)", "Luca Jaquez (VfB Stuttgart)"], "Pomocnicy": ["Denis Zakaria (Monaco)", "Remo Freuler (Bologna)", "Johan Manzambi (Freiburg)", "Granit Xhaka (Sunderland)", "Ardon Jashari (Milan)", "Djibril Sow (Sevilla)", "Chirstian Fassnach (Young Boys)", "Michel Aebischer (Pisa)", "Fabian Rieder (Augsburg)"], "Napastnicy": ["Breel Embolo (Rennes)", "Dan Ndoye (Nottingham Forest)", "Ruben Vargas (Sevilla)", "Noah Okafor (Leeds United)", "Zeki Amdouni (Burnley)", "Cedric Itten (Fortuna Duesseldorf)"] },
+    "Brazylia": { "Bramkarze": ["Alisson (Liverpool)", "Ederson (Fenerbahce)", "Weverton (Gremio)"], "Obrońcy": ["Marquinhos (PSG)", "Danilo Luiz (Flamengo)", "Alex Sandro (Flamengo)", "Gabriel Magalhaes (Arsenal)", "Bremer (Juventus)", "Wesley (AS Roma)", "Roger Ibanez (Al-Ahli)", "Douglas Santos (Zenit)", "Leo Pereira (Flamengo)"], "Pomocnicy": ["Casemiro (Manchester United)", "Lucas Paqueta (Flamengo)", "Bruno Guimaraes (Newcastle)", "Fabinho (Al-Ittihad)", "Danilo Santos (Botafogo)"], "Napastnicy": ["Neymar (Santos)", "Vinicius Junior (Real Madryt)", "Raphinha (FC Barcelona)", "Gabriel Martinelli (Arsenal)", "Matheus Cunha (Manchester United)", "Endrick (Lyon)", "Luiz Henrique (Zenit)", "Igor Thiago (Brentford)", "Rayan (Bournemouth)"] },
+    "Haiti": { "Bramkarze": ["Johny Placide (Bastia)", "Alexandre Pierre (Sochaux)", "Josue Duverger (Cosmos Koblenz)"], "Obrońcy": ["Ricardo Ade (LDU Quito)", "Carlens Arcus (Angers)", "Martin Experience (Nancy)", "Jean-Kevin Duverne (Gent)", "Duke Lacroix (Colorado)", "Wilguens Paugain (Zulte)", "Hannes Delcroix (Lugano)", "Keeto Thermoncy (Young Boys)"], "Pomocnicy": ["Leverton Pierre (Vizela)", "Danley Jean-Jacques (Philadelphia)", "Carl Sainte (El Paso)", "Jean-Ricner Bellegarde (Wolverhampton)", "Woodensky Pierre (Violette)", "Dominique Simon (Tatran Presov)"], "Napastnicy": ["Duckens Nazon (Esteghlal)", "Frantzdy Pierrot (Caykur Rizespor)", "Derrick Etienne Jr. (Toronto FC)", "Louicius Deedson (FC Dallas)", "Ruben Providence (Almere)", "Josue Casimir (Auxerre)", "Yassin Fortune (Vizela)", "Wilson Isidor (Sunderland)", "Lenny Joseph (Ferencvaros)"] },
+    "Maroko": { "Bramkarze": ["Yassine Bounou (Al-Hilal)", "Munir Mohamedi (RS Berkane)", "Ahmed Reda Tagnaouti (AS FAR)"], "Obrońcy": ["Achraf Hakimi (PSG)", "Nayef Aguerd (Marsylia)", "Noussair Mazraoui (Manchester Utd)", "Youssef Belammari (Al Ahly)", "Anass Salah-Eddine (PSV)", "Chadi Riad (Crystal Palace)", "Issa Diop (Fulham)", "Zakaria El Ouahdi (Genk)", "Redouane Halhal (Mechelen)"], "Pomocnicy": ["Sofyan Amrabat (Real Betis)", "Azzedine Ounahi (Girona)", "Bilal El Khannouss (VfB Stuttgart)", "Ismael Saibari (PSV)", "Neil El Aynaoui (Roma)", "Samir El Mourabet (Strasbourg)", "Ayyoub Bouaddi (Lille)"], "Napastnicy": ["Ayoub El Kaabi (Olympiacos)", "Abde Ezzalzouli (Real Betis)", "Soufiane Rahimi (Al Ain)", "Brahim Diaz (Real Madryt)", "Chemsdine Talbi (Sunderland)", "Gessime Yassine (Strasbourg)", "Ayoube Amaimouni (Eintracht)"] },
+    "Szkocja": { "Bramkarze": ["Craig Gordon (Hearts)", "Angus Gunn (Nottingham Forest)", "Liam Kelly (Rangers)"], "Obrońcy": ["Andy Robertson (Liverpool)", "Grant Hanley (Hibernian)", "Kieran Tierney (Celtic)", "Scott McKenna (Dinamo Zagrzeb)", "Jack Hendry (Al-Ettifaq)", "Nathan Patterson (Everton)", "Anthony Ralston (Celtic)", "John Souttar (Rangers)", "Aaron Hickey (Brentford)", "Dominic Hyam (Wrexham)"], "Pomocnicy": ["John McGinn (Aston Villa)", "Scott McTominay (Napoli)", "Ryan Christie (Bournemouth)", "Kenny McLean (Norwich City)", "Tyler Fletcher (Manchester Utd)", "Lewis Ferguson (Bologna)", "Ben Gannon-Doak (Bournemouth)", "Findlay Curtis (Kilmarnock)"], "Napastnicy": ["Lyndon Dykes (Charlton)", "Che Adams (Torino)", "Lawrence Shankland (Hearts)", "George Hirst (Ipswich Town)", "Ross Stewart (Southampton)"] },
+    "Australia": { "Bramkarze": ["Mathew Ryan (Levante)", "Paul Izzo (Randers)", "Patrick Beach (Melbourne City)"], "Obrońcy": ["Aziz Behich (Melbourne)", "Milos Degenek (APOEL)", "Harry Souttar (Leicester)", "Jordan Bos (Feyenoord)", "Cameron Burgess (Swansea)", "Jason Geria (Albirex)", "Alessandro Circati (Parma)", "Kai Trewin (New York City)", "Jacob Italiano (Grazer AK)", "Lucas Herrington (Colorado)"], "Pomocnicy": ["Jackson Irvine (FC St. Pauli)", "Ajdin Hrustic (Heracles)", "Connor Metcalfe (FC St. Pauli)", "Aiden O'Neill (New York City)", "Paul Okon-Engstler (Sydney FC)", "Cammy Devlin (Hearts)"], "Napastnicy": ["Mathew Leckie (Melbourne)", "Awer Mabil (Castellon)", "Nestory Irankunda (Watford)", "Mohamed Toure (Norwich City)", "Nishan Velupillay (Melbourne)", "Cristian Volpato (Sassuolo)", "Tete Yengi (Machida)"] },
+    "Paragwaj": { "Bramkarze": ["Roberto Fernandez (Cerro Porteno)", "Orlando Gill (San Lorenzo)", "Gaston Olveira (Olimpia)"], "Obrońcy": ["Gustavo Gomez (Palmeiras)", "Junior Alonso (Atletico Mineiro)", "Fabian Balbuena (Gremio)", "Omar Alderete (Sunderland)", "Juan Jose Caceres (Dynamo Moskwa)", "Gustavo Velazquez (Cerro Porteno)", "Jose Canale (Lanus)", "Alexandro Maidana (Talleres)"], "Pomocnicy": ["Miguel Almiron (Atlanta)", "Kaku (Al-Ain)", "Andres Cubas (Vancouver)", "Ramon Sosa (Palmeiras)", "Diego Gomez (Brighton)", "Damian Bobadilla (Sao Paulo)", "Braian Ojeda (Orlando City)", "Matias Galarza (Atlanta)", "Mauricio (Palmeiras)"], "Napastnicy": ["Antonio Sanabria (Cremonese)", "Julio Enciso (Strasbourg)", "Gabriel Avalos (Independiente)", "Alex Arce (Independiente)", "Isidro Pitta (RB Bragantino)", "Gustavo Caballero (Portsmouth)"] },
+    "USA": { "Bramkarze": ["Matt Turner (New England)", "Matt Freese (New York City)", "Chris Brady (Chicago Fire)"], "Obrońcy": ["Sergino Dest (PSV)", "Chris Richards (Crystal Palace)", "Antonee Robinson (Fulham)", "Auston Trusty (Celtic)", "Miles Robinson (FC Cincinnati)", "Tim Ream (Charlotte FC)", "Alex Freeman (Villarreal)", "Maximilian Arfsten (Columbus)", "Mark McKenzie (Toulouse)", "Joe Scally (Gladbach)"], "Pomocnicy": ["Tyler Adams (Bournemouth)", "Giovanni Reyna (Gladbach)", "Weston McKennie (Juventus)", "Sebastian Berhalter (Vancouver)", "Cristian Roldan (Seattle)", "Malik Tillman (Bayer Leverkusen)"], "Napastnicy": ["Ricardo Pepi (PSV)", "Christian Pulisic (Milan)", "Brenden Aaronson (Leeds)", "Haji Wright (Coventry City)", "Folarin Balogun (Monaco)", "Timothy Weah (Marsylia)", "Alejandro Zendejas (America)"] },
+    "Turcja": { "Bramkarze": ["Mert Gunok (Fenerbahce)", "Altay Bayindir (Manchester Utd)", "Ugurcan Cakir (Galatasaray)"], "Obrońcy": ["Zeki Celik (Roma)", "Merih Demiral (Al-Ahli)", "Caglar Soyuncu (Fenerbahce)", "Eren Elmali (Galatasaray)", "Abdulkerim Bardakci (Galatasaray)", "Ozan Kabak (Hoffenheim)", "Mert Muldur (Fenerbahce)", "Ferdi Kadioglu (Brighton)", "Samet Akaydin (Caykur Rizespor)"], "Pomocnicy": ["Salih Ozcan (BVB)", "Orkun Kokcu (Besiktas)", "Hakan Calhanoglu (Inter)", "Ismail Yuksek (Fenerbahce)", "Kaan Ayhan (Galatasaray)"], "Napastnicy": ["Kerem Akturkoglu (Fenerbahce)", "Arda Guler (Real Madryt)", "Deniz Gul (Porto)", "Kenan Yildiz (Juventus)", "Irfan Can Kahveci (Kasimpasa)", "Yunus Akgun (Galatasaray)", "Baris Alper Yilmaz (Galatasaray)", "Oguz Aydin (Fenerbahce)", "Can Uzun (Eintracht)"] },
+    "Curacao": { "Bramkarze": ["Eloy Room (Miami FC)", "Trevor Doornbusch (VVV-Venlo)", "Tyrick Bodak (Telstar)"], "Obrońcy": ["Jurien Gaari (Abha)", "Roshon van Eijma (RKC Waalwijk)", "Sherel Floranus (PEC Zwolle)", "Joshua Brenet (Kayserispor)", "Shurandy Sambo (Sparta)", "Armando Obispo (PSV)", "Riechedly Bazoer (Konyaspor)", "Deveron Fonville (NEC)"], "Pomocnicy": ["Leandro Bacuna (Igdir)", "Juninho Bacuna (Volendam)", "Godfried Roemeratoe (RKC Waalwijk)", "Kevin Felida (Den Bosch)", "Livano Comenencia (Zuerich)", "Ar'jany Martha (Rotherham)", "Tyrese Noslin (Telstar)"], "Napastnicy": ["Kenji Gorre (Maccabi Haifa)", "Brandley Kuwas (Volendam)", "Gervane Kastaneer (Terengganu)", "Jeremy Antonisse (Kifisia)", "Jearl Margaritha (Beveren)", "Juergen Locadia (Miami FC)", "Sontje Hansen (Middlesbrough)", "Tahith Chong (Sheffield United)"] },
+    "Ekwador": { "Bramkarze": ["Hernan Galindez (Huracan)", "Moises Ramirez (Kifisia)", "Gonzalo Valle (LDU Quito)"], "Obrońcy": ["Felix Torres (Internacional)", "Piero Hincapie (Arsenal)", "Joel Ordonez (Club Brugge)", "Willian Pacho (PSG)", "Pervis Estupinan (AC Milan)", "Angelo Preciado (Atletico Mineiro)", "Jackson Porozo (Tijuana)"], "Pomocnicy": ["Jordy Alcivar (Independiente)", "Denil Castillo (Midtjylland)", "John Yeboah (Venezia)", "Kendry Paez (River Plate)", "Alan Minda (Atletico Mineiro)", "Pedro Vite (UNAM)", "Gonzalo Plata (Flamengo)", "Alan Franco (Atletico Mineiro)", "Moises Caicedo (Chelsea)", "Yaimar Medina (Genk)"], "Napastnicy": ["Kevin Rodriguez (Union SG)", "Enner Valencia (Pachuca)", "Anthony Valencia (Antwerp)", "Jordy Caicedo (Huracan)", "Nilson Angulo (Sunderland)", "Jeremy Arevalo (VfB Stuttgart)"] },
+    "Niemcy": { "Bramkarze": ["Manuel Neuer (Bayern Monachium)", "Oliver Baumann (Hoffenheim)", "Alexander Nuebel (VfB Stuttgart)"], "Obrońcy": ["Antonio Ruediger (Real Madryt)", "Jonathan Tah (Bayern)", "David Raum (RB Lipsk)", "Nico Schlotterbeck (BVB)", "Waldemar Anton (BVB)", "Malick Thiaw (Newcastle)", "Nathaniel Brown (Eintracht)"], "Pomocnicy": ["Joshua Kimmich (Bayern)", "Leroy Sane (Galatasaray)", "Leon Goretzka (Bayern)", "Jamal Musiala (Bayern)", "Florian Wirtz (Liverpool)", "Pascal Gross (Brighton)", "Nadiem Amiri (Mainz 05)", "Aleksandar Pavlovic (Bayern)", "Angelo Stiller (VfB Stuttgart)", "Felix Nmecha (BVB)", "Jamie Leweling (VfB Stuttgart)", "Lennart Karl (Bayern)"], "Napastnicy": ["Kai Havertz (Arsenal)", "Nick Woltemade (Newcastle)", "Deniz Undav (VfB Stuttgart)", "Maximilian Beier (BVB)"] },
+    "WKS": { "Bramkarze": ["Yahia Fofana (Caykur Rizespor)", "Alban Lafont (Panathinaikos)", "Mohamed Kone (Charleroi)"], "Obrońcy": ["Ghislain Konan (Gil Vicente)", "Odilon Kossounou (Atalanta)", "Wilfried Singo (Galatasaray)", "Evan Ndicka (AS Roma)", "Emmanuel Agbadou (Besiktas)", "Guela Doue (Strasbourg)", "Ousmane Diomande (Sporting CP)", "Christopher Operi (Basaksehir)"], "Pomocnicy": ["Franck Kessie (Al-Ahli)", "Jean Michael Seri (Maribor)", "Ibrahim Sangare (Nottingham)", "Seko Fofana (Porto)", "Christ Inao Oulai (Trabzonspor)", "Parfait Guiagon (Charleroi)"], "Napastnicy": ["Nicolas Pepe (Villarreal)", "Oumar Diakite (Cercle Brugge)", "Simon Adingra (Monaco)", "Evann Guessand (Crystal Palace)", "Amad Diallo (Manchester Utd)", "Yan Diomande (RB Lipsk)", "Bazoumana Toure (Hoffenheim)", "Elye Wahi (Nice)", "Ange-Yoan Bonny (Inter)"] },
+    "Holandia": { "Bramkarze": ["Bart Verbruggen (Brighton)", "Mark Flekken (Bayer Leverkusen)", "Robin Roefs (Sunderland)"], "Obrońcy": ["Virgil van Dijk (Liverpool)", "Denzel Dumfries (Inter)", "Nathan Ake (Manchester City)", "Jurrien Timber (Arsenal)", "Micky van de Ven (Tottenham)", "Mats Wieffer (Brighton)", "Jan Paul van Hecke (Brighton)", "Jorrel Hato (Chelsea)"], "Pomocnicy": ["Frenkie de Jong (Barcelona)", "Marten de Roon (Atalanta)", "Tijjani Reijnders (Manchester City)", "Teun Koopmeiners (Juventus)", "Ryan Gravenberch (Liverpool)", "Justin Kluivert (Bournemouth)", "Quinten Timber (Marsylia)", "Guus Til (PSV)"], "Napastnicy": ["Memphis Depay (Corinthians)", "Wout Weghorst (Ajax)", "Donyell Malen (Roma)", "Cody Gakpo (Liverpool)", "Noa Lang (Galatasaray)", "Brian Brobbey (Sunderland)", "Crysencio Summerville (West Ham)"] },
+    "Japonia": { "Bramkarze": ["Zion Suzuki (Parma)", "Keisuke Osako (Sanfrecce)", "Tomoki Hayakawa (Kashima)"], "Obrońcy": ["Yuto Nagatomo (FC Tokyo)", "Takehiro Tomiyasu (Ajax)", "Ko Itakura (Ajax)", "Shogo Taniguchi (Sint-Truiden)", "Hiroki Ito (Bayern)", "Yukinari Sugawara (Werder Brema)", "Ayumu Seko (Le Havre)", "Tsuyoshi Watanabe (Feyenoord)", "Junnosuke Suzuki (FC Kopenhaga)"], "Pomocnicy": ["Wataru Endo (Liverpool)", "Junya Ito (Genk)", "Ritsu Doan (Eintracht)", "Daichi Kamada (Crystal Palace)", "Takefusa Kubo (Real Sociedad)", "Ao Tanaka (Leeds United)", "Keito Nakamura (Reims)", "Kaishu Sano (Mainz 05)"], "Napastnicy": ["Ayase Ueda (Feyenoord)", "Daizen Maeda (Celtic)", "Koki Ogawa (NEC)", "Yuito Suzuki (SC Freiburg)", "Keisuke Goto (Sint-Truiden)", "Kento Shiogai (Wolfsburg)"] },
+    "Szwecja": { "Bramkarze": ["Jacob Widell Zetterstroem (Derby)", "Viktor Johansson (Stoke City)", "Kristoffer Nordfeldt (AIK)"], "Obrońcy": ["Gustaf Lagerbielke (Braga)", "Victor Lindeloef (Aston Villa)", "Isak Hien (Atalanta)", "Gabriel Gudmundsson (Leeds)", "Herman Johansson (FC Dallas)", "Daniel Svensson (BVB)", "Hjalmar Ekdal (Burnley)", "Carl Starfelt (Celta Vigo)", "Eric Smith (FC St. Pauli)", "Elliot Stroud (Mjaellby)"], "Pomocnicy": ["Lucas Bergvall (Tottenham)", "Ken Sema (Pafos)", "Jesper Karlstroem (Udinese)", "Yasin Ayari (Brighton)", "Mattias Svanberg (Wolfsburg)", "Besfort Zeneli (Union SG)"], "Napastnicy": ["Alexander Isak (Liverpool)", "Benjamin Nygren (Celtic)", "Anthony Elanga (Newcastle)", "Viktor Gyoekeres (Arsenal)", "Alexander Bernhardsson (Holstein)", "Gustaf Nilsson (Club Brugge)", "Taha Ali (Malmoe FF)"] },
+    "Tunezja": { "Bramkarze": ["Aymen Dahmen (CS Sfaxien)", "Sabri Ben Hessen (Etoile)", "Mouhib Chamakh (Club Africain)"], "Obrońcy": ["Montassar Talbi (Lorient)", "Dylan Bronn (Servette)", "Ali Abdi (Nice)", "Yan Valery (Young Boys)", "Mohamed Amine Ben Hamida (Esperance)", "Moutaz Neffati (IFK Norrkoping)", "Omar Rekik (Maribor)", "Adem Arous (Kasimpasa)", "Raed Chikhaoui (US Monastir)"], "Pomocnicy": ["Ellyes Skhiri (Eintracht)", "Mohamed Belhadj Mahmoud (FC Lugano)", "Rani Khedira (Union Berlin)", "Hannibal Mejbri (Burnley)", "Anis Ben Slimane (Norwich)", "Mortadha Ben Ouanes (Kasimpasa)", "Ismael Gharbi (FC Augsburg)"], "Napastnicy": ["Khalil Ayari (PSG)", "Elias Achouri (FC Kopenhaga)", "Firas Chaouat (Club Africain)", "Hazem Mastouri (Dynamo Machaczkała)", "Elias Saad (Hannover 96)", "Sebastian Tounekti (Celtic)", "Rayan Elloumi (Vancouver)"] },
+    "Belgia": { "Bramkarze": ["Thibaut Courtois (Real Madryt)", "Senne Lammens (Manchester Utd)", "Mike Penders (Strasbourg)"], "Obrońcy": ["Thomas Meunier (Lille)", "Timothy Castagne (Fulham)", "Arthur Theate (Eintracht)", "Zeno Debast (Sporting CP)", "Maxim De Cuyper (Brighton)", "Brandon Mechele (Club Brugge)", "Koni De Winter (Milan)", "Joaquin Seys (Club Brugge)", "Nathan Ngoy (Lille)"], "Pomocnicy": ["Axel Witsel (Girona)", "Kevin De Bruyne (Napoli)", "Youri Tielemans (Aston Villa)", "Hans Vanaken (Club Brugge)", "Amadou Onana (Aston Villa)", "Nicolas Raskin (Rangers)"], "Napastnicy": ["Romelu Lukaku (Napoli)", "Leandro Trossard (Arsenal)", "Jeremy Doku (Manchester City)", "Dodi Lukebakio (Benfica)", "Charles De Ketelaere (Atalanta)", "Alexis Saelemaekers (Milan)", "Diego Moreira (Strasbourg)", "Matias Fernandez-Pardo (Lille)"] },
+    "Egipt": { "Bramkarze": ["Mohamed El Shenawy (Al Ahly)", "Mostafa Shobeir (Al Ahly)", "Mohamed Alaa (El Gouna)", "El Mahdy Soliman (Zamalek)"], "Obrońcy": ["Hamdy Fathy (Al-Wakrah)", "Ramy Rabia (Al Ain)", "Mohamed Hany (Al Ahly)", "Ahmed Fatouh (Zamalek)", "Mohamed Abdelmonem (Nice)", "Yasser Ibrahim (Al Ahly)", "Hossam Abdelmaguid (Zamalek)", "Karim Hafez (Pyramids)", "Tarek Alaa (ZED)"], "Pomocnicy": ["Marwan Attia (Al Ahly)", "Emam Ashour (Al Ahly)", "Mohanad Lasheen (Pyramids)", "Mahmoud Saber (ZED)", "Nabil Emad (Al-Najma)", "Mostafa Ziko (Pyramids)"], "Napastnicy": ["Mohamed Salah (Liverpool)", "Trezeguet (Al Ahly)", "Zizo (Al Ahly)", "Omar Marmoush (Manchester City)", "Ibrahim Adel (Nordsjaelland)", "Haissem Hassan (Oviedo)", "Hamza Abdelkarim (Barcelona B)"] },
+    "Iran": { "Bramkarze": ["Alireza Beiranvand (Tractor)", "Payam Niazmand (Persepolis)", "Hossein Hosseini (Sepahan)"], "Obrońcy": ["Ehsan Hajsafi (Sepahan)", "Milad Mohammadi (Persepolis)", "Ramin Rezaeian (Foolad)", "Hossein Kanaani (Persepolis)", "Shoja Khalilzadeh (Tractor)", "Saleh Hardani (Esteghlal)", "Ali Nemati (Foolad)", "Danial Eiri (Malavan)"], "Pomocnicy": ["Alireza Jahanbakhsh (Dender)", "Saeed Ezatolahi (Shabab Al-Ahli)", "Saman Ghoddos (Kalba)", "Mehdi Torabi (Tractor)", "Rouzbeh Cheshmi (Esteghlal)", "Mohammad Mohebi (Rostow)", "Mehdi Ghayedi (Al-Nasr)", "Mohammad Ghorbani (Al-Wahda)", "Aria Yousefi (Sepahan)", "Amirmohammad Razzaghinia (Esteghlal)"], "Napastnicy": ["Mehdi Taremi (Olympiakos)", "Shahriyar Moghanlou (Kalba)", "Amirhossein Hosseinzadeh (Tractor)", "Ali Alipour (Persepolis)", "Dennis Eckert (Standard Liege)"] },
+    "Nowa Zelandia": { "Bramkarze": ["Max Crocombe (Millwall)", "Alex Paulsen (Lechia Gdańsk)", "Michael Woud (Auckland FC)"], "Obrońcy": ["Tim Payne (Wellington)", "Francis de Vries (Auckland FC)", "Tyler Bindon (Sheffield United)", "Michael Boxall (Minnesota)", "Liberato Cacace (Wrexham)", "Nando Pijnaker (Auckland FC)", "Finn Surman (Portland)", "Callan Elliot (Auckland FC)", "Tommy Smith (Braintree)"], "Pomocnicy": ["Joe Bell (Viking)", "Matthew Garbett (Peterborough)", "Marko Stamenić (Swansea)", "Sarpreet Singh (Wellington)", "Elijah Just (Motherwell)", "Alex Rufer (Wellington)", "Ben Old (Saint-Etienne)", "Callum McCowatt (Silkeborg)", "Ryan Thomas (PEC Zwolle)", "Lachlan Bayliss (Newcastle Jets)"], "Napastnicy": ["Chris Wood (Nottingham Forest)", "Kosta Barbarouses (Western Sydney)", "Ben Waine (Port Vale)", "Jesse Randall (Auckland FC)"] },
+    "Arabia Saudyjska": { "Bramkarze": ["Mohammed Al-Owais (Al-Ula)", "Nawaf Al-Aqidi (Al-Nassr)", "Ahmed Al-Kassar (Al-Qadsiah)"], "Obrońcy": ["Saud Abdulhamid (Lens)", "Hassan Tambakti (Al-Hilal)", "Abdulelah Al-Amri (Al-Nassr)", "Nawaf Boushal (Al-Nassr)", "Ali Lajami (Al-Hilal)", "Ali Majrashi (Al-Ahli)", "Hassan Kadesh (Al-Ittihad)", "Moteb Al-Harbi (Al-Hilal)", "Jehad Thakri (Al-Qadsiah)", "Mohammed Abu Al-Shamat (Al-Qadsiah)"], "Pomocnicy": ["Salem Al-Dawsari (Al-Hilal)", "Mohamed Kanno (Al-Hilal)", "Nasser Al-Dawsari (Al-Hilal)", "Abdullah Al-Khaibari (Al-Nassr)", "Musab Al-Juwayr (Al-Qadsiah)", "Ayman Yahya (Al-Nassr)", "Ziyad Al-Johani (Al-Ahli)", "Sultan Mandash (Al-Hilal)", "Alaa Al-Hejji (Neom)"], "Napastnicy": ["Firas Al-Buraikan (Al-Ahli)", "Saleh Al-Shehri (Al-Ittihad)", "Abdullah Al-Hamdan (Al-Nassr)", "Khalid Al-Ghannam (Al-Ettifaq)"] },
+    "Hiszpania": { "Bramkarze": ["Unai Simon (Athletic Bilbao)", "David Raya (Arsenal)", "Joan Garcia (Barcelona)"], "Obrońcy": ["Aymeric Laporte (Athletic Bilbao)", "Marc Cucurella (Chelsea)", "Marcos Llorente (Atletico Madryt)", "Eric Garcia (Barcelona)", "Pedro Porro (Tottenham)", "Alex Grimaldo (Bayer Leverkusen)", "Pau Cubarsi (Barcelona)", "Marc Pubill (Atletico Madryt)"], "Pomocnicy": ["Rodri (Manchester City)", "Mikel Merino (Arsenal)", "Fabian Ruiz (PSG)", "Pedri (Barcelona)", "Gavi (Barcelona)", "Martin Zubimendi (Arsenal)", "Alex Baena (Atletico Madryt)"], "Napastnicy": ["Ferran Torres (Barcelona)", "Mikel Oyarzabal (Real Sociedad)", "Dani Olmo (Barcelona)", "Nico Williams (Athletic Bilbao)", "Lamine Yamal (Barcelona)", "Yeremy Pino (Crystal Palace)", "Borja Iglesias (Celta Vigo)", "Victor Munoz (Osasuna)"] },
+    "RZP": { "Bramkarze": ["Vozinha (Chaves)", "Marcio Rosa (Montana)", "CJ dos Santos (San Diego)"], "Obrońcy": ["Stopira (Torreense)", "Roberto Lopes (Shamrock)", "Joao Paulo (FCSB)", "Diney (Al Bataeh)", "Logan Costa (Villarreal)", "Steven Moreira (Columbus)", "Wagner Pina (Trabzonspor)", "Sidny Lopes Cabral (Benfica)", "Kelvin Pires (SJK)"], "Pomocnicy": ["Jamiro Monteiro (PEC Zwolle)", "Kevin Lenini (Krasnodar)", "Deroy Duarte (Ludogorets)", "Telmo Arcanjo (Vitoria)", "Laros Duarte (Puskas Akademia)", "Yannick Semedo (Farense)"], "Napastnicy": ["Ryan Mendes (Igdir)", "Garry Rodrigues (Apollon Limassol)", "Willy Semedo (Omonia)", "Jovane Cabral (Estrela Amadora)", "Gilson Benchimol (Akron)", "Dailon Livramento (Casa Pia)", "Helio Varela (Maccabi Tel Aviv)", "Nuno da Costa (Basaksehir)"] },
+    "Urugwaj": { "Bramkarze": ["Sergio Rochet (Internacional)", "Santiago Mele (Monterrey)", "Fernando Muslera (Estudiantes)"], "Obrońcy": ["Jose Maria Gimenez (Atletico Madryt)", "Matias Vina (River Plate)", "Mathias Olivera (Napoli)", "Guillermo Varela (Flamengo)", "Ronald Araujo (Barcelona)", "Sebastian Caceres (America)", "Joaquin Piquerez (Palmeiras)", "Santiago Bueno (Wolverhampton)"], "Pomocnicy": ["Rodrigo Bentancur (Tottenham)", "Federico Valverde (Real Madryt)", "Giorgian de Arrascaeta (Flamengo)", "Facundo Pellistri (Panathinaikos)", "Manuel Ugarte (Manchester Utd)", "Nicolas de la Cruz (Flamengo)", "Brian Rodriguez (America)", "Maximiliano Araujo (Sporting CP)", "Agustin Canobbio (Fluminense)", "Emiliano Martinez (Palmeiras)", "Rodrigo Zalazar (Braga)", "Juan Manuel Sanabria (Real Salt Lake)"], "Napastnicy": ["Darwin Nunez (Al-Hilal)", "Federico Vinas (Oviedo)", "Rodrigo Aguirre (UANL)"] },
+    "Francja": { "Bramkarze": ["Brice Samba (Rennes)", "Mike Maignan (Milan)", "Robin Risser (Lens)"], "Obrońcy": ["Malo Gusto (Chelsea)", "Lucas Digne (Aston Villa)", "Dayot Upamecano (Bayern)", "Jules Kounde (Barcelona)", "Ibrahima Konate (Liverpool)", "William Saliba (Arsenal)", "Theo Hernandez (Al-Hilal)", "Lucas Hernandez (PSG)", "Maxence Lacroix (Crystal Palace)"], "Pomocnicy": ["Manu Kone (AS Roma)", "Aurelien Tchouameni (Real Madryt)", "N'Golo Kante (Fenerbahce)", "Adrien Rabiot (Milan)", "Warren Zaire-Emery (PSG)"], "Napastnicy": ["Ousmane Dembele (PSG)", "Marcus Thuram (Inter)", "Kylian Mbappe (Real Madryt)", "Michael Olise (Bayern)", "Bradley Barcola (PSG)", "Desire Doue (PSG)", "Jean-Philippe Mateta (Crystal Palace)", "Rayan Cherki (Manchester City)", "Maghnes Akliouche (Monaco)"] },
+    "Irak": { "Bramkarze": ["Jalal Hassan (Al-Zawraa)", "Fahad Talib (Al-Talaba)", "Ahmed Basil (Al-Shorta)"], "Obrońcy": ["Rebin Sulaka (Port)", "Manaf Younis (Al-Shorta)", "Merchas Doski (Viktoria Pilzno)", "Hussein Ali (Pogoń Szczecin)", "Zaid Tahseen (Pakhtakor)", "Frans Putros (Persib)", "Ahmed Yahya (Al-Shorta)", "Mustafa Saadoon (Al-Shorta)", "Akam Hashem (Al-Zawraa)"], "Pomocnicy": ["Ibrahim Bayesh (Al-Dhafra)", "Amir Al-Ammari (Cracovia)", "Ali Jasim (Al-Najma)", "Youssef Amyn (AEK Larnaca)", "Zidane Iqbal (Utrecht)", "Marko Farji (Venezia)", "Kevin Yakob (AGF)", "Aimar Sher (Sarpsborg 08)", "Zaid Ismail (Al-Talaba)", "Ahmed Qasem (Nashville SC)"], "Napastnicy": ["Aymen Hussein (Al-Karma)", "Mohanad Ali (Dibba)", "Ali Al-Hamadi (Luton Town)", "Ali Yousif (Al-Talaba)"] },
+    "Norwegia": { "Bramkarze": ["Orjan Nyland (Sevilla)", "Sander Tangvik (Hamburger SV)", "Egil Selvik (Watford)"], "Obrońcy": ["Kristoffer Ajer (Brentford)", "Leo Ostigard (Genoa)", "David Moller Wolfe (Wolverhampton)", "Fredrik Andre Bjorkan (Bodo/Glimt)", "Marcus Holmgren Pedersen (Torino)", "Torbjorn Heggem (Bologna)", "Sondre Langas (Derby County)", "Henrik Falchener (Viking)", "Julian Ryerson (BVB)"], "Pomocnicy": ["Morten Thorsby (Cremonese)", "Patrick Berg (Bodo/Glimt)", "Sander Berge (Fulham)", "Martin Odegaard (Arsenal)", "Fredrik Aursnes (Benfica)", "Kristian Thorstvedt (Sassuolo)", "Thelo Aasgaard (Rangers)", "Antonio Nusa (RB Lipsk)", "Andreas Schjelderup (Benfica)", "Oscar Bobb (Fulham)", "Jens Petter Hauge (Bodo/Glimt)"], "Napastnicy": ["Alexander Sorloth (Atletico Madryt)", "Erling Haaland (Manchester City)", "Jorgen Strand Larsen (Crystal Palace)"] },
+    "Senegal": { "Bramkarze": ["Yehvann Diouf (Nice)", "Edouard Mendy (Al-Ahli)", "Mory Diaw (Le Havre)"], "Obrońcy": ["Mamadou Sarr (Chelsea)", "Kalidou Koulibaly (Al-Hilal)", "Abdoulaye Seck (Maccabi Haifa)", "Ismail Jakobs (Galatasaray)", "Krepin Diatta (Monaco)", "Moussa Niakhate (Lyon)", "Antoine Mendy (Nice)", "El Hadji Malick Diouf (West Ham)"], "Pomocnicy": ["Idrissa Gueye (Everton)", "Pathe Ciss (Rayo Vallecano)", "Lamine Camara (Monaco)", "Pape Matar Sarr (Tottenham)", "Habib Diarra (Sunderland)", "Bara Sapoko Ndiaye (Bayern)", "Pape Gueye (Villarreal)"], "Napastnicy": ["Assane Diao (Como)", "Bamba Dieng (Lorient)", "Sadio Mane (Al-Nassr)", "Nicolas Jackson (Bayern)", "Cherif Ndiaye (Samsunspor)", "Iliman Ndiaye (Everton)", "Ismaila Sarr (Crystal Palace)", "Ibrahim Mbaye (PSG)"] },
+    "Algieria": { "Bramkarze": ["Luca Zidane (Granada)", "Oussama Benbot (USM Alger)", "Melvin Mastil (Stade Nyonnais)", "Abdelatif Ramdane (MC Alger)"], "Obrońcy": ["Aissa Mandi (Lille)", "Ramy Bensebaini (BVB)", "Mohamed Amine Tougai (Esperance)", "Rayan Ait-Nouri (Manchester City)", "Jaouen Hadjam (Young Boys)", "Rafik Belghali (Hellas Verona)", "Zineddine Belaid (JS Kabylie)", "Achref Abada (USM Alger)", "Samir Chergui (Paris FC)"], "Pomocnicy": ["Nabil Bentaleb (Lille)", "Ramiz Zerrouki (Twente)", "Hicham Boudaoui (Nice)", "Fares Chaibi (Eintracht)", "Houssem Aouar (Al-Ittihad)", "Ibrahim Maza (Bayer Leverkusen)", "Yacine Titraoui (Charleroi)"], "Napastnicy": ["Riyad Mahrez (Al-Ahli)", "Mohamed Amoura (VfL Wolfsburg)", "Amine Gouiri (Marseille)", "Anis Hadj Moussa (Feyenoord)", "Adil Boulbina (Al-Duhail)", "Nadhir Benbouali (Gyor)", "Fares Ghedjemis (Frosinone)"] },
+    "Argentyna": { "Bramkarze": ["Juan Musso (Atletico Madryt)", "Geronimo Rulli (Marsylia)", "Emiliano Martinez (Aston Villa)"], "Obrońcy": ["Leonardo Balerdi (Marsylia)", "Nicolas Tagliafico (Lyon)", "Gonzalo Montiel (River Plate)", "Lisandro Martinez (Manchester Utd)", "Cristian Romero (Tottenham)", "Nicolas Otamendi (Benfica)", "Facundo Medina (Marsylia)", "Nahuel Molina (Atletico Madryt)"], "Pomocnicy": ["Leandro Paredes (Boca Juniors)", "Rodrigo De Paul (Inter Miami)", "Valentin Barco (Strasbourg)", "Giovani Lo Celso (Real Betis)", "Exequiel Palacios (Bayer Leverkusen)", "Alexis Mac Allister (Liverpool)", "Enzo Fernandez (Chelsea)"], "Napastnicy": ["Julian Alvarez (Atletico Madryt)", "Lionel Messi (Inter Miami)", "Nicolas Gonzalez (Atletico Madryt)", "Thiago Almada (Atletico Madryt)", "Giuliano Simeone (Atletico Madryt)", "Nico Paz (Como)", "Jose Manuel Lopez (Palmeiras)", "Lautaro Martinez (Inter)"] },
+    "Austria": { "Bramkarze": ["Alexander Schlager (RB Salzburg)", "Florian Wiegele (Viktoria Pilzno)", "Patrick Pentz (Brondby)"], "Obrońcy": ["David Affengruber (Elche)", "Kevin Danso (Tottenham)", "Stefan Posch (Mainz 05)", "David Alaba (Real Madryt)", "Philipp Lienhart (SC Freiburg)", "Phillipp Mwene (Mainz 05)", "Alexander Prass (Hoffenheim)", "Marco Friedl (Werder Brema)", "Michael Svoboda (Venezia)"], "Pomocnicy": ["Xaver Schlager (RB Lipsk)", "Nicolas Seiwald (RB Lipsk)", "Marcel Sabitzer (BVB)", "Florian Grillitsch (Braga)", "Carney Chukwuemeka (BVB)", "Romano Schmid (Werder Brema)", "Konrad Laimer (Bayern)", "Patrick Wimmer (Wolfsburg)", "Paul Wanner (PSV)", "Alessandro Schoepf (Wolfsberger AC)"], "Napastnicy": ["Marko Arnautovic (Crvena zvezda)", "Michael Gregoritsch (FC Augsburg)", "Sasa Kalajdzic (LASK)"] },
+    "Jordania": { "Bramkarze": ["Yazeed Abulaila (Al-Hussein)", "Nour Bani Attiah (Al-Faisaly)", "Abdallah Al-Fakhouri (Al-Wehdat)"], "Obrońcy": ["Mohammad Abu Hashish (Al-Karma)", "Abdallah Nasib (Al-Zawraa)", "Husam Abu Dahab (Al-Faisaly)", "Yazan Al-Arab (FC Seoul)", "Mohammad Abualnadi (Selangor)", "Salim Obaid (Al-Hussein)", "Saed Al-Rosan (Al-Hussein)", "Ehsan Haddad (Al-Hussein)", "Anas Badawi (Al-Faisaly)"], "Pomocnicy": ["Amer Jamous (Al-Zawraa)", "Noor Al-Rawabdeh (Selangor)", "Rajaei Ayed (Al-Hussein)", "Ibrahim Sadeh (Al-Karma)", "Mohannad Abu Taha (Al-Quwa)", "Nizar Al-Rashdan (Qatar SC)", "Mohammad Al-Dawoud (Al-Wehdat)"], "Napastnicy": ["Mohammad Abu Zrayq (Raja Casablanca)", "Ali Olwan (Al-Sailiya)", "Musa Al-Taamari (Rennes)", "Odeh Al-Fakhouri (Pyramids)", "Mahmoud Al-Mardi (Al-Hussein)", "Ibrahim Sabra (Lokomotiva Zagrzeb)", "Ali Azaizeh (Al-Shabab)"] },
+    "DR Konga": { "Bramkarze": ["Lionel Mpasi (Le Havre)", "Timothy Fayulu (Noah)", "Matthieu Epolo (Standard Liege)"], "Obrońcy": ["Chancel Mbemba (Lille)", "Arthur Masuaku (Lens)", "Gedeon Kalulu (Aris Limassol)", "Joris Kayembe (Genk)", "Dylan Batubinsika (AEL)", "Axel Tuanzebe (Burnley)", "Aaron Wan-Bissaka (West Ham)", "Steve Kapuadi (Widzew Łódź)"], "Pomocnicy": ["Samuel Moutoussamy (Atromitos)", "Edo Kayembe (Watford)", "Charles Pickel (Espanyol)", "Gael Kakuta (AEL)", "Noah Sadiki (Sunderland)", "Aaron Tshibola (Kilmarnock)", "Ngal'ayel Mukau (Lille)", "Brian Cipenga (Castellon)"], "Napastnicy": ["Cedric Bakambu (Real Betis)", "Meschak Elia (Alanyaspor)", "Theo Bongonda (Spartak Moskwa)", "Fiston Mayele (Pyramids)", "Yoane Wissa (Newcastle)", "Nathanael Mbuku (Montpellier)", "Simon Banza (Al Jazira)"] },
+    "Kolumbia": { "Bramkarze": ["David Ospina (Atletico Nacional)", "Camilo Vargas (Atlas)", "Alvaro Montero (Velez Sarsfield)"], "Obrońcy": ["Davinson Sanchez (Galatasaray)", "Santiago Arias (Independiente)", "Yerry Mina (Cagliari)", "Daniel Munoz (Crystal Palace)", "Johan Mojica (Mallorca)", "Jhon Lucumi (Bologna)", "Deiver Machado (Nantes)", "Willer Ditta (Cruz Azul)"], "Pomocnicy": ["James Rodriguez (Minnesota)", "Jefferson Lerma (Crystal Palace)", "Juan Fernando Quintero (River Plate)", "Jhon Arias (Palmeiras)", "Richard Rios (Benfica)", "Kevin Castano (River Plate)", "Jorge Carrascal (Flamengo)", "Jaminton Campaz (Rosario Central)", "Juan Portilla (Athletico Paranaense)", "Gustavo Puerta (Racing)"], "Napastnicy": ["Luis Diaz (Bayern)", "Jhon Cordoba (Krasnodar)", "Luis Suarez (Sporting CP)", "Cucho Hernandez (Real Betis)", "Andres Gomez (Vasco da Gama)"] },
+    "Portugalia": { "Bramkarze": ["Diogo Costa (Porto)", "Jose Sa (Wolverhampton)", "Rui Silva (Sporting CP)"], "Obrońcy": ["Ruben Dias (Manchester City)", "Joao Cancelo (Barcelona)", "Nelson Semedo (Fenerbahce)", "Nuno Mendes (PSG)", "Diogo Dalot (Manchester Utd)", "Goncalo Inacio (Sporting CP)", "Matheus Nunes (Manchester City)", "Renato Veiga (Villarreal)", "Tomas Araujo (Benfica)"], "Pomocnicy": ["Bernardo Silva (Manchester City)", "Bruno Fernandes (Manchester Utd)", "Ruben Neves (Al-Hilal)", "Vitinha (PSG)", "Joao Neves (PSG)", "Samu Costa (Mallorca)"], "Napastnicy": ["Cristiano Ronaldo (Al-Nassr)", "Joao Felix (Al-Nassr)", "Rafael Leao (Milan)", "Goncalo Guedes (Real Sociedad)", "Goncalo Ramos (PSG)", "Pedro Neto (Chelsea)", "Francisco Trincao (Sporting CP)", "Francisco Conceicao (Juventus)"] },
+    "Uzbekistan": { "Bramkarze": ["Utkir Jusupow (Navbahor)", "Abduwohid Nematow (Nasaf)", "Botirali Ergaszew (Neftchi)"], "Obrońcy": ["Abdukodir Chusanow (Manchester City)", "Chodziakbar Aliżonow (Pakhtakor)", "Farruch Sajfijew (Neftchi)", "Rustam Aszurmatow (Esteghlal)", "Szerzod Nasrułłajew (Nasaf)", "Umar Eszmurodow (Nasaf)", "Abdulla Abdullajew (Dibba)", "Bachruz Karimow (Surkhon)", "Awazbek Ulmasalijew (AGMK)", "Jachongir Urozow (Dinamo Samarkanda)"], "Pomocnicy": ["Akmal Mozgowoj (Pakhtakor)", "Otabek Szukurow (Baniyas)", "Dżamszid Iskanderow (Neftchi)", "Odilżon Chamrobekow (Tractor)", "Dżaloiddin Maszaripow (Esteghlal)", "Oston Urunow (Persepolis)", "Dostonbek Chamdamow (Pakhtakor)", "Azizjon Ganijew (Al-Bataeh)", "Abboszbek Faizułłajew (Basaksehir)", "Szerzod Jesanow (Bukhara)"], "Napastnicy": ["Eldor Szomurodow (Basaksehir)", "Azizbek Amonow (Bukhara)", "Igor Sergiejew (Persepolis)"] },
+    "Anglia": { "Bramkarze": ["Jordan Pickford (Everton)", "Dean Henderson (Crystal Palace)", "James Trafford (Manchester City)"], "Obrońcy": ["John Stones (Manchester City)", "Marc Guehi (Manchester City)", "Reece James (Chelsea)", "Ezri Konsa (Aston Villa)", "Dan Burn (Newcastle)", "Tino Livramento (Newcastle)", "Djed Spence (Tottenham)", "Nico O'Reilly (Manchester City)", "Jarell Quansah (Bayer Leverkusen)"], "Pomocnicy": ["Jordan Henderson (Brentford)", "Declan Rice (Arsenal)", "Jude Bellingham (Real Madryt)", "Morgan Rogers (Aston Villa)", "Kobbie Mainoo (Manchester Utd)", "Elliot Anderson (Nottingham Forest)"], "Napastnicy": ["Harry Kane (Bayern)", "Marcus Rashford (Barcelona)", "Bukayo Saka (Arsenal)", "Ollie Watkins (Aston Villa)", "Anthony Gordon (Newcastle)", "Eberechi Eze (Arsenal)", "Noni Madueke (Arsenal)", "Ivan Toney (Al-Ahli)"] },
+    "Chorwacja": { "Bramkarze": ["Dominik Livaković (Dinamo Zagreb)", "Dominik Kotarski (Copenhagen)", "Ivor Pandur (Hull City)"], "Obrońcy": ["Josko Gvardiol (Manchester City)", "Duje Caleta-Car (Real Sociedad)", "Josip Sutalo (Ajax)", "Josip Stanisić (Bayern)", "Marin Pongracić (Fiorentina)", "Martin Erlić (Midtjylland)", "Luka Vusković (Hamburger SV)"], "Pomocnicy": ["Luka Modrić (Milan)", "Mateo Kovacić (Manchester City)", "Mario Pasalić (Atalanta)", "Nikola Vlasić (Torino)", "Luka Sucić (Real Sociedad)", "Martin Baturina (Como)", "Kristijan Jakić (FC Augsburg)", "Petar Sucić (Inter)", "Nikola Moro (Bologna)", "Toni Fruk (Rijeka)"], "Napastnicy": ["Ivan Perisić (PSV)", "Andrej Kramarić (Hoffenheim)", "Ante Budimir (Osasuna)", "Marco Pasalić (Orlando City)", "Petar Musa (FC Dallas)", "Igor Matanović (SC Freiburg)"] },
+    "Ghana": { "Bramkarze": ["Lawrence Ati-Zigi (St. Gallen)", "Joseph Anang (St Patrick's)", "Benjamin Asare (Hearts of Oak)"], "Obrońcy": ["Alidu Seidu (Rennes)", "Jonas Adjetey (VfL Wolfsburg)", "Abdul Mumin (Rayo Vallecano)", "Gideon Mensah (Auxerre)", "Abdul Rahman Baba (PAOK)", "Jerome Opoku (Basaksehir)", "Kojo Peprah Oppong (Nice)", "Derrick Luckassen (Pafos)", "Marvin Senaya (Auxerre)"], "Pomocnicy": ["Caleb Yirenkyi (Nordsjaelland)", "Thomas Partey (Villarreal)", "Kwasi Sibo (Oviedo)", "Antoine Semenyo (Manchester City)", "Elisha Owusu (Auxerre)", "Augustine Boakye (Saint-Etienne)"], "Napastnicy": ["Abdul Fatawu (Leicester City)", "Jordan Ayew (Leicester City)", "Brandon Thomas-Asante (Coventry City)", "Christopher Bonsu Baah (Al-Qadsiah)", "Inaki Williams (Athletic Bilbao)", "Kamaldeen Sulemana (Atalanta)", "Ernest Nuamah (Lyon)", "Prince Kwabena Adu (Viktoria Pilzno)"] },
+    "Panama": { "Bramkarze": ["Luis Mejia (Nacional)", "Orlando Mosquera (Al-Fayha)", "Cesar Samudio (Marathon)"], "Obrońcy": ["Eric Davis (Plaza Amador)", "Fidel Escobar (Saprissa)", "Amir Murillo (Besiktas)", "Roderick Miller (Turan Tovuz)", "Andres Andrade (LASK)", "Cesar Blackman (Slovan Bratislava)", "Jose Cordoba (Norwich City)", "Jiovany Ramos (Puerto Cabello)", "Jorge Gutierrez (Deportivo La Guaira)", "Edgardo Farina (Nizhny Novgorod)"], "Pomocnicy": ["Anibal Godoy (San Diego FC)", "Alberto Quintero (Plaza Amador)", "Yoel Barcenas (Mazatlan)", "Adalberto Carrasquilla (UNAM)", "Jose Luis Rodriguez (Juarez)", "Cristian Martinez (Ironi Kiryat Shmona)", "Cesar Yanis (Cobresal)", "Carlos Harvey (Minnesota)", "Azarias Londono (Universidad Catolica)"], "Napastnicy": ["Jose Fajardo (Universidad Catolica)", "Ismael Diaz (Leon)", "Cecilio Waterman (Univ. de Concepcion)", "Tomas Rodriguez (Saprissa)"] }
+};
+
+const TEAM_DATA = {
+    "Francja": { group: "I", p: 66, w: 38, d: 14, l: 14, g: 134, worldCups: 2, style: "Ekstremalna elastyczność taktyczna, zabójcze kontry w oparciu o szybkość skrzydeł, dominacja fizyczna w środku pola i wyjątkowa głębia składu pozwalająca na różne warianty ataku.", odds: 18, recent_form: "🇫🇷 W W W W W D L L W W", fun_fact: "W 1998 roku jako gospodarz sięgnęli po pierwszy tytuł mistrzowski, a 20 lat później powtórzyli sukces w Rosji.", fifa_rank: 2 },
+    "Brazylia": { group: "C", p: 114, w: 76, d: 19, l: 19, g: 236, worldCups: 5, style: "Odejście od klasycznego Jogo Bonito na rzecz intensywnego, wysokiego pressingu, bazującego na dynamice bocznych obrońców oraz indywidualnej kreatywności zawodników w tercji ataku.", odds: 15, recent_form: "🇧🇷 W D W L W W W D W W", fun_fact: "Canarinhos to największy piłkarski kolekcjoner trofeów — Puchar Świata zgarniali aż 5 razy. Nikomu innemu się to nie udało.", fifa_rank: 5 },
+    "Argentyna": { group: "J", p: 88, w: 47, d: 22, l: 19, g: 145, worldCups: 3, style: "Bardzo inteligentne zarządzanie tempem gry, płynne przejścia między formacjami, wysoka dyscyplina w pressingu i budowanie akcji wokół centralnego punktu kreacji.", odds: 14, recent_form: "🇦🇷 W W W D W L D W W W", fun_fact: "To właśnie Albicelestes, a nie Brazylia, mają na koncie najwięcej finałów Mistrzostw Świata. Zagrają w swoim szóstym finale.", fifa_rank: 1 },
+    "Niemcy": { group: "E", p: 106, w: 67, d: 20, l: 19, g: 226, worldCups: 4, style: "Ofensywna przebudowa oparta na bardzo intensywnym gegenpressingu, skomplikowanych schematach wymiany podań i wysokim ustawieniu linii obrony dla pełnej kontroli pola.", odds: 10, recent_form: "🇩🇪 W W L D W W D L L W", fun_fact: "Die Nationalelf to prawdziwy fenomen skuteczności – w historii światowych czempionatów tylko raz nie wyszli z grupy!", fifa_rank: 16 },
+    "Hiszpania": { group: "H", p: 71, w: 41, d: 15, l: 15, g: 125, worldCups: 1, style: "Dominacja poprzez długie utrzymywanie się przy piłce, szerokie rozciąganie gry skrzydłami oraz natychmiastowy, wysoki odbiór piłki zaraz po jej utracie.", odds: 12, recent_form: "🇪🇸 W W W D L W W D W L", fun_fact: "La Furia Roja w 2010 roku sięgnęła po pierwsze w historii mistrzostwo, stając się czwartą reprezentacją, która wygrała mundial po wcześniejszym triumfie w Euro.", fifa_rank: 8 },
+    "Anglia": { group: "L", p: 69, w: 32, d: 23, l: 14, g: 106, worldCups: 1, style: "Pragmatyczne podejście łączące wielką siłę rażenia w ataku z bardzo solidną, zwartą strukturą defensywną i umiejętnością gry z kontrataku w kluczowych momentach.", odds: 9, recent_form: "🏴󠁧󠁢󠁥󠁮󠁧󠁿 W W W W D L W W W W", fun_fact: "Mimo że są kolebką futbolu i regularnie stawiani w roli faworytów, jedyne mistrzostwo świata wywalczyli u siebie w 1966 roku.", fifa_rank: 4 },
+    "Portugalia": { group: "K", p: 41, w: 20, d: 9, l: 12, g: 64, worldCups: 0, style: "Nastawienie na dominację ofensywną poprzez dużą wymienność pozycji w linii pomocy, co otwiera korytarze dla kreatywnych zawodników w tercji ataku.", odds: 7, recent_form: "🇵🇹 L W W W D W W W W W", fun_fact: "Eusébio, legendarny czarny Pantera, był królem strzelców mundialu w 1966 roku z 9 bramkami. Nawet dzisiaj to piąty wynik w historii.", fifa_rank: 6 },
+    "Holandia": { group: "F", p: 52, w: 28, d: 11, l: 13, g: 94, worldCups: 0, style: "Współczesna reinterpretacja futbolu totalnego, charakteryzująca się dużą mobilnością zawodników, wysoką dyscypliną taktyczną i agresywnym budowaniem akcji od obrony.", odds: 8, recent_form: "🇳🇱 W W D L W W D W W W", fun_fact: "Pomorscy rywale trzykrotnie meldowali się w finałach mundialu. Niestety, za każdym razem wracali do domu z srebrnym medalem.", fifa_rank: 7 },
+    "Belgia": { group: "G", p: 45, w: 22, d: 9, l: 14, g: 76, worldCups: 0, style: "Proces odmładzania kadry z naciskiem na szybkie przejścia z obrony do ataku, wykorzystujące atuty techniczne młodych zawodników w szybkich akcjach bocznych.", odds: 5, recent_form: "🇧🇪 W W D L W D L W W W", fun_fact: "Czerwone Diabły wielokrotnie okupowały pierwsze miejsce w rankingu FIFA, choć nigdy nie zdobyły żadnego seniorskiego trofeum.", fifa_rank: 3 },
+    "Urugwaj": { group: "H", p: 56, w: 28, d: 12, l: 16, g: 92, worldCups: 2, style: "Styl Bielsy: szalona intensywność, man-marking na całym boisku, bezwzględna walka fizyczna i nieustanny, agresywny pressing wymuszający błędy rywala.", odds: 3, recent_form: "🇺🇾 W L D D L W D L L W", fun_fact: "Choć wielu kibiców o tym zapomina, to właśnie Urugwaj może pochwalić się złotem z pierwszego mundialu w 1930 roku.", fifa_rank: 11 },
+    "Kolumbia": { group: "K", p: 25, w: 12, d: 5, l: 8, g: 41, worldCups: 0, style: "Płynność ofensywna oparta na bardzo kreatywnym środku pola, który wykorzystuje energię w ataku do rozrywania defensywy rywala szybką grą kombinacyjną.", odds: 3, recent_form: "🇨🇴 L W D D L W W L L W", fun_fact: "Wielkie Los Cafeteros przeżywały w 2014 roku, gdy z Jamesem Rodríguezem zdobyli pierwszy w historii ćwierćfinał, a James został królem strzelców turnieju.", fifa_rank: 12 },
+    "Meksyk": { group: "A", p: 57, w: 16, d: 14, l: 27, g: 66, worldCups: 0, style: "Solidna organizacja w niskim lub średnim bloku, z szybkim przejściem do kontry poprzez dynamiczne boki boiska i bazowaniem na dużej waleczności.", odds: 2, recent_form: "🇲🇽 D L W L D D L W D L", fun_fact: "Podopieczni z Ameryki Północnej słyną z niepisanego prawa: od 1994 roku regularnie odpadają w 1/8 finału, kończąc zawsze na tym samym etapie.", fifa_rank: 14 },
+    "USA": { group: "D", p: 35, w: 15, d: 6, l: 14, g: 55, worldCups: 0, style: "Opieranie gry na wybitnym przygotowaniu atletycznym, agresywnym odbiorze piłki i poszukiwaniu jak najszybszych ścieżek pod bramkę przeciwnika po przechwycie.", odds: 4, recent_form: "🇺🇸 W L W L D W L W D L", fun_fact: "Najlepszy wynik Yanksów to III miejsce na pierwszym mundialu w 1930 roku. Współcześnie najdalej zaszli w 2002 roku, dochodząc do ćwierćfinału.", fifa_rank: 13 },
+    "Kanada": { group: "B", p: 5, w: 1, d: 1, l: 3, g: 5, worldCups: 0, style: "Bezpośrednia gra o bardzo wysokiej intensywności biegowej, gdzie kluczem jest walka na każdym metrze boiska i szybkie przemieszczanie futbolówki w strefy ataku.", odds: 2, recent_form: "🇨🇦 L L W L D L L L L W", fun_fact: "Kanadyjczycy długo byli piłkarskim kopciuszkiem. Na mundialu grali tylko raz (1986), a swój premierowy występ na mistrzostwach świata zaliczyli w Katarze (2022).", fifa_rank: 45 },
+    "Australia": { group: "D", p: 15, w: 5, d: 3, l: 7, g: 19, worldCups: 0, style: "Styl oparty na żelaznej dyscyplinie taktycznej, solidnej postawie defensywnej oraz bardzo groźnych, wyćwiczonych stałych fragmentach gry.", odds: 1, recent_form: "🇦🇺 L L W D L W L D L W", fun_fact: "Socceroos mają na swoim koncie najwyższe zwycięstwo w historii mistrzostw świata, kiedy to w 2022 roku ograli Tunezję 1:0.", fifa_rank: 30 },
+    "Japonia": { group: "F", p: 22, w: 8, d: 3, l: 11, g: 25, worldCups: 0, style: "Kombinacyjna gra w dużej szybkości, precyzja techniczna w wymianie podań oraz świetna organizacja w kontrataku, pozwalająca na zaskakiwanie faworytów.", odds: 2, recent_form: "🇯🇵 W L W L D W D L W L", fun_fact: "Samurajowie Niebiescy jako pierwsi Azjaci wygrali mecz z reprezentacją Niemiec na mundialu (Katar 2022).", fifa_rank: 17 },
+    "Korea Południowa": { group: "A", p: 37, w: 8, d: 9, l: 20, g: 39, worldCups: 0, style: "Ekstremalnie intensywny pressing, ogromna dyscyplina w realizacji założeń oraz błyskawiczne przejścia do fazy ataku po odzyskaniu piłki.", odds: 1, recent_form: "🇰🇷 L L D L W L D L D W", fun_fact: "Azjatyckie Tygrysy zapisały się w historii jako pierwsza reprezentacja spoza Europy i Ameryki Południowej, która dotarła do półfinału mistrzostw świata. Dokonały tego w 2002 roku, będąc gospodarzem.", fifa_rank: 22 },
+    "Maroko": { group: "C", p: 21, w: 7, d: 5, l: 9, g: 24, worldCups: 0, style: "Kompaktowa, niemal niemożliwa do sforsowania defensywa, połączona z wybitnymi umiejętnościami indywidualnymi zawodników w szybkich kontratakach.", odds: 3, recent_form: "🇲🇦 D L L W L D L D D L", fun_fact: "Atlas Lions przeszli do historii jako pierwsza afrykańska drużyna, która zagrała w półfinale mistrzostw świata. Dokonali tego w Katarze.", fifa_rank: 12 },
+    "Senegal": { group: "I", p: 12, w: 4, d: 3, l: 5, g: 14, worldCups: 0, style: "Wykorzystanie przewagi fizycznej nad rywalami, duża dyscyplina taktyczna oraz szybkość skrzydłowych w ataku bezpośrednim.", odds: 2, recent_form: "🇸🇳 L W D L W L D L W L", fun_fact: "Senegalczycy w swoim debiucie na mundialu w 2002 roku sensacyjnie pokonali Broniących Tytułu Francuzów (1:0).", fifa_rank: 19 },
+    "Ghana": { group: "L", p: 13, w: 4, d: 4, l: 5, g: 17, worldCups: 0, style: "Gra oparta na dużej dynamice, fizycznym zaangażowaniu i bezpośrednim dążeniu do bramki, wykorzystująca naturalną szybkość zawodników.", odds: 1, recent_form: "🇬🇭 L W L D D L L L W L", fun_fact: "Czarne Gwiazdy w 2010 roku były o rzut karny od historycznego awansu do półfinału.", fifa_rank: 60 },
+    "Katar": { group: "B", p: 3, w: 0, d: 0, l: 3, g: 1, worldCups: 0, style: "Uporządkowana struktura defensywna, próbująca budować grę kombinacyjną, lecz głównie bazująca na wyczekiwaniu na okazje w ataku pozycyjnym.", odds: 1, recent_form: "🇶🇦 L L L L L D L L L L", fun_fact: "Gospodarz mundialu w 2022 roku, który na własnych oczach przeżył kompletną klęskę, przegrywając wszystkie mecze grupowe.", fifa_rank: 58 },
+    "Arabia Saudyjska": { group: "H", p: 15, w: 5, d: 2, l: 8, g: 20, worldCups: 0, style: "Defensywna organizacja, szybkie kontry, agresywny pressing.", odds: 1, recent_form: "🇸🇦 L L W L D L W D L L", fun_fact: "Sokóły zadebiutowały w 1994 roku i od razu wyszły z grupy, ogrywając m.in. Belgię.", fifa_rank: 53 },
+    "Iran": { group: "G", p: 16, w: 4, d: 3, l: 9, g: 18, worldCups: 0, style: "Kompaktowa obrona, długie piłki, kontry i walka o każdy centymetr.", odds: 1, recent_form: "🇮🇷 L L L D L L L D L L", fun_fact: "Reprezentacja narodowa jeszcze nigdy nie wyszła z grupy na mistrzostwach świata.", fifa_rank: 21 },
+    "Szwajcaria": { group: "B", p: 30, w: 11, d: 9, l: 10, g: 52, worldCups: 0, style: "Pragmatyzm połączony z taktyczną dojrzałością, gdzie każda formacja gra niezwykle solidnie, minimalizując błędy własne.", odds: 2, recent_form: "🇨🇭 W L D L D L W L D L", fun_fact: "Helweci nie przegrali żadnego meczu w fazie grupowej mundialu od 1994 roku (bilans 3 zwycięstw, 6 remisów). To swoisty rekord.", fifa_rank: 15 },
+    "Szwecja": { group: "F", p: 50, w: 22, d: 12, l: 16, g: 88, worldCups: 0, style: "Tradycyjna solidność w defensywie, oparta na fizycznej walce, świetnym ustawianiu się i groźnych stałych fragmentach gry.", odds: 2, recent_form: "🇸🇪 L D W L L D W L L W", fun_fact: "Niebiesko-Żółci mają na koncie wicemistrzostwo świata (1958), a także dwa brązowe medale (1950, 1994).", fifa_rank: 26 },
+    "Norwegia": { group: "I", p: 8, w: 3, d: 2, l: 3, g: 11, worldCups: 0, style: "Bezpośrednia gra kierowana do egzekutora, szybki odbiór w środku pola i wykorzystywanie siły fizycznej do wygrywania pojedynków.", odds: 4, recent_form: "🇳🇴 L L L L D W L D L W", fun_fact: "Norwegia ze swoim wikingiem pojawiła się tylko raz na wielkiej scenie (1994). Dzisiaj ich kadra pnie się w górę.", fifa_rank: 43 },
+    "Chorwacja": { group: "L", p: 26, w: 14, d: 5, l: 7, g: 46, worldCups: 0, style: "Kontrola meczu poprzez genialny środek pola, ogromne doświadczenie w grze pod presją i mistrzowskie operowanie piłką w małej przestrzeni.", odds: 5, recent_form: "🇭🇷 W L D W L D L D W W", fun_fact: "Vatreni to prawdziwi tyrani dogrywek — na mundialach od 2018 roku wygrali aż 5 spotkań po 120 minutach gry.", fifa_rank: 10 },
+    "Czechy": { group: "A", p: 30, w: 14, d: 7, l: 9, g: 52, worldCups: 0, style: "Dyscyplina taktyczna, bezpośredniość w budowaniu ataków i wysoki poziom zaangażowania każdego zawodnika w realizację planu gry.", odds: 2, recent_form: "🇨🇿 L L D W D L L L W L", fun_fact: "Czesi jako Czechosłowacja byli dwukrotnie wicemistrzami świata (1934, 1962). To największe osiągnięcie w historii.", fifa_rank: 42 },
+    "Austria": { group: "J", p: 29, w: 12, d: 4, l: 13, g: 58, worldCups: 0, style: "Nowoczesny futbol oparty na bardzo intensywnym pressingu, szybkości w ataku i dużej dyscyplinie taktycznej w realizacji założeń trenera.", odds: 2, recent_form: "🇦🇹 L L W L D D L W L W", fun_fact: "Wunderteam z lat 30. zajął III miejsce na mistrzostwach świata w 1954 roku. Austriacy dzisiaj wracają do łask.", fifa_rank: 25 },
+    "Turcja": { group: "D", p: 15, w: 7, d: 3, l: 5, g: 28, worldCups: 0, style: "Dynamiczna, pełna emocji gra, charakteryzująca się szybką grą skrzydłami i dużą agresją w odbiorze piłki.", odds: 2, recent_form: "🇹🇷 L W D L W L D D W L", fun_fact: "Turcy są brązowymi medalistami z 2002 roku (wspólnie z Koreą Południową).", fifa_rank: 38 },
+    "Paragwaj": { group: "D", p: 28, w: 9, d: 9, l: 10, g: 30, worldCups: 0, style: "Twarda, często bezkompromisowa gra w obronie, z naciskiem na szybkie kontry i ogromną determinację całego zespołu.", odds: 1, recent_form: "🇵🇾 L D L W L L D L L D", fun_fact: "Los Guaraníes nigdy nie zdobyli medalu, ale aż 4 razy grali w 1/8 finału (najlepszy wynik).", fifa_rank: 35 },
+    "Ekwador": { group: "E", p: 10, w: 4, d: 2, l: 4, g: 13, worldCups: 0, style: "Styl bazujący na szybkości i atletyzmie zawodników, z bardzo agresywną postawą w defensywie i nieustanną presją na przeciwnika.", odds: 1, recent_form: "🇪🇨 D W L L D L W D L L", fun_fact: "La Tri zanotowało historyczny ćwierćfinał w 2006 roku. To ich największy sukces.", fifa_rank: 31 },
+    "Algieria": { group: "J", p: 16, w: 6, d: 3, l: 7, g: 26, worldCups: 0, style: "Techniczna gra w ofensywie, szybkie kombinacje w środku pola i duża determinacja w grze o stawkę.", odds: 1, recent_form: "🇩🇿 D L D W L L D L W L", fun_fact: "Pustynne Lisy w 2014 roku zagrały swój najlepszy mundial, dochodząc do 1/8 finału i remisując z późniejszymi mistrzami Niemcami (1:1).", fifa_rank: 44 },
+    "Irak": { group: "I", p: 3, w: 0, d: 1, l: 2, g: 4, worldCups: 0, style: "Defensywny fundament, nastawienie na grę z kontry oraz wysoka wytrzymałość psychiczna w meczach z silniejszymi przeciwnikami.", odds: 1, recent_form: "🇮🇶 L L L L D L L L L L", fun_fact: "Asyria Lwów dwukrotnie zdobyła Puchar Azji (2007, 2015). W Katarze 2022 zagrali swój pierwszy mundial od 36 lat.", fifa_rank: 55 },
+    "Jordania": { group: "J", p: 0, w: 0, d: 0, l: 0, g: 0, worldCups: 0, style: "Duża dyscyplina i świetna organizacja defensywna, wsparta groźnymi przejściami do ataku po błędach rywala.", odds: 1, recent_form: "🇯🇴 L L L W L D L L L L", fun_fact: "Orły Jordanii zadebiutują na Mistrzostwach Świata właśnie w 2026 roku, po raz pierwszy w historii.", fifa_rank: 68 },
+    "Uzbekistan": { group: "K", p: 0, w: 0, d: 0, l: 0, g: 0, worldCups: 0, style: "Techniczne wyszkolenie zawodników, gra kombinacyjna i wysoka dyscyplina taktyczna w budowaniu akcji ofensywnych.", odds: 1, recent_form: "🇺🇿 D L L W D L L L D L", fun_fact: "Biali Wilki nigdy wcześniej nie grali na mundialu. W 2026 roku przejdą chrzest bojowy.", fifa_rank: 73 },
+    "DR Konga": { group: "K", p: 3, w: 0, d: 1, l: 2, g: 2, worldCups: 0, style: "Ogromny potencjał fizyczny, szybkość w bocznych sektorach boiska i bezpośrednie ataki na bramkę przeciwnika.", odds: 1, recent_form: "🇨🇩 L L L L D L L L D L", fun_fact: "Leopards są mistrzami Afryki (1974), ale na Mistrzostwach Świata zagrają po raz pierwszy od 50 lat.", fifa_rank: 61 },
+    "Panama": { group: "L", p: 3, w: 0, d: 0, l: 3, g: 2, worldCups: 0, style: "Gra w niskim bloku, nastawienie na próby kontrataków oraz maksymalne zaangażowanie w walkę o każdy centymetr boiska.", odds: 1, recent_form: "🇵🇦 L L L L L L L L L L", fun_fact: "Los Canaleros powalczą o pierwsze zwycięstwo w mistrzostwach świata — do tej pory przegrali wszystkie 3 mecze.", fifa_rank: 45 },
+    "Haiti": { group: "C", p: 3, w: 0, d: 0, l: 3, g: 2, worldCups: 0, style: "Ofensywny duch, duża szybkość w atakach i nieprzewidywalność, wynikająca z indywidualnych umiejętności zawodników.", odds: 1, recent_form: "🇭🇹 L L L L L L L L L L", fun_fact: "Les Grenadiers wystąpili tylko raz (1974). Po 52 latach powracają na mundial.", fifa_rank: 87 },
+    "Curacao": { group: "E", p: 0, w: 0, d: 0, l: 0, g: 0, worldCups: 0, style: "Technika indywidualna zawodników z lig europejskich, próbujących budować przemyślane ataki pozycyjne.", odds: 1, recent_form: "🇨🇼 L L L L L D L L L L", fun_fact: "Byłe Antyle Holenderskie grają swój debiutancki mundial. To historyczny moment dla wyspy.", fifa_rank: 90 },
+    "RPA": { group: "A", p: 9, w: 2, d: 3, l: 4, g: 10, worldCups: 0, style: "Zwinność zawodników, waleczność w każdym pojedynku i szybkie przejścia pod bramkę rywala.", odds: 1, recent_form: "🇿🇦 L L D L D L L L L L", fun_fact: "Bafana Bafana byli gospodarzem w 2010 roku. To jedyny raz, gdy wystąpili w mistrzostwach świata.", fifa_rank: 59 },
+    "Bośnia i Hercegowina": { group: "B", p: 3, w: 1, d: 0, l: 2, g: 4, worldCups: 0, style: "Gra oparta na silnym środkowym napastniku, solidna postawa w defensywie i groźne stałe fragmenty gry.", odds: 1, recent_form: "🇧🇦 L L D L D L L L W L", fun_fact: "Zmajevi (Smoki) zadebiutowali w Brazylii 2014. Teraz wracają po 12 latach przerwy.", fifa_rank: 74 },
+    "Nowa Zelandia": { group: "G", p: 6, w: 1, d: 3, l: 2, g: 7, worldCups: 0, style: "Fizyczna gra, ogromne zaangażowanie w defensywie i bazowanie na stałych fragmentach.", odds: 1, recent_form: "🇳🇿 L L D L D D L L L L", fun_fact: "Wszyscy biały na mundialu grali trzykrotnie (1982, 2010, 2022). Do tej pory nie wygrali żadnego spotkania.", fifa_rank: 100 },
+    "Tunezja": { group: "F", p: 18, w: 3, d: 7, l: 8, g: 17, worldCups: 0, style: "Bardzo wysoka organizacja gry, solidny blok defensywny i duża dyscyplina taktyczna w każdym aspekcie.", odds: 1, recent_form: "🇹🇳 L L D L D L L D D L", fun_fact: "Orły Kartaginy wywalczyły pierwsze w historii zwycięstwo dla afrykańskiej drużyny na mundialu 1978 (3:1 z Meksykiem).", fifa_rank: 31 },
+    "Egipt": { group: "G", p: 6, w: 1, d: 0, l: 5, g: 7, worldCups: 0, style: "Techniczni zawodnicy, poleganie na błysku indywidualności i kombinacyjna gra w środku pola.", odds: 1, recent_form: "🇪🇬 L L L L D L L D L L", fun_fact: "Faraonowie czterokrotnie grali w finałach (1934, 1990, 2018, 2022). Nigdy nie zdobyli punktu w fazie grupowej.", fifa_rank: 36 },
+    "Szkocja": { group: "C", p: 23, w: 4, d: 7, l: 12, g: 31, worldCups: 0, style: "Wysoka intensywność, walka do ostatniego gwizdka, groźne stałe fragmenty i wielka duma narodowa w grze.", odds: 1, recent_form: "🏴󠁧󠁢󠁳󠁣󠁴󠁿 L L L L D L L L L L", fun_fact: "Płonący Tartan przegapili mundial od 1998 roku. Powrót po 28 latach jest świętem dla fanów ze starego kontynentu.", fifa_rank: 34 },
+    "RZP": { group: "H", p: 0, w: 0, d: 0, l: 0, g: 0, worldCups: 0, style: "Szybkie skrzydła, agresywny pressing w wysokim ustawieniu i nowoczesne, odważne podejście taktyczne.", odds: 1, recent_form: "🇨🇻 L L L L L L D L L L", fun_fact: "Republika Zielonego Przylądka (Tubarões Azuis) debiutuje na Mistrzostwach Świata. To ich pierwszy tak duży turniej.", fifa_rank: 65 },
+    "WKS": { group: "E", p: 0, w: 0, d: 0, l: 0, g: 0, worldCups: 0, style: "Siła i atletyzm, szybkie akcje ofensywne oraz duża dynamika w przejściu z obrony do ataku.", odds: 1, recent_form: "🇨🇮 L L L L L L D L L L", fun_fact: "Słonie Wybrzeża Kości Słoniowej mają na koncie Puchar Afryki (2024), ale na mundialach zawsze kończyli w grupie od 2006 do 2014. Wracają po 12 latach.", fifa_rank: 49 },
+};
+
+        const FAV_TEAMS_LIST = Object.keys(TEAM_DATA);
+        let favCurrentIdx = 0;
+
+        function favNav(dir) {
+            favCurrentIdx = (favCurrentIdx + dir + FAV_TEAMS_LIST.length) % FAV_TEAMS_LIST.length;
+            renderFavCard(favCurrentIdx);
+        }
+
+        function renderFavCard(idx) {
+            const name = FAV_TEAMS_LIST[idx];
+            const d = TEAM_DATA[name];
+            const code = FLAG_CODES[name];
+            const flagUrl = code ? `${FLAG_BASE_URL}${code}.svg` : '';
+
+            document.getElementById('favTeamCounter').textContent = `${idx + 1} / ${FAV_TEAMS_LIST.length}`;
+            document.getElementById('favTeamFlag').src = flagUrl;
+            document.getElementById('favTeamName').textContent = name;
+            document.getElementById('favTeamGroup').textContent = 'Grupa ' + d.group;
+
+            const badge = document.getElementById('favWorldCupBadge');
+            const cups = d.worldCups || 0;
+            if (cups > 0) {
+                badge.textContent = '🏆'.repeat(cups);
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+
+            document.getElementById('fav-stat-p').textContent = d.p;
+            document.getElementById('fav-stat-w').textContent = d.w;
+            document.getElementById('fav-stat-d').textContent = d.d;
+            document.getElementById('fav-stat-l').textContent = d.l;
+            document.getElementById('fav-style').textContent = d.style;
+            document.getElementById('fav-odds-text').textContent = d.odds + '%';
+            document.getElementById('fav-fifa-rank').textContent = `Ranking FIFA: ${d.fifa_rank}`;
+            setTimeout(() => {
+                document.getElementById('fav-odds-bar').style.width = d.odds + '%';
+            }, 50);
+
+            const card = document.getElementById('favTeamCard');
+            card.style.opacity = '0';
+            card.style.transform = 'translateX(10px)';
+            setTimeout(() => {
+                card.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
+                card.style.opacity = '1';
+                card.style.transform = 'translateX(0)';
+            }, 30);
+        }
+
+        function showFavoriteTeamModal() {
+            const modal = document.getElementById('favoriteTeamModal');
+            if (!modal) return;
+            favCurrentIdx = 0;
+            renderFavCard(0);
+            modal.style.display = 'flex';
+        }
+
+        function closeFavModal() {
+            document.getElementById('favoriteTeamModal').style.display = 'none';
+        }
+
+        const STAR_PLAYERS = [
+            { name: "Cristiano Ronaldo", country: "Portugalia", matches: 205, goals: 128, assists: 46, age: 41, height: "187 cm", weight: "83 kg", foot: "Prawa", img: "/static/players/ronaldo.jpg" },
+            { name: "Lionel Messi", country: "Argentyna", matches: 180, goals: 106, assists: 56, age: 38, height: "170 cm", weight: "72 kg", foot: "Lewa", img: "/static/players/messi.jpg" },
+            { name: "Kylian Mbappé", country: "Francja", matches: 77, goals: 46, assists: 31, age: 27, height: "178 cm", weight: "73 kg", foot: "Prawa", img: "/static/players/mbappe.jpg" },
+            { name: "Harry Kane", country: "Anglia", matches: 89, goals: 62, assists: 19, age: 32, height: "188 cm", weight: "86 kg", foot: "Prawa", img: "/static/players/kane.jpg" },
+            { name: "Lamine Yamal", country: "Hiszpania", matches: 12, goals: 4, assists: 6, age: 18, height: "178 cm", weight: "72 kg", foot: "Lewa", img: "/static/players/yamal.jpg" },
+            { name: "Raphinha", country: "Brazylia", matches: 22, goals: 6, assists: 5, age: 29, height: "176 cm", weight: "68 kg", foot: "Lewa", img: "/static/players/raphinha.jpg" },
+            { name: "Erling Haaland", country: "Norwegia", matches: 39, goals: 36, assists: 3, age: 25, height: "195 cm", weight: "88 kg", foot: "Lewa", img: "/static/players/haaland.jpg" },
+            { name: "Jude Bellingham", country: "Anglia", matches: 40, goals: 6, assists: 8, age: 22, height: "186 cm", weight: "75 kg", foot: "Prawa", img: "/static/players/bellingham.jpg" },
+            { name: "Vinícius Júnior", country: "Brazylia", matches: 35, goals: 5, assists: 5, age: 25, height: "176 cm", weight: "73 kg", foot: "Prawa", img: "/static/players/vinicius.jpg" },
+            { name: "Ousmane Dembélé", country: "Francja", matches: 51, goals: 6, assists: 4, age: 29, height: "178 cm", weight: "67 kg", foot: "Obie", img: "/static/players/dembele.jpg" },
+            { name: "Kai Havertz", country: "Niemcy", matches: 53, goals: 20, assists: 15, age: 26, height: "193 cm", weight: "83 kg", foot: "Lewa", img: "/static/players/havertz.jpg" },
+            { name: "Florian Wirtz", country: "Niemcy", matches: 25, goals: 4, assists: 6, age: 23, height: "176 cm", weight: "71 kg", foot: "Prawa", img: "/static/players/wirtz.jpg" },
+            { name: "Michael Olise", country: "Francja", matches: 8, goals: 2, assists: 3, age: 24, height: "184 cm", weight: "73 kg", foot: "Lewa", img: "/static/players/olise.jpg" },
+            { name: "Cole Palmer", country: "Anglia", matches: 15, goals: 4, assists: 5, age: 24, height: "189 cm", weight: "74 kg", foot: "Lewa", img: "/static/players/palmer.jpg" },
+            { name: "Bukayo Saka", country: "Anglia", matches: 42, goals: 14, assists: 13, age: 24, height: "178 cm", weight: "72 kg", foot: "Lewa", img: "/static/players/saka.jpg" },
+            { name: "Lautaro Martínez", country: "Argentyna", matches: 68, goals: 30, assists: 8, age: 28, height: "174 cm", weight: "72 kg", foot: "Prawa", img: "/static/players/martinez.jpg" },
+            { name: "Rafael Leão", country: "Portugalia", matches: 33, goals: 4, assists: 6, age: 26, height: "188 cm", weight: "81 kg", foot: "Prawa", img: "/static/players/leao.jpg" },
+            { name: "Cody Gakpo", country: "Holandia", matches: 35, goals: 13, assists: 5, age: 27, height: "193 cm", weight: "76 kg", foot: "Prawa", img: "/static/players/gakpo.jpg" },
+        ];
+
+        let spCurrentIdx = 0;
+        let temporarySelectedTeam = "";
+
+        document.getElementById('favSelectBtn')?.addEventListener('click', () => {
+            temporarySelectedTeam = FAV_TEAMS_LIST[favCurrentIdx];
+            document.getElementById('favoriteTeamModal').style.display = 'none';
+
+            spCurrentIdx = 0;
+            renderStarPlayerCard(spCurrentIdx);
+            document.getElementById('starPlayerModal').style.display = 'flex';
+        });
+
+        function spNav(dir) {
+            spCurrentIdx = (spCurrentIdx + dir + STAR_PLAYERS.length) % STAR_PLAYERS.length;
+            renderStarPlayerCard(spCurrentIdx);
+        }
+
+        function renderStarPlayerCard(idx) {
+            const player = STAR_PLAYERS[idx];
+            const code = FLAG_CODES[player.country];
+
+            const imgEl = document.getElementById('sp-img');
+            imgEl.style.opacity = '0';
+            setTimeout(() => {
+                imgEl.src = player.img;
+                imgEl.style.opacity = '0.7';
+            }, 200);
+
+            document.getElementById('sp-name').textContent = player.name;
+            document.getElementById('sp-country').textContent = player.country;
+            document.getElementById('sp-flag').src = code ? `${FLAG_BASE_URL}${code}.svg` : '';
+
+            document.getElementById('sp-age').textContent = player.age;
+            document.getElementById('sp-height').textContent = player.height;
+            document.getElementById('sp-weight').textContent = player.weight;
+            document.getElementById('sp-foot').textContent = player.foot;
+
+            document.getElementById('sp-matches').textContent = player.matches;
+            document.getElementById('sp-goals').textContent = player.goals;
+            document.getElementById('sp-assists').textContent = player.assists;
+
+            document.getElementById('sp-counter').textContent = `${idx + 1} / ${STAR_PLAYERS.length}`;
+
+            const card = document.getElementById('spCard');
+            card.style.transform = 'scale(0.99)';
+            setTimeout(() => { card.style.transform = 'scale(1)'; }, 150);
+        }
+
+        document.getElementById('spSelectFinalBtn')?.addEventListener('click', async () => {
+            const selectedPlayer = STAR_PLAYERS[spCurrentIdx].name;
+            const playerId = {{ current_player.id if current_player else 0 }};
+
+            if (playerId) {
+                await fetch(`/players/${playerId}/favorite`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        favorite_team: temporarySelectedTeam,
+                        star_player: selectedPlayer
+                    })
+                });
+            }
+            document.getElementById('starPlayerModal').style.display = 'none';
+            location.reload();
+        });
+
+        document.addEventListener('keydown', (e) => {
+            const modal = document.getElementById('favoriteTeamModal');
+            if (modal && modal.style.display !== 'none') {
+                if (e.key === 'ArrowLeft') favNav(-1);
+                if (e.key === 'ArrowRight') favNav(1);
+            }
+        });
+
+        async function checkFavoriteTeam() {
+            const playerId = {{ current_player.id if current_player else 0 }};
+            if (!playerId) return;
+            try {
+                const res = await fetch(`/players/${playerId}`);
+                const player = await res.json();
+            } catch(e) {}
+        }
+
+        const team_world_cups = {};
+        Object.entries(TEAM_DATA).forEach(([name, data]) => {
+            team_world_cups[name] = data.worldCups || 0;
+        });
+
+        function showStarPlayerModal() {
+            const playerId = {{ current_player.id if current_player else 0 }};
+            if (playerId) {
+                const favTeam = '{{ current_player.favorite_team if current_player else "" }}';
+                if (favTeam) {
+                    const idx = FAV_TEAMS_LIST.indexOf(favTeam);
+                    if (idx >= 0) {
+                        favCurrentIdx = idx;
+                        renderFavCard(idx);
+                    }
+                }
+                showFavoriteTeamModal();
+            } else {
+                showFavoriteTeamModal();
+            }
+        }
+
+        function updateSidebarFlag() {
+            const favTeam = '{{ current_player.favorite_team if current_player else "" }}';
+            if (favTeam) {
+                const code = FLAG_CODES[favTeam];
+                if (code) {
+                    const flagUrl = `${FLAG_BASE_URL}${code}.svg`;
+                    const flagImg = document.getElementById('sidebar-fav-flag');
+                    if (flagImg) flagImg.src = flagUrl;
+                }
+            }
+        }
+
+        function updateSidebarStar() {
+            const starName = '{{ current_player.star_player if current_player else "" }}';
+            const img = document.getElementById('sidebar-star-img');
+            if (!img || !starName) return;
+            const player = STAR_PLAYERS.find(p => p.name === starName);
+            if (player && player.img) {
+                img.src = player.img;
+                img.style.display = 'block';
+                img.onerror = () => {
+                    // brak pliku zdjęcia → pokaż inicjał zamiast pustego boksu
+                    img.style.display = 'none';
+                    const box = img.parentElement;
+                    if (box && !box.querySelector('.star-initial')) {
+                        const span = document.createElement('span');
+                        span.className = 'star-initial w-full h-full flex items-center justify-center font-display font-bold text-2xl';
+                        span.style.color = 'var(--gold)';
+                        span.textContent = starName.split(' ').map(w => w[0]).slice(0,2).join('');
+                        box.appendChild(span);
+                    }
+                };
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            addAllFlags();
+            addFavoriteBadges();
+            updateSidebarFlag();
+            updateSidebarStar();
+            checkFavoriteTeam();
+            updateCountdown();
+            countdownInterval = setInterval(tickCountdown, 1000);
+            setInterval(fetchNextMatch, 5 * 60 * 1000);
+        });
+
+        
+
+    // Upewnij się, że to jest na samym dole wewnątrz <script>
+    window.showFavoriteTeamModal = showFavoriteTeamModal;
+
+    </script>
+</body>
+</html>

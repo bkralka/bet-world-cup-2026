@@ -1,0 +1,59 @@
+sudo password: Wojtek123
+ADMIN_SECRET: Wojtek123
+
+1. Start / Stop
+
+sudo docker-compose up --build        # uruchom z przebudowaniem
+sudo docker-compose up -d             # uruchom w tle
+sudo docker-compose down              # zatrzymaj (dane zostają)
+sudo docker-compose down -v           # zatrzymaj + wyczyść bazę
+
+2. Logi
+sudo docker-compose logs -f           # wszystkie logi na żywo
+sudo docker-compose logs api          # tylko backend
+sudo docker-compose logs db           # tylko baza
+Seed i admin
+bash# Dodaj mecze
+curl -X POST http://localhost:8000/seed/ \
+  -H "X-Admin-Secret: Wojtek123"
+
+3. Dodaj wynik meczu
+curl -X PUT http://localhost:8000/matches/3/result -H "Content4Type: application/json" -H "x-admin-secret: Wojtek123" -d '{"result": "1:0", "scorers": ["Erling Haaland"]}'
+
+4. Zablokuj mecz (nie można już typować)
+curl -X PUT http://localhost:8000/matches/1/lock \
+  -H "X-Admin-Secret: TWÓJ_KLUCZ"
+
+5. Kto nie postawił tyku dzisiaj
+curl http://localhost:8000/admin/missing-picks/ \
+  -H "X-Admin-Secret: TWÓJ_KLUCZ"
+
+6, Baza danych
+bash# Wejdź do bazy
+sudo docker exec -it world_cup_survivor_26-db-1 psql -U admin -d world_cup_survivor
+
+7. # Przydatne zapytania SQL:
+SELECT id, username, total_points, shields, is_alive FROM players;
+SELECT id, home_team, away_team, match_date, result, is_finished FROM matches LIMIT 10;
+SELECT * FROM user_picks;
+
+8. Zmień datę meczu
+UPDATE matches SET match_date = '2026-04-09 20:00:00' WHERE id = 2;
+
+9. Zresetuj mecz
+UPDATE matches SET result = NULL, is_finished = false, is_locked = false WHERE id = 1;
+
+# Wyjdź z psql
+\q
+Inne
+bash# Sprawdź działające kontenery
+sudo docker ps
+
+# Wyczyść stare obrazy i cache
+sudo docker system prune -f
+
+# Sprawdź mecze przez API
+curl http://localhost:8000/matches/ | python3 -m json.tool
+
+# Sprawdź graczy
+curl http://localhost:8000/players/

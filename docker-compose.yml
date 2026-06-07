@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  # 1. Backend FastAPI
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    env_file:
+      - .env                        # POPRAWKA: dane z pliku .env, nie hardcoded
+    depends_on:
+      db:
+        condition: service_healthy  # POPRAWKA: czekamy aż DB jest gotowe (zamiast pętli while w Pythonie)
+      redis:
+        condition: service_started
+
+  # 2. Baza danych (PostgreSQL)
+  db:
+    image: postgres:15
+    env_file:
+      - .env                        # POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB z .env
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data   # POPRAWKA: dane przeżyją restart kontenera
+    healthcheck:                    # POPRAWKA: healthcheck zamiast sleep/retry w Pythonie
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-admin} -d ${POSTGRES_DB:-world_cup_survivor}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  # 3. Cache Redis
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  postgres_data:
+  redis_data:
