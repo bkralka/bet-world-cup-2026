@@ -16,15 +16,12 @@ import models
 from database import engine, get_db
 from typing import Optional
 
-connected = False
-while not connected:
-    try:
-        models.Base.metadata.create_all(bind=engine)
-        connected = True
-        print("⚽ CONNECTED TO DATABASE!")
-    except Exception as e:
-        print(f"⏳ Waiting for DB... {e}")
-        time.sleep(2)
+try:
+    models.Base.metadata.create_all(bind=engine)
+    print("⚽ CONNECTED TO DATABASE!", flush=True)
+except Exception as e:
+    print(f"❌ BŁĄD POŁĄCZENIA Z BAZĄ DANYCH: {e}", flush=True)
+    raise e
 
 app = FastAPI(title="OnePick Cup 2026 API")
 app.mount("/static", StaticFiles(directory="static"), name="static")
