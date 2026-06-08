@@ -762,9 +762,29 @@ def advance_tournament_if_ready(db):
 
 @app.post("/admin/advance", dependencies=[Depends(verify_admin)])
 def admin_advance(db: Session = Depends(get_db)):
-    """Ręcznie wyzwala budowę kolejnej rundy (np. gdy grupy rozegrano przed wdrożeniem tej funkcji)."""
+    """Ręcznie wyzwala budowę kolejnej rundy + zwraca diagnostykę, co blokuje awans."""
+    group_total = db.query(models.Match).filter(models.Match.stage == "group").count()
+    group_done = db.query(models.Match).filter(models.Match.stage == "group", models.Match.is_finished == True).count()
+    q = _qualified_32(db)
+    before = db.query(models.Match).filter(models.Match.stage == "round_32").count()
     advance_tournament_if_ready(db)
-    return {"status": "ok"}
+    after = db.query(models.Match).filter(models.Match.stage == "round_32").count()
+
+    # tabela grup — ile drużyn w każdej (do diagnozy)
+    standings = calculate_group_standings(db)
+    groups_sizes = {g: len(standings.get(g, [])) for g in GROUPS_LIST}
+    incomplete = [g for g, n in groups_sizes.items() if n < 4]
+
+    return {
+        "status": "ok",
+        "mecze_grupowe_lacznie": group_total,
+        "mecze_grupowe_rozegrane": group_done,
+        "wszystkie_grupowe_rozegrane": group_total > 0 and group_total == group_done,
+        "zakwalifikowanych_druzyn": len(q),
+        "round_32_przed": before,
+        "round_32_po": after,
+        "grupy_niekompletne": incomplete,
+    }
 
 @app.put("/matches/{match_id}/result", dependencies=[Depends(verify_admin)])
 def update_match_result(match_id: int, result: MatchResultUpdate, db: Session = Depends(get_db)):
