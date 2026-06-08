@@ -716,8 +716,6 @@ def _qualified_32(db):
     return qualified
 
 def advance_tournament_if_ready(db):
-    """Automatycznie tworzy kolejną rundę, gdy poprzednia jest w całości rozegrana.
-    Wywoływane po każdym wprowadzeniu wyniku — dzięki temu drabinka buduje się sama."""
     def all_done(stage):
         ms = db.query(models.Match).filter(models.Match.stage == stage).all()
         return bool(ms) and all(m.is_finished for m in ms)
@@ -727,52 +725,57 @@ def advance_tournament_if_ready(db):
         ms = db.query(models.Match).filter(models.Match.stage == stage, models.Match.is_finished == True).order_by(models.Match.match_date, models.Match.id).all()
         return [_ko_winner(m) for m in ms]
 
-    # 1) Faza grupowa zakończona → utwórz 1/16 finału (oficjalny schemat MŚ 2026)
+    # 1) Faza grupowa zakończona → utwórz 1/16 finału (Format MŚ 2026)
     if all_done("group") and not has("round_32"):
         q = _qualified_32(db)
         if len(q) >= 32:
             winners = {g: n for n, g, p in q if p == 1}
             runners = {g: n for n, g, p in q if p == 2}
-            third_list = [(n, g) for n, g, p in q if p == 3]  # (drużyna, grupa) wg rankingu
+            third_list = [(n, g) for n, g, p in q if p == 3]
 
-            # Oficjalny klucz MŚ 2026:
-            #  - zwycięzcy grup A,B,D,E,G,I,K,L grają z najlepszymi 3. miejscami
-            #  - zwycięzcy C,F,H,J grają z wicemistrzami (krzyżowo)
-            #  - pozostali wicemistrzowie grają parami
-            winner_third_slots = ["A", "B", "D", "E", "G", "I", "K", "L"]
-            wr_pairs = [("C", "F"), ("F", "C"), ("H", "J"), ("J", "H")]   # zwycięzca vs wicemistrz
-            rr_pairs = [("A", "B"), ("E", "I"), ("D", "G"), ("K", "L")]   # wicemistrz vs wicemistrz
-
-            pairs = []
-            used = set()
-            # zwycięzca vs wicemistrz
-            for wg, rg in wr_pairs:
-                t1, t2 = winners.get(wg), runners.get(rg)
-                if t1 and t2 and t1 not in used and t2 not in used:
-                    pairs.append((t1, t2)); used.add(t1); used.add(t2)
-            # wicemistrz vs wicemistrz
-            for rg1, rg2 in rr_pairs:
-                t1, t2 = runners.get(rg1), runners.get(rg2)
-                if t1 and t2 and t1 not in used and t2 not in used:
-                    pairs.append((t1, t2)); used.add(t1); used.add(t2)
-            # zwycięzca vs 3. miejsce (przypisanie unikające tej samej grupy)
-            for wg in winner_third_slots:
-                w_team = winners.get(wg)
-                if not w_team or w_team in used:
-                    continue
+            assigned_thirds = {}
+            used_thirds = set()
+            
+            # Bezpieczne przypisanie 3. miejsc z fallbackiem
+            for wg in ["A", "B", "D", "E", "G", "I", "K", "L"]:
                 chosen = None
+                # Próba 1: Szukamy drużyny z innej grupy
                 for tn, tg in third_list:
-                    if tn not in used and tg != wg:
-                        chosen = tn; break
+                    if tn not in used_thirds and tg != wg:
+                        chosen = tn
+                        break
+                # Próba 2 (Fallback): Jeśli się nie da, bierzemy pierwszą wolną
+                if not chosen:
+                    for tn, tg in third_list:
+                        if tn not in used_thirds:
+                            chosen = tn
+                            break
+                assigned_thirds[wg] = chosen
                 if chosen:
-                    pairs.append((w_team, chosen)); used.add(w_team); used.add(chosen)
+                    used_thirds.add(chosen)
+
+            # Pomocnicze funkcje pobierające drużyny do drabinki
+            def W(g): return winners.get(g, f"Brak 1{g}")
+            def R(g): return runners.get(g, f"Brak 2{g}")
+            def T(g): return assigned_thirds.get(g, f"Brak 3{g}")
+
+            # Oficjalny krzyżowy układ par (zapobiega szybkim rewanżom i dzieli siły)
+            bracket_order = [
+                (W('A'), T('A')),   (R('C'), W('F')),
+                (W('E'), T('E')),   (R('A'), R('B')),
+                (W('I'), T('I')),   (R('D'), R('G')),
+                (W('C'), R('F')),   (W('L'), T('L')),
+                (W('B'), T('B')),   (R('H'), W('J')),
+                (W('G'), T('G')),   (R('E'), R('I')),
+                (W('K'), T('K')),   (R('K'), R('L')),
+                (W('H'), R('J')),   (W('D'), T('D'))
+            ]
 
             base = KO_DATES["round_32"]
-            for i, (home, away) in enumerate(pairs):
+            for i, (home, away) in enumerate(bracket_order):
                 _ko_create(db, home, away, "round_32", base + timedelta(days=i//4, hours=(i%4)*3))
 
-    # 2) Kolejne rundy — buduj/aktualizuj na bieżąco: zwycięzca rozstrzygniętego meczu
-    #    od razu trafia do następnej rundy, nierozstrzygnięte miejsca pokazują "—".
+    # 2) Kolejne rundy — buduj/aktualizuj na bieżąco
     TBD = "—"
     def slot_winner(m):
         return _ko_winner(m) or TBD
@@ -791,7 +794,7 @@ def advance_tournament_if_ready(db):
             away = slot_winner(prev[2*i+1])
             if i < len(existing):
                 nm = existing[i]
-                if not nm.is_finished:  # nie nadpisuj już rozegranego meczu
+                if not nm.is_finished:
                     nm.home_team = home
                     nm.away_team = away
             else:
@@ -799,12 +802,13 @@ def advance_tournament_if_ready(db):
                                     stage=nxt, multiplier=STAGE_MULTIPLIERS.get(nxt, 1), is_locked=False, is_finished=False, result=None))
         db.commit()
 
-    # 3) Półfinały → finał + mecz o 3. miejsce (też na bieżąco)
+    # 3) Półfinały → finał + mecz o 3. miejsce
     if has("semi"):
         sm = db.query(models.Match).filter(models.Match.stage == "semi").order_by(models.Match.match_date, models.Match.id).all()
         if len(sm) >= 2:
             fh, fa = slot_winner(sm[0]), slot_winner(sm[1])
             lh, la = (_ko_loser(sm[0]) or TBD), (_ko_loser(sm[1]) or TBD)
+            
             ef = db.query(models.Match).filter(models.Match.stage == "final").first()
             if ef:
                 if not ef.is_finished:
@@ -812,6 +816,7 @@ def advance_tournament_if_ready(db):
             else:
                 db.add(models.Match(home_team=fh, away_team=fa, match_date=KO_DATES["final"], stage="final",
                                     multiplier=STAGE_MULTIPLIERS.get("final", 3), is_locked=False, is_finished=False, result=None))
+            
             et = db.query(models.Match).filter(models.Match.stage == "third_place").first()
             if et:
                 if not et.is_finished:
@@ -1221,3 +1226,88 @@ def admin_panel(request: Request, db: Session = Depends(get_db)):
     </html>
     """
     return html_content
+
+
+@app.get("/admin/recalculate-all")
+def recalculate_all_points(db: Session = Depends(get_db)):
+    """Skrypt naprawczy: zeruje punktację graczy i przelicza wszystkie typy 
+    od zera chronologicznie, uwzględniając poprawne bonusy i serie."""
+    try:
+        # 1. Reset wszystkich wyliczalnych statystyk graczy do zera
+        players = db.query(models.Player).all()
+        for p in players:
+            p.total_points = 0
+            p.correct_predictions = 0
+            p.current_streak = 0
+            p.longest_streak = 0
+            p.favorite_team_points = 0
+            p.star_player_points = 0
+        db.commit()
+
+        # 2. Pobranie wszystkich ZAKOŃCZONYCH meczów CHRONOLOGICZNIE (bardzo ważne dla serii!)
+        finished_matches = db.query(models.Match).filter(
+            models.Match.is_finished == True
+        ).order_by(models.Match.match_date.asc(), models.Match.id.asc()).all()
+
+        match_count = 0
+        pick_count = 0
+
+        for match in finished_matches:
+            match_count += 1
+            # Pobierz typy oddane na ten konkretny mecz
+            picks = db.query(models.UserPick).filter(models.UserPick.match_id == match.id).all()
+            
+            for pick in picks:
+                player = db.query(models.Player).filter(models.Player.id == pick.player_id).first()
+                if not player: continue
+
+                pick_count += 1
+
+                # Wyliczamy punkty i bonusy za sam mecz
+                pd = calculate_points_with_bonus(
+                    pick.predicted_result, match.result, match.stage,
+                    match.home_team, match.away_team, player.favorite_team,
+                    player.star_player, match.scorers
+                )
+                match_total = pd["total_points"]
+
+                # Odtwarzamy chronologiczną serię trafień
+                sb = 0
+                if pd["base_points"] > 0:
+                    player.correct_predictions += 1
+                    player.current_streak += 1
+                    if player.current_streak > player.longest_streak:
+                        player.longest_streak = player.current_streak
+                    sb = streak_bonus(player.current_streak)  # Nowy, poprawny bonus za serię
+                else:
+                    player.current_streak = 0
+
+                # Łączymy punkty z meczu i bonus za serię
+                grand_total = match_total + sb
+
+                # Aktualizujemy rekord pojedynczego zakładu w bazie
+                pick.points_earned = grand_total
+                pick.points_breakdown = {
+                    "base": pd["base_points"], "high_score": pd["high_score_bonus"], "underdog": pd["underdog_bonus"],
+                    "favorite": pd["favorite_bonus"], "star": pd["star_player_bonus"], "multiplier": pd["multiplier"],
+                    "streak_bonus": sb, "streak_len": player.current_streak,
+                    "match_total": match_total, "grand_total": grand_total
+                }
+
+                # Aktualizujemy stan konta gracza
+                player.total_points += grand_total
+                player.favorite_team_points += pd["favorite_bonus"]
+                player.star_player_points += pd["star_player_bonus"]
+
+            db.commit()
+
+        # 3. Na koniec upewniamy się, że drabinka pucharowa jest prawidłowo zbudowana
+        advance_tournament_if_ready(db)
+
+        return {
+            "status": "success",
+            "message": f"Baza danych została zsynchronizowana. Przeliczono {match_count} meczów i {pick_count} typów graczy."
+        }
+    except Exception as e:
+        db.rollback()
+        return {"status": "error", "message": f"Błąd krytyczny podczas przeliczania: {str(e)}"}
