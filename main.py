@@ -126,7 +126,7 @@ class MatchResultUpdate(BaseModel):
         return v
 
 class FavoriteTeamUpdate(BaseModel):
-    favorite_team: str
+    favorite_team: str = None
     star_player: str = None
 
 UNDERDOG_TEAMS = {
@@ -604,13 +604,24 @@ def set_favorite_team(
     if not player:
         raise HTTPException(status_code=404, detail="Player not found")
 
-    # 🔒 Jeśli już zablokowane – nie pozwól zmienić
-    if player.favorite_locked:
-        raise HTTPException(status_code=400, detail="Nie możesz już zmienić swojej drużyny ani gwiazdy")
+    # Drużyna i gwiazda zapisywane są NIEZALEŻNIE.
+    # Każde pole można ustawić tylko raz – potem jest zablokowane na zawsze,
+    # ale ustawienie jednego nie blokuje drugiego.
 
-    player.favorite_team = favorite.favorite_team
-    player.star_player = favorite.star_player
-    player.favorite_locked = True   # <----- BLOKUJEMY NA ZAWSZE
+    if favorite.favorite_team:
+        if player.favorite_team:
+            raise HTTPException(status_code=400, detail="Drużyna jest już wybrana i nie można jej zmienić")
+        player.favorite_team = favorite.favorite_team
+
+    if favorite.star_player:
+        if player.star_player:
+            raise HTTPException(status_code=400, detail="Gwiazda jest już wybrana i nie można jej zmienić")
+        player.star_player = favorite.star_player
+
+    # Pełna blokada dopiero, gdy oba wybory są dokonane.
+    if player.favorite_team and player.star_player:
+        player.favorite_locked = True
+
     db.commit()
     db.refresh(player)
 
