@@ -2135,22 +2135,37 @@ const TEAM_DATA = {
         let spCurrentIdx = 0;
         let temporarySelectedTeam = "";
 
-            document.getElementById('favSelectBtn')?.addEventListener('click', () => {
-                temporarySelectedTeam = FAV_TEAMS_LIST[favCurrentIdx];
-                document.getElementById('favoriteTeamModal').style.display = 'none';
+        // Przejście z kroku "drużyna" do kroku "piłkarz" – jeden ciągły wybór.
+        // Funkcja nazwana, by można było ją bezpiecznie podpiąć (i ewentualnie wywołać ponownie).
+        function goToStarStep() {
+            temporarySelectedTeam = FAV_TEAMS_LIST[favCurrentIdx];
 
-                // Sprawdź, czy modal gwiazdy istnieje
-                const starModal = document.getElementById('starPlayerModal');
-                if (!starModal) {
-                    console.error('❌ Brak elementu #starPlayerModal w DOM!');
-                    alert('Wystąpił błąd – nie można wybrać gwiazdy. Odśwież stronę i spróbuj ponownie.');
-                    return;
-                }
+            const favModal = document.getElementById('favoriteTeamModal');
+            if (favModal) favModal.style.display = 'none';
 
-                spCurrentIdx = 0;
-                renderStarPlayerCard(spCurrentIdx);
-                starModal.style.display = 'block';
-            });
+            const starModal = document.getElementById('starPlayerModal');
+            if (!starModal) {
+                console.error('❌ Brak elementu #starPlayerModal w DOM!');
+                alert('Wystąpił błąd – nie można wybrać gwiazdy. Odśwież stronę i spróbuj ponownie.');
+                return;
+            }
+
+            spCurrentIdx = 0;
+            renderStarPlayerCard(spCurrentIdx);
+            starModal.style.display = 'block';
+        }
+
+        // Podpinamy obsługę kliknięcia raz, w pewnym momencie (po załadowaniu DOM),
+        // żeby przycisk zawsze działał za pierwszym kliknięciem.
+        function bindFavSelectBtn() {
+            const btn = document.getElementById('favSelectBtn');
+            if (btn && !btn.dataset.bound) {
+                btn.addEventListener('click', goToStarStep);
+                btn.dataset.bound = '1';
+            }
+        }
+        bindFavSelectBtn();
+        document.addEventListener('DOMContentLoaded', bindFavSelectBtn);
 
         function spNav(dir) {
             spCurrentIdx = (spCurrentIdx + dir + STAR_PLAYERS.length) % STAR_PLAYERS.length;
@@ -2188,19 +2203,31 @@ const TEAM_DATA = {
             setTimeout(() => { card.style.transform = 'scale(1)'; }, 150);
         }
 
-        document.getElementById('spSelectFinalBtn')?.addEventListener('click', async () => {
+        document.getElementById('spSelectFinalBtn')?.addEventListener('click', async (e) => {
             const selectedPlayer = STAR_PLAYERS[spCurrentIdx].name;
             const playerId = {{ current_player.id if current_player else 0 }};
 
-            if (playerId) {
-                await fetch(`/players/${playerId}/favorite`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        favorite_team: temporarySelectedTeam,
-                        star_player: selectedPlayer
-                    })
-                });
+            // Drużyna + piłkarz zapisywane są jako JEDEN wybór.
+            // Zabezpieczenie: jeśli z jakiegoś powodu nie ma drużyny w pamięci,
+            // użyj tej już zapisanej w profilu, żeby jej nie wyczyścić.
+            const teamToSave = temporarySelectedTeam || '{{ current_player.favorite_team if current_player else "" }}';
+
+            if (playerId && teamToSave) {
+                const btn = e.currentTarget;
+                btn.disabled = true;
+                btn.textContent = 'Zapisywanie…';
+                try {
+                    await fetch(`/players/${playerId}/favorite`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            favorite_team: teamToSave,
+                            star_player: selectedPlayer
+                        })
+                    });
+                } catch (err) {
+                    console.error('Błąd zapisu wyboru:', err);
+                }
             }
             document.getElementById('starPlayerModal').style.display = 'none';
             location.reload();
@@ -2229,18 +2256,26 @@ const TEAM_DATA = {
         });
 
         function showStarPlayerModal() {
-            const playerId = {{ current_player.id if current_player else 0 }};
-            if (playerId) {
-                const favTeam = '{{ current_player.favorite_team if current_player else "" }}';
-                if (favTeam) {
-                    const idx = FAV_TEAMS_LIST.indexOf(favTeam);
-                    if (idx >= 0) {
-                        favCurrentIdx = idx;
-                        renderFavCard(idx);
-                    }
+            const favTeam = '{{ current_player.favorite_team if current_player else "" }}';
+
+            // Jeśli drużyna jest już wybrana – otwieramy od razu wybór piłkarza,
+            // bez przechodzenia jeszcze raz przez ekran drużyny.
+            if (favTeam) {
+                temporarySelectedTeam = favTeam;
+
+                // Ustaw karuzelę na aktualnie wybranego piłkarza (jeśli jest).
+                const currentStar = '{{ current_player.star_player if current_player else "" }}';
+                const starIdx = STAR_PLAYERS.findIndex(p => p.name === currentStar);
+                spCurrentIdx = starIdx >= 0 ? starIdx : 0;
+
+                const starModal = document.getElementById('starPlayerModal');
+                if (starModal) {
+                    renderStarPlayerCard(spCurrentIdx);
+                    starModal.style.display = 'block';
                 }
-                showFavoriteTeamModal();
             } else {
+                // Brak drużyny – zaczynamy od ekranu drużyny, który płynnie
+                // przejdzie do wyboru piłkarza po kliknięciu "Wybierz tę drużynę".
                 showFavoriteTeamModal();
             }
         }
