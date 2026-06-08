@@ -520,7 +520,7 @@
                                 <th class="text-left w-2/5 pl-4">Grupa {{ group }}</th>
                                 <th class="text-center">M</th>
                                 <th class="text-center">Pkt</th>
-                                <th class="text-center">Bramki</th>
+                                <th class="text-center">B</th>
                                 <th class="text-center">G+/-</th>
                                 <th class="text-center pr-2">Forma</th>
                             </tr>
@@ -531,7 +531,7 @@
                                 <td class="font-medium whitespace-nowrap overflow-hidden text-ellipsis pl-4"><span class="team-name" data-team="{{ team.name }}">{{ team.name }}</span></td>
                                 <td class="text-center" style="color: var(--text-muted);">{{ team.played }}</td>
                                 <td class="text-center font-semibold" style="color: var(--success);">{{ team.points }}</td>
-                                <td class="text-center font-mono text-xs" style="color: var(--text-muted);">{{ team.goals_for }}-{{ team.goals_against }}</td>
+                                <td class="text-center font-mono text-xs" style="color: var(--text-muted);">{{ team.goals_for }}:{{ team.goals_against }}</td>
                                 <td class="text-center font-medium" style="color: {% if team.goal_diff >= 0 %}var(--success){% else %}var(--danger){% endif %};">{{ team.goal_diff }}</td>
                                 <td class="text-center pt-3 pb-3 pr-2">{% for c in team.form_str %}<span class="form-icon form-{% if c == 'W' %}w{% elif c == 'D' %}d{% else %}l{% endif %}">{{ c }}</span>{% endfor %}</td>
                             </tr>
