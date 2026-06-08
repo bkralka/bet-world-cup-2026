@@ -1230,11 +1230,17 @@ def admin_panel(request: Request, db: Session = Depends(get_db)):
 
 @app.get("/admin/recalculate-all")
 def recalculate_all_points(db: Session = Depends(get_db)):
-    """Skrypt naprawczy: czyści złą drabinkę, zeruje punkty i przelicza wszystko od nowa."""
+    """Skrypt naprawczy: czyści złą drabinkę (wraz z typami na nią oddanymi), zeruje punkty i przelicza wszystko od nowa."""
     try:
-        # 🔥 KLUCZOWA ZMIANA: Wycinamy starą, uszkodzoną drabinkę pucharową z bazy,
-        # dzięki czemu funkcja poniżej wygeneruje pełne, oficjalne 16 par od zera.
-        db.query(models.Match).filter(models.Match.stage != "group").delete()
+        # 🔥 NOWA POPRAWKA: Najpierw usuwamy typy graczy przypisane do fazy pucharowej
+        db.query(models.UserPick).filter(
+            models.UserPick.match_id.in_(
+                db.query(models.Match.id).filter(models.Match.stage != "group")
+            )
+        ).delete(synchronize_session=False)
+
+        # Następnie bezpiecznie usuwamy same mecze fazy pucharowej
+        db.query(models.Match).filter(models.Match.stage != "group").delete(synchronize_session=False)
         db.commit()
 
         # 1. Reset wszystkich wyliczalnych statystyk graczy do zera
@@ -1299,12 +1305,12 @@ def recalculate_all_points(db: Session = Depends(get_db)):
 
             db.commit()
 
-        # 3. Generujemy NOWĄ drabinkę pucharową (baza jest czysta, więc stworzy równe 16 par!)
+        # 3. Generujemy NOWĄ drabinkę pucharową
         advance_tournament_if_ready(db)
 
         return {
             "status": "success",
-            "message": f"Drabinka została całkowicie zresetowana i zbudowana poprawnie! Przeliczono {match_count} meczów grupowych."
+            "message": f"Drabinka zresetowana! Przeliczono {match_count} meczów grupowych i {pick_count} typów graczy."
         }
     except Exception as e:
         db.rollback()
