@@ -39,6 +39,7 @@ class Match(Base):
     away_team = Column(String)
     match_date = Column(DateTime)
     result = Column(String, nullable=True) 
+    penalties = Column(String, nullable=True)  # wynik karnych przy remisie w fazie pucharowej, np. "4:3"
     is_locked = Column(Boolean, default=False)
     is_finished = Column(Boolean, default=False)
     stage = Column(String, default="group") 

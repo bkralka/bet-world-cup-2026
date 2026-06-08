@@ -545,7 +545,7 @@
         <div id="tab-matches" class="tab-content">
             <div class="space-y-3">
                 {% set future_matches = matches %}
-                {% for match in future_matches %}
+                {% for match in future_matches[:15] %}
                 <div class="match-card p-5">
                     <div class="flex flex-wrap items-center gap-4">
                         <div class="flex-1 min-w-[300px]">
@@ -647,22 +647,27 @@
                 {% set parts = match.result.split(':') if match.result else None %}
                 {% set hs = (parts[0]|int) if parts else -1 %}
                 {% set asc = (parts[1]|int) if parts else -1 %}
+                {% set pen = match.penalties.split(':') if match.penalties else None %}
+                {% set ph = (pen[0]|int) if pen else -1 %}
+                {% set pa = (pen[1]|int) if pen else -1 %}
+                {% set hwin = parts and (hs > asc or (hs == asc and pen and ph > pa)) %}
+                {% set awin = parts and (asc > hs or (hs == asc and pen and pa > ph)) %}
                 {% set hpos = positions.get(match.home_team) %}
                 {% set apos = positions.get(match.away_team) %}
                 <div class="ko-match">
                     <div class="ko-card2" {% if gold %}style="border-color: rgba(251,191,36,0.4);"{% endif %}>
-                        {% if match.match_date %}<div class="ko-date">{{ match.match_date.strftime('%d.%m · %H:%M') }}</div>{% endif %}
+                        {% if match.match_date %}<div class="ko-date">{{ match.match_date.strftime('%d.%m · %H:%M') }}{% if pen %} &nbsp;·&nbsp; <span style="color: var(--gold);">karne {{ match.penalties }}</span>{% endif %}</div>{% endif %}
                         <div class="ko-row">
                             <span class="flex items-center gap-1.5 min-w-0">
                                 {% if hpos %}<span class="ko-pos">{{ hpos }}</span>{% endif %}
-                                <span class="team-name truncate text-sm" data-team="{{ match.home_team }}" style="{% if parts and hs > asc %}color: var(--success); font-weight:700;{% else %}font-weight:500;{% endif %}">{{ match.home_team }}</span>
+                                <span class="team-name truncate text-sm" data-team="{{ match.home_team }}" style="{% if hwin %}color: var(--success); font-weight:700;{% else %}font-weight:500;{% endif %}">{{ match.home_team }}</span>
                             </span>
                             <span class="font-mono text-sm flex-shrink-0" style="color: {% if parts %}var(--text){% else %}var(--text-faint){% endif %};">{{ parts[0] if parts else '–' }}</span>
                         </div>
                         <div class="ko-row">
                             <span class="flex items-center gap-1.5 min-w-0">
                                 {% if apos %}<span class="ko-pos">{{ apos }}</span>{% endif %}
-                                <span class="team-name truncate text-sm" data-team="{{ match.away_team }}" style="{% if parts and asc > hs %}color: var(--success); font-weight:700;{% else %}font-weight:500;{% endif %}">{{ match.away_team }}</span>
+                                <span class="team-name truncate text-sm" data-team="{{ match.away_team }}" style="{% if awin %}color: var(--success); font-weight:700;{% else %}font-weight:500;{% endif %}">{{ match.away_team }}</span>
                             </span>
                             <span class="font-mono text-sm flex-shrink-0" style="color: {% if parts %}var(--text){% else %}var(--text-faint){% endif %};">{{ parts[1] if parts else '–' }}</span>
                         </div>
@@ -674,16 +679,20 @@
             {% set champion = None %}
             {% set runnerup = None %}
             {% if knockout_bracket.final and knockout_bracket.final[0].result %}
-                {% set fp = knockout_bracket.final[0].result.split(':') %}
-                {% if fp[0]|int >= fp[1]|int %}
-                    {% set champion = knockout_bracket.final[0].home_team %}
-                    {% set runnerup = knockout_bracket.final[0].away_team %}
+                {% set fm = knockout_bracket.final[0] %}
+                {% set fp = fm.result.split(':') %}
+                {% set fpen = fm.penalties.split(':') if fm.penalties else None %}
+                {% set home_won = fp[0]|int > fp[1]|int or (fp[0]|int == fp[1]|int and fpen and fpen[0]|int > fpen[1]|int) %}
+                {% if home_won %}
+                    {% set champion = fm.home_team %}
+                    {% set runnerup = fm.away_team %}
                 {% else %}
-                    {% set champion = knockout_bracket.final[0].away_team %}
-                    {% set runnerup = knockout_bracket.final[0].home_team %}
+                    {% set champion = fm.away_team %}
+                    {% set runnerup = fm.home_team %}
                 {% endif %}
             {% endif %}
 
+            {% if knockout_bracket.round_of_32 or knockout_bracket.round_of_16 or knockout_bracket.final %}
             <div class="px-6 pt-5 pb-1">
                 <p class="text-[11px]" style="color: var(--text-faint);">Oznaczenia: <span class="ko-pos">1A</span> = zwycięzca grupy A, <span class="ko-pos">2B</span> = drugie miejsce grupy B, <span class="ko-pos">3C</span> = trzecie miejsce grupy C.</p>
             </div>
@@ -713,6 +722,13 @@
                     </div>
                 </div>
             </div>
+            {% else %}
+            <div class="px-6 py-16 text-center">
+                <div class="text-4xl mb-4">🗓️</div>
+                <p class="font-display font-bold text-lg mb-2">Faza pucharowa jeszcze się nie rozpoczęła</p>
+                <p class="text-sm max-w-md mx-auto" style="color: var(--text-muted);">Pary 1/16 finału powstaną po rozegraniu wszystkich meczów grupowych. Drabinka wypełni się drużynami i wynikami automatycznie.</p>
+            </div>
+            {% endif %}
 
             {# Zwycięzca + mecz o 3. miejsce #}
             <div class="px-6 pb-6 flex flex-col md:flex-row gap-4 justify-center items-stretch">

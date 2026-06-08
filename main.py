@@ -44,6 +44,7 @@ def ensure_columns():
         "matches": [
             ("scorers", "JSON DEFAULT '[]'::json"),
             ("multiplier", "INTEGER DEFAULT 1"),
+            ("penalties", "VARCHAR"),
         ],
     }
     try:
@@ -107,6 +108,7 @@ class UserPickCreate(BaseModel):
 class MatchResultUpdate(BaseModel):
     result: str
     scorers: List[str] = []
+    penalties: str = None
 
     @validator('result')
     def validate_result_format(cls, v):
@@ -597,17 +599,7 @@ def create_pick(pick: UserPickCreate, db: Session = Depends(get_db)):
     if pick.match_id not in upcoming_ids:
         raise HTTPException(status_code=400, detail="Można typować tylko 5 najbliższych meczy (kolejność dat)")
 
-    # Policz ile typów gracz już oddał na te 4 mecze
-    user_picks_count = db.query(models.UserPick).filter(
-        models.UserPick.player_id == pick.player_id,
-        models.UserPick.match_id.in_(upcoming_ids)
-    ).count()
-    if user_picks_count >= 5:
-        raise HTTPException(status_code=400, detail="Możesz obstawić maksymalnie 5 meczy (wszystkie już wybrane)")
-
-    # ----- KONIEC NOWEJ LOGIKI -----
-
-    # Sprawdzenie czy typ na ten mecz już istnieje – jeśli tak, aktualizujemy
+    # Jeśli typ na ten mecz już istnieje → to EDYCJA, aktualizujemy bez limitu
     existing = db.query(models.UserPick).filter(
         models.UserPick.player_id == pick.player_id,
         models.UserPick.match_id == pick.match_id
@@ -618,18 +610,172 @@ def create_pick(pick: UserPickCreate, db: Session = Depends(get_db)):
         db.commit()
         return existing
 
+    # NOWY typ — sprawdź limit 5 meczów z bieżącej puli
+    user_picks_count = db.query(models.UserPick).filter(
+        models.UserPick.player_id == pick.player_id,
+        models.UserPick.match_id.in_(upcoming_ids)
+    ).count()
+    if user_picks_count >= 5:
+        raise HTTPException(status_code=400, detail="Możesz obstawić maksymalnie 5 meczy (wszystkie już wybrane)")
+
     new_pick = models.UserPick(player_id=pick.player_id, match_id=pick.match_id, predicted_result=pick.predicted_result)
     db.add(new_pick)
     db.commit()
     return new_pick
+
+KO_DATES = {
+    "round_32": datetime(2026, 6, 29, 18, 0),
+    "round_16": datetime(2026, 7, 4, 18, 0),
+    "quarter": datetime(2026, 7, 9, 18, 0),
+    "semi": datetime(2026, 7, 14, 18, 0),
+    "third_place": datetime(2026, 7, 18, 18, 0),
+    "final": datetime(2026, 7, 19, 18, 0),
+}
+
+def _ko_winner(match):
+    """Zwycięzca meczu pucharowego. Przy remisie po 90 min decydują karne (pole penalties)."""
+    if not match.result: return None
+    h, a = map(int, match.result.split(":"))
+    if h > a: return match.home_team
+    if a > h: return match.away_team
+    # remis — rozstrzygają karne
+    if match.penalties:
+        try:
+            ph, pa = map(int, match.penalties.split(":"))
+            return match.home_team if ph > pa else match.away_team
+        except (ValueError, AttributeError):
+            return None
+    return None  # remis bez karnych — nie można wyłonić zwycięzcy
+
+def _ko_loser(match):
+    if not match.result: return None
+    w = _ko_winner(match)
+    if not w: return None
+    return match.away_team if w == match.home_team else match.home_team
+
+def _ko_create(db, home, away, stage, when):
+    """Tworzy mecz pucharowy, jeśli jeszcze nie istnieje (idempotentne)."""
+    exists = db.query(models.Match).filter(
+        models.Match.stage == stage,
+        models.Match.home_team == home,
+        models.Match.away_team == away
+    ).first()
+    if exists: return exists
+    m = models.Match(home_team=home, away_team=away, match_date=when, stage=stage,
+                     multiplier=STAGE_MULTIPLIERS.get(stage, 1), is_locked=False, is_finished=False, result=None)
+    db.add(m); db.commit()
+    return m
+
+def _qualified_32(db):
+    """32 drużyny awansujące: 12 zwycięzców grup + 12 wicemistrzów + 8 najlepszych z 3. miejsc."""
+    standings = calculate_group_standings(db)
+    qualified = []   # (team, group, pos)
+    thirds = []
+    for g in GROUPS_LIST:
+        teams = standings.get(g, [])
+        for pos in (1, 2):
+            if len(teams) >= pos:
+                qualified.append((teams[pos-1]["name"], g, pos))
+        if len(teams) >= 3:
+            t = teams[2]
+            thirds.append((t["name"], g, t["points"], t["goal_diff"], t["goals_for"]))
+    thirds.sort(key=lambda x: (x[2], x[3], x[4]), reverse=True)
+    for name, g, *_ in thirds[:8]:
+        qualified.append((name, g, 3))
+    return qualified
+
+def advance_tournament_if_ready(db):
+    """Automatycznie tworzy kolejną rundę, gdy poprzednia jest w całości rozegrana.
+    Wywoływane po każdym wprowadzeniu wyniku — dzięki temu drabinka buduje się sama."""
+    def all_done(stage):
+        ms = db.query(models.Match).filter(models.Match.stage == stage).all()
+        return bool(ms) and all(m.is_finished for m in ms)
+    def has(stage):
+        return db.query(models.Match).filter(models.Match.stage == stage).first() is not None
+    def winners_of(stage):
+        ms = db.query(models.Match).filter(models.Match.stage == stage, models.Match.is_finished == True).order_by(models.Match.match_date, models.Match.id).all()
+        return [_ko_winner(m) for m in ms]
+
+    # 1) Faza grupowa zakończona → utwórz 1/16 finału (oficjalny schemat MŚ 2026)
+    if all_done("group") and not has("round_32"):
+        q = _qualified_32(db)
+        if len(q) >= 32:
+            winners = {g: n for n, g, p in q if p == 1}
+            runners = {g: n for n, g, p in q if p == 2}
+            third_list = [(n, g) for n, g, p in q if p == 3]  # (drużyna, grupa) wg rankingu
+
+            # Oficjalny klucz MŚ 2026:
+            #  - zwycięzcy grup A,B,D,E,G,I,K,L grają z najlepszymi 3. miejscami
+            #  - zwycięzcy C,F,H,J grają z wicemistrzami (krzyżowo)
+            #  - pozostali wicemistrzowie grają parami
+            winner_third_slots = ["A", "B", "D", "E", "G", "I", "K", "L"]
+            wr_pairs = [("C", "F"), ("F", "C"), ("H", "J"), ("J", "H")]   # zwycięzca vs wicemistrz
+            rr_pairs = [("A", "B"), ("E", "I"), ("D", "G"), ("K", "L")]   # wicemistrz vs wicemistrz
+
+            pairs = []
+            used = set()
+            # zwycięzca vs wicemistrz
+            for wg, rg in wr_pairs:
+                t1, t2 = winners.get(wg), runners.get(rg)
+                if t1 and t2 and t1 not in used and t2 not in used:
+                    pairs.append((t1, t2)); used.add(t1); used.add(t2)
+            # wicemistrz vs wicemistrz
+            for rg1, rg2 in rr_pairs:
+                t1, t2 = runners.get(rg1), runners.get(rg2)
+                if t1 and t2 and t1 not in used and t2 not in used:
+                    pairs.append((t1, t2)); used.add(t1); used.add(t2)
+            # zwycięzca vs 3. miejsce (przypisanie unikające tej samej grupy)
+            for wg in winner_third_slots:
+                w_team = winners.get(wg)
+                if not w_team or w_team in used:
+                    continue
+                chosen = None
+                for tn, tg in third_list:
+                    if tn not in used and tg != wg:
+                        chosen = tn; break
+                if chosen:
+                    pairs.append((w_team, chosen)); used.add(w_team); used.add(chosen)
+
+            base = KO_DATES["round_32"]
+            for i, (home, away) in enumerate(pairs):
+                _ko_create(db, home, away, "round_32", base + timedelta(days=i//4, hours=(i%4)*3))
+
+    # 2) Kolejne rundy: zwycięzcy parowani po kolei
+    for stage, nxt in [("round_32","round_16"), ("round_16","quarter"), ("quarter","semi")]:
+        if has(stage) and all_done(stage) and not has(nxt):
+            w = winners_of(stage)
+            base = KO_DATES[nxt]
+            for j in range(0, len(w)-1, 2):
+                _ko_create(db, w[j], w[j+1], nxt, base + timedelta(days=j//2))
+
+    # 3) Półfinały zakończone → finał + mecz o 3. miejsce
+    if has("semi") and all_done("semi") and not has("final"):
+        sm = db.query(models.Match).filter(models.Match.stage == "semi", models.Match.is_finished == True).order_by(models.Match.id).all()
+        w = [_ko_winner(m) for m in sm]
+        l = [_ko_loser(m) for m in sm]
+        if len(w) >= 2:
+            _ko_create(db, w[0], w[1], "final", KO_DATES["final"])
+        if len(l) >= 2:
+            _ko_create(db, l[0], l[1], "third_place", KO_DATES["third_place"])
+
+    db.commit()
+
+@app.post("/admin/advance", dependencies=[Depends(verify_admin)])
+def admin_advance(db: Session = Depends(get_db)):
+    """Ręcznie wyzwala budowę kolejnej rundy (np. gdy grupy rozegrano przed wdrożeniem tej funkcji)."""
+    advance_tournament_if_ready(db)
+    return {"status": "ok"}
 
 @app.put("/matches/{match_id}/result", dependencies=[Depends(verify_admin)])
 def update_match_result(match_id: int, result: MatchResultUpdate, db: Session = Depends(get_db)):
     match = db.query(models.Match).filter(models.Match.id == match_id).first()
     if not match: raise HTTPException(status_code=404)
 
+    was_finished = match.is_finished  # czy to korekta już rozliczonego meczu
+
     match.result = result.result
     match.scorers = result.scorers
+    match.penalties = result.penalties
     match.is_finished = True
     match.is_locked = True
     db.commit()
@@ -646,25 +792,28 @@ def update_match_result(match_id: int, result: MatchResultUpdate, db: Session = 
             player.star_player, result.scorers
         )
 
-        pick.points_earned = points_data["total_points"]
-
-        # Bez eliminacji — wszyscy zdobywają/tracą punkty
-        player.total_points += points_data["total_points"]
-
-        # Śledzenie punktów z wyboru reprezentacji i gwiazdy
-        player.favorite_team_points += points_data.get("favorite_bonus", 0)
-        player.star_player_points += points_data.get("star_player_bonus", 0)
-
-        # Seria trafień
-        if points_data["base_points"] > 0:
-            player.correct_predictions += 1
-            player.current_streak += 1
-            if player.current_streak > player.longest_streak:
-                player.longest_streak = player.current_streak
+        if was_finished:
+            # KOREKTA — cofnij poprzednio naliczony wynik, dolicz nowy (bez ruszania serii)
+            player.total_points += (points_data["total_points"] - (pick.points_earned or 0))
+            pick.points_earned = points_data["total_points"]
         else:
-            player.current_streak = 0
+            # PIERWSZE rozliczenie
+            pick.points_earned = points_data["total_points"]
+            player.total_points += points_data["total_points"]
+            player.favorite_team_points += points_data.get("favorite_bonus", 0)
+            player.star_player_points += points_data.get("star_player_bonus", 0)
+            if points_data["base_points"] > 0:
+                player.correct_predictions += 1
+                player.current_streak += 1
+                if player.current_streak > player.longest_streak:
+                    player.longest_streak = player.current_streak
+            else:
+                player.current_streak = 0
 
         db.commit()
+
+    # Automatyczne tworzenie kolejnej rundy, gdy bieżąca jest rozegrana
+    advance_tournament_if_ready(db)
 
     return {"status": "updated"}
 
@@ -746,9 +895,24 @@ def admin_panel(request: Request, db: Session = Depends(get_db)):
     # Budowanie kafelków z meczami
     matches_html = ""
     for m in matches:
+        scorers_val = ", ".join(m.scorers) if m.scorers else ""
+        is_ko = m.stage != "group"
+        pen_finished = f'<input type="text" id="pen-{m.id}" value="{m.penalties or ""}" placeholder="Karne np. 4:3 (przy remisie)" class="w-full bg-[#1a1e26] border border-amber-500/30 rounded-lg px-2.5 py-1 text-xs text-amber-300 focus:outline-none focus:border-amber-500">' if is_ko else ""
+        pen_pending = f'<input type="text" id="pen-{m.id}" placeholder="Karne np. 4:3 (przy remisie)" class="w-full bg-[#1a1e26] border border-amber-500/30 rounded-lg px-2.5 py-1 text-xs text-amber-300 focus:outline-none focus:border-amber-500">' if is_ko else ""
         if m.is_finished:
-            status_badge = f'<span class="text-gray-400 bg-white/5 px-2 py-0.5 rounded text-xs font-medium">Zakończony ({m.result})</span>'
-            action_fields = f'<p class="text-[11px] text-gray-500 italic mt-1">Strzelcy: {", ".join(m.scorers) if m.scorers else "Brak bramek"}</p>'
+            pen_label = f' &nbsp;·&nbsp; karne {m.penalties}' if m.penalties else ''
+            status_badge = f'<span class="text-gray-400 bg-white/5 px-2 py-0.5 rounded text-xs font-medium">Zakończony ({m.result}{pen_label})</span>'
+            action_fields = f"""
+            <div class="flex flex-col gap-2 mt-2 pt-2 border-t border-white/5">
+                <p class="text-[11px] text-gray-500 italic">Popraw wynik / bramki:</p>
+                <div class="flex gap-2">
+                    <input type="text" id="res-{m.id}" value="{m.result or ''}" placeholder="Wynik np. 2:1" class="w-24 bg-[#1a1e26] border border-white/10 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none focus:border-amber-500">
+                    <input type="text" id="sc-{m.id}" value="{scorers_val}" placeholder="Strzelcy (np. Mbappe, Neymar)" class="flex-1 bg-[#1a1e26] border border-white/10 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none focus:border-amber-500">
+                </div>
+                {pen_finished}
+                <button onclick="saveMatch({m.id})" class="w-full bg-white/10 hover:bg-white/20 text-white font-bold text-xs py-1.5 rounded-lg transition">Zaktualizuj wynik</button>
+            </div>
+            """
         else:
             status_badge = '<span class="text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded text-xs font-medium">Oczekuje</span>'
             action_fields = f"""
@@ -757,6 +921,7 @@ def admin_panel(request: Request, db: Session = Depends(get_db)):
                     <input type="text" id="res-{m.id}" placeholder="Wynik np. 2:1" class="w-24 bg-[#1a1e26] border border-white/10 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none focus:border-amber-500">
                     <input type="text" id="sc-{m.id}" placeholder="Strzelcy (np. Mbappe, Neymar)" class="flex-1 bg-[#1a1e26] border border-white/10 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none focus:border-amber-500">
                 </div>
+                {pen_pending}
                 <button onclick="saveMatch({m.id})" class="w-full bg-amber-500 hover:bg-amber-600 text-gray-900 font-bold text-xs py-1.5 rounded-lg transition shadow-md">Zatwierdź i Rozlicz Punkty</button>
             </div>
             """
@@ -800,6 +965,7 @@ def admin_panel(request: Request, db: Session = Depends(get_db)):
                 <div class="flex items-center gap-2 bg-[#14171d] p-1.5 rounded-xl border border-white/5">
                     <input type="password" id="admin-secret-input" placeholder="Wpisz Twój ADMIN_SECRET" class="bg-[#1a1e26] border border-white/5 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500 w-48">
                     <button onclick="saveSecret()" class="bg-amber-500 hover:bg-amber-600 text-gray-900 text-xs font-bold px-3 py-1.5 rounded-lg transition shadow">Autoryzuj</button>
+                    <button onclick="buildKnockout()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition shadow">🏆 Zbuduj fazę pucharową</button>
                 </div>
             </div>
 
@@ -859,6 +1025,17 @@ def admin_panel(request: Request, db: Session = Depends(get_db)):
                 alert('Klucz autoryzacyjny został zapisany w przeglądarce!');
             }}
 
+            async function buildKnockout() {{
+                const secret = document.getElementById('admin-secret-input').value.trim();
+                if (!secret) {{ alert('Najpierw podaj ADMIN_SECRET!'); return; }}
+                if (!confirm('Zbudować/odświeżyć fazę pucharową na podstawie wyników? (bezpieczne — nie nadpisuje istniejących meczów)')) return;
+                try {{
+                    const r = await fetch('/admin/advance', {{ method: 'POST', headers: {{ 'x-admin-secret': secret }} }});
+                    if (r.ok) {{ alert('Gotowe! Drabinka zaktualizowana. Sprawdź zakładkę Drabinka.'); location.reload(); }}
+                    else {{ const e = await r.json(); alert('Błąd: ' + JSON.stringify(e.detail || e)); }}
+                }} catch (err) {{ alert('Błąd połączenia: ' + err); }}
+            }}
+
             async function saveMatch(matchId) {{
                 const secret = document.getElementById('admin-secret-input').value.trim();
                 if (!secret) {{
@@ -868,16 +1045,27 @@ def admin_panel(request: Request, db: Session = Depends(get_db)):
 
                 const resultString = document.getElementById('res-' + matchId).value.trim();
                 const scorersString = document.getElementById('sc-' + matchId).value.trim();
+                const penEl = document.getElementById('pen-' + matchId);
+                const penString = penEl ? penEl.value.trim() : '';
 
                 if (!resultString) {{
                     alert('Błąd: Musisz podać ostateczny wynik (np. 1:0)!');
                     return;
                 }}
 
+                // W fazie pucharowej remis wymaga karnych (żeby wyłonić zwycięzcę)
+                if (penEl) {{
+                    const rp = resultString.split(':');
+                    if (rp.length === 2 && rp[0].trim() === rp[1].trim() && !penString) {{
+                        alert('To mecz pucharowy i jest remis — podaj wynik karnych (np. 4:3), żeby wyłonić zwycięzcę.');
+                        return;
+                    }}
+                }}
+
                 // Zamiana strzelców po przecinku na czystą tablicę JSON
                 const scorersArray = scorersString ? scorersString.split(',').map(s => s.trim()).filter(s => s.length > 0) : [];
 
-                if (!confirm('Czy na pewno chcesz zapisać wynik ' + resultString + ' dla meczu o ID: ' + matchId + '? System automatycznie przeliczy punkty wszystkim graczom.')) return;
+                if (!confirm('Czy na pewno chcesz zapisać wynik ' + resultString + (penString ? ' (karne ' + penString + ')' : '') + ' dla meczu o ID: ' + matchId + '? System automatycznie przeliczy punkty wszystkim graczom.')) return;
 
                 try {{
                     const response = await fetch('/matches/' + matchId + '/result', {{
@@ -888,7 +1076,8 @@ def admin_panel(request: Request, db: Session = Depends(get_db)):
                         }},
                         body: JSON.stringify({{
                             result: resultString,
-                            scorers: scorersArray
+                            scorers: scorersArray,
+                            penalties: penString || null
                         }})
                     }});
 
