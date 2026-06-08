@@ -123,6 +123,9 @@
             max-width: 100%;
         }
         .team-name img.flag-icon { flex-shrink: 0; }
+        @media (max-width: 640px) {
+            .flag-icon { width: 18px; height: 13px; margin-right: 5px; }
+        }
 
         .underdog-badge {
             display: inline-flex;
@@ -553,17 +556,17 @@
             <div class="space-y-3">
                 {% set future_matches = matches|sort(attribute='is_finished') %}
                 {% for match in future_matches %}
-                <div class="match-card p-5">
-                    <div class="flex flex-wrap items-center gap-4">
-                        <div class="flex-1 min-w-[300px]">
-                            <div class="flex items-center gap-4 justify-between">
-                                <div class="font-semibold text-sm w-2/5 text-right whitespace-nowrap overflow-hidden text-ellipsis"><span class="team-name" data-team="{{ match.home_team }}">{{ match.home_team }}</span></div>
+                <div class="match-card p-4 sm:p-5">
+                    <div class="flex flex-wrap items-center gap-3 sm:gap-4">
+                        <div class="flex-1 min-w-0 sm:min-w-[280px]">
+                            <div class="flex items-center gap-2 sm:gap-3 justify-between">
+                                <div class="font-semibold text-xs sm:text-sm flex-1 min-w-0 overflow-hidden whitespace-nowrap text-ellipsis text-right"><span class="team-name" data-team="{{ match.home_team }}">{{ match.home_team }}</span></div>
                                 {% if match.is_finished and match.result %}
-                                    <span class="font-mono text-lg font-bold px-1" style="color: var(--text);">{{ match.result }}</span>
+                                    <span class="font-mono text-base sm:text-lg font-bold px-1 flex-shrink-0" style="color: var(--text);">{{ match.result }}</span>
                                 {% else %}
-                                    <span class="text-xs font-medium" style="color: var(--text-faint);">vs</span>
+                                    <span class="text-xs font-medium flex-shrink-0" style="color: var(--text-faint);">vs</span>
                                 {% endif %}
-                                <div class="font-semibold text-sm w-2/5 text-left whitespace-nowrap overflow-hidden text-ellipsis"><span class="team-name" data-team="{{ match.away_team }}">{{ match.away_team }}</span></div>
+                                <div class="font-semibold text-xs sm:text-sm flex-1 min-w-0 overflow-hidden whitespace-nowrap text-ellipsis text-left"><span class="team-name" data-team="{{ match.away_team }}">{{ match.away_team }}</span></div>
                             </div>
                             <p class="text-center text-xs mt-2.5" style="color: var(--text-muted);">{{ match.match_date.strftime('%d.%m.%Y · %H:%M') }}{% if match.is_finished and match.penalties %} · <span style="color: var(--gold);">karne {{ match.penalties }}</span>{% endif %}</p>
 
