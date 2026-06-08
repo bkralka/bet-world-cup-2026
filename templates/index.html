@@ -280,17 +280,17 @@
 
 <main class="max-w-7xl mx-auto px-6 py-10 relative z-10">
 
-        <div class="flex gap-6 border-b mb-8 flex-wrap px-1" style="border-color: var(--border-subtle);">
-            <button class="tab-btn active pb-3 transition" data-tab="home">Home</button>
-            <button class="tab-btn pb-3 transition" data-tab="groups">Grupy</button>
-            <button class="tab-btn pb-3 transition" data-tab="matches">Mecze</button>
-            <button class="tab-btn pb-3 transition" data-tab="knockouts">Drabinka</button>
-            <button class="tab-btn pb-3 transition" data-tab="teams">Drużyny</button>
-            <button class="tab-btn pb-3 transition" data-tab="players">Gracze</button>
-            <button class="tab-btn pb-3 transition" data-tab="history">Moje typy</button>
-            <button class="tab-btn pb-3 transition" data-tab="ranking">Ranking</button>
-            <button class="tab-btn pb-3 transition" data-tab="rules">Zasady</button>
-        </div>
+    <div class="flex gap-6 border-b mb-8 overflow-x-auto whitespace-nowrap scrollbar-hide px-1" style="border-color: var(--border-subtle);">
+        <button class="tab-btn active pb-3 transition shrink-0" data-tab="home">Home</button>
+        <button class="tab-btn pb-3 transition shrink-0" data-tab="groups">Grupy</button>
+        <button class="tab-btn pb-3 transition shrink-0" data-tab="matches">Mecze</button>
+        <button class="tab-btn pb-3 transition shrink-0" data-tab="knockouts">Drabinka</button>
+        <button class="tab-btn pb-3 transition shrink-0" data-tab="teams">Drużyny</button>
+        <button class="tab-btn pb-3 transition shrink-0" data-tab="players">Gracze</button>
+        <button class="tab-btn pb-3 transition shrink-0" data-tab="history">Moje typy</button>
+        <button class="tab-btn pb-3 transition shrink-0" data-tab="ranking">Ranking</button>
+        <button class="tab-btn pb-3 transition shrink-0" data-tab="rules">Zasady</button>
+    </div>
 
 <div id="tab-home" class="tab-content active">
 <div class="grid lg:grid-cols-2 gap-6 mb-10">
@@ -1049,9 +1049,9 @@
         </div>
     </div>
 
-<div id="teamDetailModal" class="fixed inset-0 flex items-center justify-center z-[400] p-4" style="display:none; background: rgba(11,13,17,0.9); backdrop-filter: blur(10px);">
-    <div class="relative w-full max-w-5xl mx-auto">
-        <div class="flex justify-between items-center mb-2 px-1">
+<div id="teamDetailModal" class="fixed inset-0 z-[400] overflow-y-auto" style="display:none; background: rgba(11,13,17,0.9); backdrop-filter: blur(10px);">
+    <div class="min-h-screen px-4 py-8 flex items-center justify-center">
+        <div class="relative w-full max-w-5xl mx-auto">
             <div>
                 <p class="font-display font-bold text-sm tracking-tight">Karta drużyny</p>
                 <p class="text-[11px]" style="color: var(--text-faint);" id="teamDetailSubtitle"></p>
@@ -1145,9 +1145,9 @@
 
 
         <!-- ======================= MODAL WYBORU ULUBIONEJ DRUŻYNY ======================= -->
-    <div id="favoriteTeamModal" class="fixed inset-0 flex items-center justify-center z-[200] hidden p-4" style="background: rgba(11,13,17,0.92); backdrop-filter: blur(10px);">
-        <div class="relative max-w-3xl w-full">
-            <div class="flex justify-end mb-2">
+    <div id="favoriteTeamModal" class="fixed inset-0 z-[200] overflow-y-auto hidden" style="background: rgba(11,13,17,0.92); backdrop-filter: blur(10px);">
+        <div class="min-h-screen px-4 py-8 flex items-center justify-center">
+            <div class="relative max-w-3xl w-full">
                 <button onclick="closeFavModal()" class="w-8 h-8 flex items-center justify-center rounded-lg" style="color: var(--text-muted); background: var(--bg-surface); border: 1px solid var(--border-subtle);">✕</button>
             </div>
             <div class="flat-card rounded-2xl overflow-hidden" style="border: 1px solid var(--border-soft); background: var(--bg-surface);">
@@ -1206,9 +1206,9 @@
     </div>
 
     <!-- ======================= MODAL WYBORU GWIAZDY ======================= -->
-    <div id="starPlayerModal" class="fixed inset-0 flex items-center justify-center z-[200] hidden p-4" style="background: rgba(11,13,17,0.92); backdrop-filter: blur(10px);">
+<div id="starPlayerModal" class="fixed inset-0 z-[200] overflow-y-auto hidden" style="background: rgba(11,13,17,0.92); backdrop-filter: blur(10px);">
+    <div class="min-h-screen px-4 py-8 flex items-center justify-center">
         <div class="relative max-w-3xl w-full">
-            <div class="flex justify-end mb-2">
                 <button onclick="document.getElementById('starPlayerModal').style.display='none'" class="w-8 h-8 flex items-center justify-center rounded-lg" style="color: var(--text-muted); background: var(--bg-surface); border: 1px solid var(--border-subtle);">✕</button>
             </div>
             <div class="flat-card rounded-2xl overflow-hidden" style="border: 1px solid var(--border-soft); background: var(--bg-surface);">

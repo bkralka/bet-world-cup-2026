@@ -535,7 +535,7 @@ def get_player_public(player_id: int, db: Session = Depends(get_db)):
 
 @app.get("/players/{player_id}/picks/public")
 def get_player_picks_public(player_id: int, db: Session = Depends(get_db)):
-    picks = db.query(models.UserPick).filter(models.UserPick.player_id == player_id).join(models.Match).order_by(models.Match.match_date).all()
+    picks = db.query(models.UserPick).filter(models.UserPick.player_id == player_id).join(models.Match).order_by(models.Match.match_date.asc()).all()
     res = []
     for pick in picks:
         m = pick.match
@@ -543,8 +543,8 @@ def get_player_picks_public(player_id: int, db: Session = Depends(get_db)):
             "match_date": m.match_date.isoformat(),
             "home_team": m.home_team,
             "away_team": m.away_team,
-            "predicted_result": pick.predicted_result,   # zawsze widoczny
-            "hidden": False,                              # zawsze false
+            "predicted_result": pick.predicted_result,
+            "hidden": False,
             "actual_result": m.result,
             "points_earned": pick.points_earned,
             "is_finished": m.is_finished,
@@ -869,7 +869,8 @@ def get_next_match_info(db: Session = Depends(get_db)):
 
 @app.get("/players/{player_id}/history/")
 def get_player_history(player_id: int, db: Session = Depends(get_db)):
-    picks = db.query(models.UserPick).filter(models.UserPick.player_id == player_id).join(models.Match).order_by(models.Match.match_date).all()
+    # Dodane .asc() wymusza sortowanie od najstarszego meczu do najnowszego
+    picks = db.query(models.UserPick).filter(models.UserPick.player_id == player_id).join(models.Match).order_by(models.Match.match_date.asc()).all()
     history = []
     for pick in picks:
         match = pick.match
