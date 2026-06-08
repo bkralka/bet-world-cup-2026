@@ -221,6 +221,9 @@
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.15); }
 
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
         .animate-pulse-slow { animation: pulse 2.5s infinite; }
 
@@ -344,7 +347,6 @@
 
         <div>
             <div class="flex flex-col gap-3">
-                <!-- Kafelek DRUŻYNA -->
                 <div class="rounded-2xl overflow-hidden transition {% if current_player.favorite_locked %}cursor-default{% else %}cursor-pointer hover:opacity-90{% endif %}" style="background: var(--bg-elevated); border: 1px solid var(--border-subtle);"
                     {% if not current_player.favorite_locked %}onclick="showFavoriteTeamModal()"{% endif %}>
                     <div class="flex items-center gap-4 p-4">
@@ -365,7 +367,6 @@
                     </div>
                 </div>
 
-                <!-- Kafelek GWIAZDA -->
                 {% if current_player.star_player %}
                 <div class="rounded-2xl overflow-hidden transition {% if current_player.favorite_locked %}cursor-default{% else %}cursor-pointer hover:opacity-90{% endif %}" style="background: var(--bg-elevated); border: 1px solid var(--border-subtle);"
                      {% if not current_player.favorite_locked %}onclick="showStarPlayerModal()"{% endif %}>
@@ -444,7 +445,6 @@
 
 {% if current_player %}
 <div class="grid lg:grid-cols-2 gap-6 mb-10">
-    <!-- Twoja pozycja w rankingu -->
     <div class="flat-card rounded-2xl p-7">
         <p class="text-[10px] font-semibold uppercase tracking-[0.15em] mb-3" style="color: var(--text-faint);">Twoja pozycja</p>
         {% set ns = namespace(pos=0, found=false, prev_points=none) %}
@@ -471,7 +471,6 @@
         {% endif %}
     </div>
 
-    <!-- Twoje aktywne typy -->
     <div class="flat-card rounded-2xl p-7">
         <div class="flex items-center justify-between mb-3">
             <p class="text-[10px] font-semibold uppercase tracking-[0.15em]" style="color: var(--text-faint);">Twoje aktywne typy</p>
@@ -492,7 +491,6 @@
     </div>
 </div>
 {% else %}
-<!-- Gość: puls turnieju + zachęta -->
 {% set finished_count = matches|selectattr('is_finished')|list|length %}
 <div class="flat-card rounded-2xl p-7 mb-10 text-center">
     <p class="text-[10px] font-semibold uppercase tracking-[0.15em] mb-4" style="color: var(--text-faint);">Puls turnieju</p>
@@ -577,7 +575,6 @@
                             {% endif %}
                         </div>
                         <div class="min-w-[140px] text-right flex-shrink-0">
-                            {# znajdź pick użytkownika (namespace = pewny scope po pętli) #}
                             {% set ns = namespace(pick=none) %}
                             {% if current_player %}
                                 {% for pick in picks %}
@@ -596,16 +593,12 @@
                             {% elif current_player %}
                                 {% set betting_closed = match.match_date - timedelta(minutes=10) <= now() %}
                                 {% if ns.pick and betting_closed %}
-                                    {# typ wysłany, obstawianie zamknięte — podgląd bez edycji #}
                                     <span class="text-xs font-semibold px-3 py-1.5 rounded-lg inline-block" style="background: var(--bg-elevated); color: var(--text-muted);">🔒 Twój typ: {{ ns.pick.predicted_result }}</span>
                                 {% elif ns.pick and match.id in upcoming_match_ids %}
-                                    {# typ wysłany, można edytować #}
                                     <button onclick="openPickModal({{ match.id }}, '{{ match.home_team }}', '{{ match.away_team }}', '{{ ns.pick.predicted_result }}')" class="text-xs font-semibold px-3 py-1.5 rounded-lg transition" style="background: var(--success-soft); color: var(--success); border: 1px solid rgba(74,222,128,0.3);">✏️ Edytuj ({{ ns.pick.predicted_result }})</button>
                                 {% elif ns.pick %}
-                                    {# typ wysłany, mecz poza pulą edycji #}
                                     <span class="text-xs font-semibold px-3 py-1.5 rounded-lg inline-block" style="background: var(--bg-elevated); color: var(--text-muted);">Twój typ: {{ ns.pick.predicted_result }}</span>
                                 {% elif match.id in upcoming_match_ids %}
-                                    {# brak typu, mecz w puli #}
                                     <button onclick="openPickModal({{ match.id }}, '{{ match.home_team }}', '{{ match.away_team }}')" class="pick-btn px-5 py-2 rounded-lg text-xs transition">Typuj</button>
                                 {% elif betting_closed %}
                                     <span class="text-xs" style="color: var(--text-faint);">Obstawianie zamknięte</span>
@@ -642,7 +635,6 @@
                 .ko-row + .ko-row { border-top:1px solid var(--border-subtle); }
             </style>
 
-            {# makro: pojedynczy mecz w stylu drabinki (data, pozycje grup, flagi, wynik, podświetlenie zwycięzcy) #}
             {% macro ko_match(match, positions, gold=false) %}
                 {% set parts = match.result.split(':') if match.result else None %}
                 {% set hs = (parts[0]|int) if parts else -1 %}
@@ -656,7 +648,7 @@
                 {% set apos = positions.get(match.away_team) %}
                 <div class="ko-match">
                     <div class="ko-card2" {% if gold %}style="border-color: rgba(251,191,36,0.4);"{% endif %}>
-                        {% if match.match_date %}<div class="ko-date">{{ match.match_date.strftime('%d.%m · %H:%M') }}{% if pen %} &nbsp;·&nbsp; <span style="color: var(--gold);">karne {{ match.penalties }}</span>{% endif %}</div>{% endif %}
+                        {% if match.match_date %}<div class="ko-date">{{ match.match_date.strftime('%d.%m · %H:%M') }}{% if pen %}  ·  <span style="color: var(--gold);">karne {{ match.penalties }}</span>{% endif %}</div>{% endif %}
                         <div class="ko-row">
                             <span class="flex items-center gap-1.5 min-w-0">
                                 {% if hpos %}<span class="ko-pos">{{ hpos }}</span>{% endif %}
@@ -675,7 +667,6 @@
                 </div>
             {% endmacro %}
 
-            {# wyłonienie mistrza z finału #}
             {% set champion = None %}
             {% set runnerup = None %}
             {% if knockout_bracket.final and knockout_bracket.final[0].result %}
@@ -730,7 +721,6 @@
             </div>
             {% endif %}
 
-            {# Zwycięzca + mecz o 3. miejsce #}
             <div class="px-6 pb-6 flex flex-col md:flex-row gap-4 justify-center items-stretch">
                 {% if champion %}
                 <div id="champion-box" class="flex-1 max-w-md rounded-2xl p-6 flex items-center gap-4" style="background: linear-gradient(135deg, rgba(251,191,36,0.16), rgba(251,191,36,0.04)); border: 1px solid rgba(251,191,36,0.4);">
@@ -846,7 +836,6 @@
                 <h3 class="font-display font-bold text-xl mb-1">Jak grać?</h3>
                 <p class="text-sm mb-7" style="color: var(--text-muted);">Wszystko, co musisz wiedzieć przed startem.</p>
 
-                <!-- GŁÓWNA ZASADA -->
                 <div class="rounded-xl p-5 mb-7" style="background: var(--bg-elevated); border-left: 2px solid var(--accent);">
                     <p class="text-xs font-semibold uppercase tracking-wider mb-2" style="color: var(--accent);">główna zasada</p>
                     <p class="text-sm leading-relaxed">Typujesz <strong>dokładny wynik</strong> meczów mundialu. Trafienie daje punkty, błędne wskazanie zwycięzcy je odbiera. <br> Nikt nie odpada — gra trwa do końca turnieju. <strong>Wygrywa gracz z największą liczbą punktów.</strong></p>
@@ -855,15 +844,14 @@
                 <div class="mb-7">
                     <p class="text-[10px] font-semibold uppercase tracking-wider mb-3" style="color: var(--text-faint);">Typowanie meczów</p>
                     <div class="p-4 rounded-xl text-sm leading-relaxed space-y-2.5" style="background: var(--bg-elevated);">
-                        <p>🎯 Aktywne okno typowania to zawsze <strong style="color: var(--accent);">5 najbliższych meczów</strong>. Gdy jeden się kończy, wskakuje kolejny. Nie musisz obstawiać wszystkich — typuj te, których jesteś pewny!</p>
+                        <p>🎯 Aktywne okno typowania to zawsze <strong style="color: var(--accent);">5 najbliższych meczów</strong>.</p>
                         <p>✏️ Swobodna <strong>edycja</strong> typu aż do pierwszego gwizdka.</p>
                         <p>🔒 Po starcie meczu typ zostaje <strong style="color: var(--danger);">zablokowany</strong>.</p>
-                        <p>📋 Zawsze typujesz dokładny wynik, np. <strong>2:1</strong>. Liczy się przede wszystkim trafienie rozstrzygnięcia (kto wygra lub remis) — pomyłka co do zwycięzcy kosztuje punkty.</p>
+                        <p>📋 Zawsze typujesz dokładny wynik, np. <strong>2:1</strong>. Liczy się przede wszystkim trafienie rozstrzygnięcia.</p>
                     </div>
                 </div>
 
                 <div class="grid md:grid-cols-2 gap-5">
-                    <!-- PUNKTACJA -->
                     <div>
                         <p class="text-[10px] font-semibold uppercase tracking-wider mb-3" style="color: var(--text-faint);">Punktacja</p>
                         <div class="space-y-2">
@@ -872,7 +860,7 @@
                                 <span class="font-display font-bold text-base" style="color: var(--success);">+3 pkt</span>
                             </div>
                             <div class="flex justify-between items-center p-3 rounded-lg" style="background: var(--bg-elevated);">
-                                <span class="text-sm">Dobry zwycięzca / remis, zły wynik</span>
+                                <span class="text-sm">Dobry zwycięzca / remis</span>
                                 <span class="font-display font-bold text-base">+1 pkt</span>
                             </div>
                             <div class="flex justify-between items-center p-3 rounded-lg" style="background: var(--bg-elevated);">
@@ -882,7 +870,6 @@
                         </div>
                     </div>
 
-                    <!-- JAK WYGRAĆ -->
                     <div>
                         <p class="text-[10px] font-semibold uppercase tracking-wider mb-3" style="color: var(--text-faint);">Jak wygrać</p>
                         <div class="p-4 rounded-xl text-sm leading-relaxed space-y-2" style="background: var(--bg-elevated);">
@@ -894,10 +881,9 @@
                     </div>
                 </div>
 
-                <!-- BONUSY -->
                 <div class="mt-7">
                     <p class="text-[10px] font-semibold uppercase tracking-wider mb-1" style="color: var(--text-faint);">Bonusy punktowe</p>
-                    <p class="text-xs mb-3" style="color: var(--text-faint);">Doliczane do trafionego typu. Bonusy za liczbę bramek liczą się tylko przy trafionym dokładnym wyniku.</p>
+                    <p class="text-xs mb-3" style="color: var(--text-faint);">Doliczane do trafionego typu.</p>
                     <div class="grid md:grid-cols-2 gap-2">
                         <div class="flex justify-between items-center p-3 rounded-lg" style="background: var(--bg-elevated);"><span class="text-sm">🐺 Underdog (U) wygrywa</span><span class="font-display font-bold text-sm" style="color: var(--success);">+2</span></div>
                         <div class="flex justify-between items-center p-3 rounded-lg" style="background: var(--bg-elevated);"><span class="text-sm">🐺 Underdog (U) remisuje</span><span class="font-display font-bold text-sm">+1</span></div>
@@ -908,34 +894,17 @@
                     </div>
                 </div>
 
-                <!-- MNOŻNIKI -->
                 <div class="mt-7">
                     <p class="text-[10px] font-semibold uppercase tracking-wider mb-1" style="color: var(--text-faint);">Mnożniki fazy pucharowej</p>
-                    <p class="text-xs mb-3" style="color: var(--text-faint);">W fazie pucharowej punkty (bez bonusu za gwiazdę) są mnożone — im dalej, tym więcej.</p>
+                    <p class="text-xs mb-3" style="color: var(--text-faint);">W fazie pucharowej punkty są mnożone.</p>
                     <div class="grid grid-cols-4 gap-2">
-                        <div class="text-center p-3 rounded-lg" style="background: var(--bg-elevated);"><p class="text-[10px]" style="color: var(--text-muted);">Faza grupowa</p><p class="font-display font-bold text-base" style="color: var(--text-muted);">×1</p></div>
+                        <div class="text-center p-3 rounded-lg" style="background: var(--bg-elevated);"><p class="text-[10px]" style="color: var(--text-muted);">Grupa</p><p class="font-display font-bold text-base" style="color: var(--text-muted);">×1</p></div>
                         <div class="text-center p-3 rounded-lg" style="background: var(--bg-elevated);"><p class="text-[10px]" style="color: var(--text-muted);">Ćwierćfinał</p><p class="font-display font-bold text-base" style="color: var(--success);">×1.5</p></div>
                         <div class="text-center p-3 rounded-lg" style="background: var(--bg-elevated);"><p class="text-[10px]" style="color: var(--text-muted);">Półfinał</p><p class="font-display font-bold text-base">×2</p></div>
                         <div class="text-center p-3 rounded-lg" style="background: var(--bg-elevated);"><p class="text-[10px]" style="color: var(--text-muted);">Finał</p><p class="font-display font-bold text-base" style="color: var(--gold);">×3</p></div>
                     </div>
                 </div>
 
-                <!-- SERIA + WYBORY -->
-                <div class="mt-7">
-                    <p class="text-[10px] font-semibold uppercase tracking-wider mb-3" style="color: var(--text-faint);">Dodatkowo</p>
-                    <div class="grid md:grid-cols-2 gap-5">
-                        <div class="p-4 rounded-xl text-sm leading-relaxed space-y-2" style="background: var(--bg-elevated);">
-                            <p class="font-semibold" style="color: var(--accent);">🔥 Seria (streak)</p>
-                            <p style="color: var(--text-muted);">Licznik trafień z rzędu, pokazywany przy Twoim nicku. Pomyłka zeruje serię.</p>
-                        </div>
-                        <div class="p-4 rounded-xl text-sm leading-relaxed space-y-2" style="background: var(--bg-elevated);">
-                            <p class="font-semibold" style="color: var(--gold);">⭐ Ulubiona drużyna i gwiazda</p>
-                            <p style="color: var(--text-muted);">Na starcie wybierasz ulubioną drużynę (+1 pkt za jej wygraną) i gwiazdę (+1 pkt za jej gola). <strong>Wybór jest jednorazowy</strong> — przemyśl go!</p>
-                        </div>
-                    </div>
-                </div>
-
-                                <!-- PRZYKŁAD 1: DOKŁADNY WYNIK + UNDERDOG + GWIAZDA -->
                 <div class="mt-7 p-4 rounded-xl" style="background: var(--bg-elevated); border-left: 2px solid var(--success);">
                     <p class="text-xs font-semibold uppercase tracking-wider mb-2" style="color: var(--success);">Przykład – dokładny wynik</p>
                     <p class="text-sm leading-relaxed">
@@ -944,30 +913,12 @@
                     </p>
                 </div>
 
-                <!-- PRZYKŁAD 2: BŁĘDNY TYP + BONUS ZA ULUBIONĄ DRUŻYNĘ -->
-                <div class="mt-7 p-4 rounded-xl" style="background: var(--bg-elevated); border-left: 2px solid var(--info);">
-                    <p class="text-xs font-semibold uppercase tracking-wider mb-2" style="color: var(--info);">Przykład – kara i bonus</p>
-                    <p class="text-sm leading-relaxed">
-                        Twoja ulubiona drużyna: <strong>Francja</strong>. Obstawiasz <strong>0:1</strong> (porażka), a mecz kończy się <strong>2:0</strong> dla Francji. Twój typ jest błędny → <strong>-1 pkt</strong>, ale Francja wygrywa → <strong>+1 pkt</strong> (bonus za ulubioną drużynę).<br>
-                        → <strong style="color: var(--danger);">-1 pkt</strong> + <strong style="color: var(--gold);">+1 pkt</strong> = <strong style="color: var(--text-muted);">0 pkt</strong>
-                    </p>
-                </div>
-
-                <!-- PRZYKŁAD 3: FAZA PUCHAROWA (mnożnik) + WIELE BRAMEK GWIAZDY -->
-                <div class="mt-7 p-4 rounded-xl" style="background: var(--bg-elevated); border-left: 2px solid var(--gold);">
-                    <p class="text-xs font-semibold uppercase tracking-wider mb-2" style="color: var(--gold);">Przykład – faza pucharowa</p>
-                    <p class="text-sm leading-relaxed">
-                        Ćwierćfinał (mnożnik ×1.5): <strong>Holandia 3:2 Hiszpania</strong>, Twój typ: <strong>3:2</strong> (dokładny wynik). Twoja gwiazda – <strong>Gakpo</strong> strzela 2 gole. Łączna liczba bramek: 5 → +2 pkt (bonus za 5+ goli).<br>
-                        → (3 pkt + 2 pkt) ×1.5 = 7.5 → <strong>7 pkt</strong> (zaokrąglenie w dół) + 2 pkt (gwiazda) = <strong style="color:var(--success);">9 punktów</strong> 🚀
-                    </p>
-                </div>
-
                 <p class="text-center text-xs mt-7" style="color: var(--text-faint);">Powodzenia — niech wygra najlepszy typer! 🏆</p>
             </div>
         </div>
     </main>
 
-  <div id="playerProfileModal" class="fixed inset-0 z-[400] overflow-y-auto" style="display:none; background: rgba(11,13,17,0.85); backdrop-filter: blur(8px);">
+  <div id="playerProfileModal" class="fixed inset-0 z-[400] overflow-y-auto" style="display: none; background: rgba(11,13,17,0.85); backdrop-filter: blur(8px);">
     <div class="flex min-h-full items-center justify-center p-4 md:p-6">
         <div class="relative w-full max-w-2xl mx-auto">
             <div class="flex justify-between items-center mb-3 px-1">
@@ -1018,6 +969,7 @@
             </div>
         </div>
     </div>
+</div>
 
     <div id="pickModal" class="fixed inset-0 flex items-center justify-center z-[200] hidden p-4" style="background: rgba(11,13,17,0.85); backdrop-filter: blur(8px);">
         <div class="flat-card rounded-2xl p-7 w-full max-w-sm" style="border: 1px solid var(--border-soft);">
@@ -1050,7 +1002,7 @@
         </div>
     </div>
 
-<div id="teamDetailModal" class="fixed inset-0 z-[400] overflow-y-auto" style="display:none; background: rgba(11,13,17,0.9); backdrop-filter: blur(10px);">
+<div id="teamDetailModal" class="fixed inset-0 z-[400] overflow-y-auto" style="display: none; background: rgba(11,13,17,0.9); backdrop-filter: blur(10px);">
     <div class="flex min-h-full items-center justify-center p-4 md:p-6">
         <div class="relative w-full max-w-5xl mx-auto">
             <div class="flex justify-between items-center mb-3 px-1">
@@ -1139,10 +1091,7 @@
         </div>
     </div>
 
-
-
-        <!-- ======================= MODAL WYBORU ULUBIONEJ DRUŻYNY ======================= -->
-    <div id="favoriteTeamModal" class="fixed inset-0 z-[200] overflow-y-auto hidden" style="background: rgba(11,13,17,0.92); backdrop-filter: blur(10px);">
+    <div id="favoriteTeamModal" class="fixed inset-0 z-[200] overflow-y-auto" style="display: none; background: rgba(11,13,17,0.92); backdrop-filter: blur(10px);">
     <div class="flex min-h-full items-center justify-center p-4 md:p-6">
         <div class="relative max-w-3xl w-full mx-auto">
             <div class="flex justify-end mb-3 px-1">
@@ -1203,8 +1152,7 @@
         </div>
     </div>
 
-    <!-- ======================= MODAL WYBORU GWIAZDY ======================= -->
-<div id="starPlayerModal" class="fixed inset-0 z-[200] overflow-y-auto hidden" style="background: rgba(11,13,17,0.92); backdrop-filter: blur(10px);">
+<div id="starPlayerModal" class="fixed inset-0 z-[200] overflow-y-auto" style="display: none; background: rgba(11,13,17,0.92); backdrop-filter: blur(10px);">
     <div class="flex min-h-full items-center justify-center p-4 md:p-6">
         <div class="relative max-w-3xl w-full mx-auto">
             <div class="flex justify-end mb-3 px-1">
@@ -1430,18 +1378,15 @@
             btn.addEventListener('click', () => {
                 const tab = btn.dataset.tab;
                 activateTab(tab);
-                // zapamiętaj aktywną zakładkę, by przetrwała odświeżenie strony
                 history.replaceState(null, '', '#' + tab);
             });
         });
 
-        // Po załadowaniu strony przywróć zakładkę z adresu (#mecze itd.)
         (function restoreTabFromHash() {
             const tab = window.location.hash.replace('#', '');
             if (tab && tab !== 'home') activateTab(tab);
         })();
 
-        // ------------------ PLAYER PROFILES ------------------
         document.getElementById('players-search')?.addEventListener('input', (e) => {
             const q = e.target.value.toLowerCase();
             document.querySelectorAll('#players-list .player-card').forEach(card => {
@@ -1452,7 +1397,7 @@
 
         async function openPlayerProfile(playerId) {
             const m = document.getElementById('playerProfileModal');
-            m.style.display = 'flex';
+            m.style.display = 'block';
 
             try {
                 const [profileRes, historyRes] = await Promise.all([
@@ -1507,7 +1452,6 @@
 
         function closePlayerProfile() { document.getElementById('playerProfileModal').style.display = 'none'; }
 
-        // ------------------ TEAMS GRID ------------------
         const GROUPS_ORDER = ["A","B","C","D","E","F","G","H","I","J","K","L"];
 
         function renderTeamsGrid() {
@@ -1578,7 +1522,6 @@ function openTeamDetail(name) {
     document.getElementById('td-odds-text').textContent = d.odds + '%';
     document.getElementById('td-fifa-rank').textContent = d.fifa_rank;
 
-    // Mecze towarzyskie
     const friendliesDiv = document.getElementById('td-friendlies');
     const fr = FRIENDLIES[name] || [];
     if (fr.length) {
@@ -1595,17 +1538,10 @@ function openTeamDetail(name) {
    document.getElementById('td-odds-bar').style.width = '0%';
     setTimeout(() => { document.getElementById('td-odds-bar').style.width = d.odds + '%'; }, 80);
 
-    // ============================================
-    // PREMIUM DESIGN SKŁADU NA MŚ
-    // ============================================
-// ============================================
-    // ULTRA-KOMPAKTOWY DESIGN TABLICY TAKTYCZNEJ (2x2)
-    // ============================================
     const squadContainer = document.getElementById('td-squad-container');
     const squad = SQUADS[name];
 
     if (squad) {
-        // Wymuszamy płaski układ 2 kolumn dla formacji obok siebie
         squadContainer.className = "grid grid-cols-1 sm:grid-cols-2 gap-3";
         squadContainer.innerHTML = ''; 
         
@@ -1622,10 +1558,10 @@ function openTeamDetail(name) {
                 }
                 
                 return `
-                    <div class="flex items-center justify-between py-0.5 px-1.5 rounded bg-white/[0.01]" 
+                    <div class="flex items-center justify-between py-0.5 px-1.5 rounded bg-white/[0.01] gap-2 overflow-hidden" 
                          style="border: 1px solid rgba(255,255,255,0.03); border-left: 2px solid ${colorHex};">
-                        <span class="font-medium text-[11px] text-white/80 truncate mr-1">${playerName}</span>
-                        ${club ? `<span class="text-[9px] text-white/30 truncate max-w-[85px]">${club.split(' ')[0]}</span>` : ''}
+                        <span class="font-medium text-[11px] text-white/80 truncate min-w-0 flex-1">${playerName}</span>
+                        ${club ? `<span class="text-[9px] text-white/30 truncate flex-shrink-0 text-right max-w-[75px]">${club.split(' ')[0]}</span>` : ''}
                     </div>
                 `;
             }).join('');
@@ -1658,7 +1594,7 @@ function openTeamDetail(name) {
     }
 
     const modal = document.getElementById('teamDetailModal');
-    modal.style.display = 'flex';
+    modal.style.display = 'block';
     modal.scrollTop = 0;
 }
 
@@ -1666,7 +1602,6 @@ function openTeamDetail(name) {
             document.getElementById('teamDetailModal').style.display = 'none';
         }
 
-        // ------------------ PREDICT MODAL ------------------
         let selectedMatchId = null;
         const pickModal = document.getElementById('pickModal');
         const scoreInput = document.getElementById('scoreInput');
@@ -1704,7 +1639,6 @@ function openTeamDetail(name) {
                 body: JSON.stringify({ player_id: playerId, match_id: parseInt(selectedMatchId), predicted_result: predicted })
             });
             if(res.ok) {
-                // zostań na bieżącej zakładce po odświeżeniu (np. „Mecze")
                 const activeTab = document.querySelector('.tab-btn.active')?.dataset.tab;
                 if (activeTab) history.replaceState(null, '', '#' + activeTab);
                 location.reload();
@@ -1776,7 +1710,6 @@ function openTeamDetail(name) {
             } 
         });
 
-        // ------------------ WELCOME LOGIC ------------------
         const stepContent = {
             1: { icon: "🏆", title: "Bet World Cup 2026", subtitle: "Typer Mistrzostw Świata", text: "Typujesz dokładne wyniki meczów mundialu. Trafiasz — zdobywasz punkty. Mylisz zwycięzcę — tracisz punkty. Wygrywa ten, kto uzbiera ich najwięcej." },
             2: { icon: "📋", title: "Zasady", subtitle: "Krótka wersja", items: ["Typuj <strong>dokładny wynik</strong> (np. '2:1')", "Obstawiasz <strong>5 najbliższych meczów</strong> z terminarza", "Typ <strong>edytujesz</strong> aż do gwizdka", "Nikt nie odpada — gra się <strong>na punkty</strong>", "Wygrywa gracz z <strong style='color:var(--gold);'>najwyższym wynikiem</strong>"] },
@@ -1835,93 +1768,57 @@ function openTeamDetail(name) {
             renderStep(currentStep);
         }
 
-// ========================================================
-// MECZE TOWARZYSKIE PRZED MŚ — WPISZ TUTAJ
-// Dla każdej drużyny dopisz listę sparingów. Format dowolny,
-// np. "2:1 Niemcy", "Polska 3:0 Szkocja". Zostaw [] albo pomiń
-// drużynę, jeśli nie chcesz nic pokazywać.
-// ========================================================
 const FRIENDLIES = {
-    // ===== Wyniki sparingów przed MŚ 2026 (źródło: football365, maj–czerwiec 2026) =====
-    // Format z perspektywy danej drużyny: "wynik_drużyny:wynik_rywala Rywal"
-
-    // Grupa A
     "Meksyk": ["5:1 Serbia", "1:0 Australia", "2:0 Ghana", "1:1 Belgia", "0:0 Portugalia"],
     "Korea Południowa": ["1:0 Salwador", "5:0 Trynidad i Tobago", "0:1 Austria", "0:4 WKS"],
     "RPA": ["1:1 Jamajka" ,"0:0 Nikaragua", "1:2 Panama", "1:1 Panama"],
     "Czechy": ["3:1 Gwatemala", "2:1 Kosowo"],
-
-    // Grupa B
     "Kanada": ["1:1 Irlandia", "2:0 Uzbekistan", "0:0 Uzbekistan", "2:2 Islandia", "1:0 Gwatemala"],
     "Szwajcaria": ["1:1 Australia", "4:1 Jordania", "0:0 Norwegia", "3:4 Niemcy"],
     "Katar": ["0:0 Salwador", "0:1 Irlandia"],
     "Bośnia i Hercegowina": ["1:1 Panama", "0:0 Macedonia Północna"],
-
-    // Grupa C
     "Brazylia": ["2:1 Egipt", "6:2 Panama", "3:1 Chorwacja", "1:2 Francja"],
     "Maroko": ["4:0 Madagaskar", "5:0 Burundi", "2:1 Paragwaj", "1:1 Ekwador"],
     "Szkocja": ["4:0 Boliwia", "4:1 Curacao", "0:1 WKS", "0:1 Japonia"],
     "Haiti": ["1:2 Peru", "4:0 Nowa Zelandia", "1:1 Islandia", "0:1 Tunezja"],
-
-    // Grupa D
     "USA": ["1:2 Niemcy", "3:2 Senegal", "0:2 Portugalia", "2:5 Belgia"],
     "Australia": ["1:1 Szwajcaria", "0:1 Meksyk"],
     "Paragwaj": ["4:0 Nikaragua", "1:2 Maroko", "1:0 Grecja"],
     "Turcja": ["2:1 Wenezuela", "4:0 Macedonia Północna"],
-
-    // Grupa E
     "Niemcy": ["2:1 USA", "4:0 Finlandia", "2:1 Ghana", "4:3 Szwajcaria"],
     "Ekwador": ["2:1 Arabia Saudyjska", "1:1 Holadnia", "1:1 Maroko"],
     "WKS": ["2:1 Francja", "1:0 Szkocja", "4:0 Korea Południowa"],
     "Curacao": ["4:0 Aruba", "1:4 Szkocja"],
-
-    // Grupa F
     "Holandia": ["0:1 Algieria", "1:1 Ekwador", "2:1 Norwegia"],
     "Japonia": ["1:0 Islandia", "1:0 Anglia", "1:0 Szkocja"],
     "Tunezja": ["0:5 Belgia", "0:1 Austria", "0:0 Kanada", "1:0 Haiti"],
     "Szwecja": ["2:2 Grecja", "1:3 Norwegia",],
-
-    // Grupa G
     "Belgia": ["5:0 Tunezja", "2:0 Chorwacja", "1:1 Meksyk", "5:2 USA"],
     "Iran": ["2:0 Mali", "3:1 Gambia", "5:0 Kostaryka", "1:2 Nigeria"],
     "Egipt": ["1:2 Brazylia", "1:0 Rosja", "0:0 Hiszpania", "4:0 Arabia Saudyjska"],
     "Nowa Zelandia": ["0:1 Anglia", "0:4 Haiti"],
-
-    // Grupa H
     "Hiszpania": ["1:1 Irak", "0:0 Egipt", "3:0 Serbia"],
     "Urugwaj": ["1:1 Anglia", "0:0 Algieria"],
     "Arabia Saudyjska": ["3:0 Portoryko", "1:2 Ekwador", "1:2 Serbia", "0:4 Egipt"],
     "RZP": ["3:0 Bermudy","3:0 Serbia"],
-
-    // Grupa I
     "Francja": ["1:2 Wybrzeże Kości Słoniowej", "3:1 Kolumbia", "2:1 Brazylia"],
     "Senegal": ["2:3 USA", "3:1 Gambia", "2:0 Peru"],
     "Norwegia": ["3:1 Szwecja", "0:0 Szwajcaria", "1:2 Holandia"],
     "Irak": ["1:1 Hiszpania", "1:0 Andora"],
-
-    // Grupa J
     "Argentyna": ["2:0 Honduras", "5:0 Zambia", "2:1 Mauretania"],
     "Austria": ["1:0 Tunezja", "1:0 Korea Południowa", "5:1 Ghana"],
     "Algieria": ["1:0 Holandia", "0:0 Urugwaj", "7:0 Gwatemala"],
     "Jordania": ["1:4 Szwajcaria", "2:2 Nigeria", "2:2 Kostaryka"],
-
-    // Grupa K
     "Portugalia": ["2:1 Chile", "2:0 USA", "0:0 Meksyk"],
     "Kolumbia": ["3:1 Kostaryka", "1:3 Francja", "1:2 Chorwacja"],
     "Uzbekistan": ["0:2 Kanada",],
     "DR Konga": ["0:0 Dania"],
-
-    // Grupa L
     "Anglia": ["1:0 Nowa Zelandia", "0:1 Japonia", "1:1 Urugwaj"],
     "Chorwacja": ["0:2 Belgia", "1:3 Brazylia", "2:1 Kolumbia"],
     "Panama": ["1:1 Bośnia", "4:2 Dominikana", "2:6 Brazylia", "2:1 RPA", "1:1 RPA"],
     "Ghana": ["1:1 Walia", "0:2 Meksyk", "1:2 Niemcy", "1:5 Austria"],
 };
 
-
-// ========================================================
-// SKŁADY DRUŻYN NA MŚ 2026
-// ========================================================
 const SQUADS = {
     "Czechy": { "Bramkarze": ["Matej Kovar (PSV Eindhoven)", "Jindrich Stanek (Slavia Praga)", "Lukas Hornicek (Braga)"], "Obrońcy": ["Vladimir Coufal (TSG Hoffenheim)", "Tomas Holes (Slavia Praga)", "Ladislav Krejci (Wolverhampton Wanderers)", "David Zima (Slavia Praga)", "Jaroslav Zeleny (Sparta Praga)", "David Jurasek (Slavia Praga)", "David Doudera (Slavia Praga)", "Robin Hranac (TSG Hoffenheim)", "Stepan Chaloupek (Slavia Praga)"], "Pomocnicy": ["Tomas Soucek (West Ham United)", "Vladimir Darida (Hradec Kralove)", "Lukas Provod (Slavia Praga)", "Michal Sadilek (Slavia Praga)", "Pavel Sulc (Lyon)", "Lukas Cerv (Viktoria Pilzno)", "Hugo Sochurek (Sparta Praga)", "Alexandr Sojka (Viktoria Pilzno)", "Denis Visinsky (Viktoria Pilzno)"], "Napastnicy": ["Patrik Schick (Bayer Leverkusen)", "Adam Hlozek (TSG Hoffenheim)", "Jan Kuchta (Sparta Praga)", "Mojmir Chytil (Slavia Praga)", "Tomas Chory (Slavia Praga)"] },
     "Korea Południowa": { "Bramkarze": ["Kim Seung-gyu (FC Tokyo)", "Jo Hyeon-woo (Ulsan HD)", "Song Bum-keun (Jeonbuk)"], "Obrońcy": ["Kim Min-jae (Bayern Monachium)", "Kim Moon-hwan (Daejeon)", "Seol Young-woo (Crvena zvezda)", "Cho Wi-je (Jeonbuk)", "Lee Tae-seok (Austria Wiedeń)", "Park Jin-seob (Zhejiang)", "Kim Tae-hyeon (Kashima)", "Lee Han-beom (Midtjylland)", "Jes Castrop (Gladbach)", "Lee Ki-hyuk (Gangwon)"], "Pomocnicy": ["Lee Jae-sung (Mainz)", "Hwang Hee-chan (Wolverhampton)", "Hwang In-beom (Feyenoord)", "Lee Kang-in (PSG)", "Paik Seung-ho (Birmingham)", "Kim Jin-gyu (Jeonbuk)", "Lee Dong-gyeong (Ulsan HD)", "Bae Jun-ho (Stoke)", "Eom Ji-sung (Swansea)", "Yang Hyun-jun (Celtic)"], "Napastnicy": ["Son Heung-min (Los Angeles FC)", "Cho Gue-sung (Midtjylland)", "Oh Hyeon-gyu (Besiktas)"] },
@@ -2078,7 +1975,7 @@ const TEAM_DATA = {
             if (!modal) return;
             favCurrentIdx = 0;
             renderFavCard(0);
-            modal.style.display = 'flex';
+            modal.style.display = 'block';
         }
 
         function closeFavModal() {
@@ -2139,7 +2036,7 @@ const TEAM_DATA = {
 
             spCurrentIdx = 0;
             renderStarPlayerCard(spCurrentIdx);
-            document.getElementById('starPlayerModal').style.display = 'flex';
+            document.getElementById('starPlayerModal').style.display = 'block';
         });
 
         function spNav(dir) {
@@ -2256,7 +2153,6 @@ const TEAM_DATA = {
                 img.src = player.img;
                 img.style.display = 'block';
                 img.onerror = () => {
-                    // brak pliku zdjęcia → pokaż inicjał zamiast pustego boksu
                     img.style.display = 'none';
                     const box = img.parentElement;
                     if (box && !box.querySelector('.star-initial')) {
@@ -2281,9 +2177,6 @@ const TEAM_DATA = {
             setInterval(fetchNextMatch, 5 * 60 * 1000);
         });
 
-        
-
-    // Upewnij się, że to jest na samym dole wewnątrz <script>
     window.showFavoriteTeamModal = showFavoriteTeamModal;
 
     </script>
