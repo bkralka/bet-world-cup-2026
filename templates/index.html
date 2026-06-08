@@ -362,8 +362,8 @@
 
                 <div class="flex flex-col gap-3">
 
-                    {# ---------- DRUŻYNA ---------- #}
-                    {% if current_player.favorite_team %}
+                    {% if current_player.favorite_team and current_player.star_player %}
+                    {# ---------- OBA WYBRANE: pokaż zablokowane karty ---------- #}
                     <div class="rounded-2xl overflow-hidden cursor-default" style="background: var(--bg-elevated); border: 1px solid var(--border-subtle);">
                         <div class="flex items-center gap-3 sm:gap-4 p-3 sm:p-4">
                             <div class="relative flex-shrink-0">
@@ -382,16 +382,7 @@
                             </div>
                         </div>
                     </div>
-                    {% else %}
-                    <button onclick="showFavoriteTeamModal()" class="w-full rounded-2xl p-4 text-left cursor-pointer hover:opacity-90 transition" style="background: var(--bg-elevated); border: 1px dashed var(--gold);">
-                        <p class="text-[10px] font-semibold uppercase tracking-wider mb-0.5" style="color: var(--text-faint);">⭐ Twoja drużyna</p>
-                        <p class="font-display font-bold text-lg" style="color: var(--gold);">Wybierz drużynę →</p>
-                        <p class="text-[10px] sm:text-xs mt-1" style="color: var(--text-muted);">+1 pkt za każdą jej wygraną</p>
-                    </button>
-                    {% endif %}
 
-                    {# ---------- GWIAZDA ---------- #}
-                    {% if current_player.star_player %}
                     <div class="rounded-2xl overflow-hidden cursor-default" style="background: var(--bg-elevated); border: 1px solid var(--border-subtle);">
                         <div class="flex items-center gap-3 sm:gap-4 p-3 sm:p-4">
                             <div class="w-16 h-20 sm:w-24 sm:h-28 rounded-xl overflow-hidden shadow-md flex-shrink-0" style="background: var(--bg-surface);">
@@ -411,10 +402,11 @@
                         </div>
                     </div>
                     {% else %}
-                    <button onclick="showStarPlayerModal()" class="w-full rounded-2xl p-4 text-left cursor-pointer hover:opacity-90 transition" style="background: var(--bg-elevated); border: 1px dashed var(--gold);">
-                        <p class="text-[10px] font-semibold uppercase tracking-wider mb-0.5" style="color: var(--text-faint);">🏃 Twoja gwiazda</p>
-                        <p class="font-display font-bold text-lg" style="color: var(--gold);">Wybierz gwiazdę →</p>
-                        <p class="text-[10px] sm:text-xs mt-1" style="color: var(--text-muted);">+1 pkt za każdego jej gola</p>
+                    {# ---------- JEDEN PRZYCISK: wybór drużyny i gwiazdy w jednym przepływie ---------- #}
+                    <button onclick="startPickFlow()" class="w-full rounded-2xl p-4 text-left cursor-pointer hover:opacity-90 transition" style="background: var(--bg-elevated); border: 1px dashed var(--gold);">
+                        <p class="text-[10px] font-semibold uppercase tracking-wider mb-0.5" style="color: var(--text-faint);">⭐🏃 Twoje bonusy</p>
+                        <p class="font-display font-bold text-lg" style="color: var(--gold);">Wybierz drużynę i gwiazdę →</p>
+                        <p class="text-[10px] sm:text-xs mt-1" style="color: var(--text-muted);">Najpierw drużyna, potem piłkarz — zapis jednym kliknięciem</p>
                     </button>
                     {% endif %}
 
@@ -1194,7 +1186,7 @@
                     </div>
 
                     <div class="flex justify-center gap-3 mt-6">
-                        <button id="favSelectBtn" class="font-semibold px-6 py-2.5 rounded-xl transition text-sm" style="background: var(--accent); color: var(--bg-base);">Zapisz drużynę</button>
+                        <button id="favSelectBtn" class="font-semibold px-6 py-2.5 rounded-xl transition text-sm" style="background: var(--accent); color: var(--bg-base);">Dalej: wybierz gwiazdę →</button>
                         <button onclick="closeFavModal()" class="font-semibold px-6 py-2.5 rounded-xl transition text-sm" style="background: var(--bg-elevated); color: var(--text-muted); border: 1px solid var(--border-subtle);">Anuluj</button>
                     </div>
                 </div>
@@ -1246,7 +1238,7 @@
                         <span id="sp-counter" class="text-xs" style="color: var(--text-faint);">1 / 18</span>
                     </div>
                     <div class="flex justify-center gap-3 mt-6">
-                        <button id="spSelectFinalBtn" class="font-semibold px-6 py-2.5 rounded-xl transition text-sm" style="background: var(--accent); color: var(--bg-base);">Zapisz gwiazdę</button>
+                        <button id="spSelectFinalBtn" class="font-semibold px-6 py-2.5 rounded-xl transition text-sm" style="background: var(--accent); color: var(--bg-base);">Zapisz drużynę i gwiazdę</button>
                         <button onclick="document.getElementById('starPlayerModal').style.display='none'" class="font-semibold px-6 py-2.5 rounded-xl transition text-sm" style="background: var(--bg-elevated); color: var(--text-muted); border: 1px solid var(--border-subtle);">Anuluj</button>
                     </div>
                 </div>
@@ -2084,8 +2076,10 @@ const TEAM_DATA = {
         function showFavoriteTeamModal() {
             const modal = document.getElementById('favoriteTeamModal');
             if (!modal) return;
-            favCurrentIdx = 0;
-            renderFavCard(0);
+            const favTeam = '{{ current_player.favorite_team if current_player else "" }}';
+            const idx = favTeam ? FAV_TEAMS_LIST.indexOf(favTeam) : -1;
+            favCurrentIdx = idx >= 0 ? idx : 0;
+            renderFavCard(favCurrentIdx);
             modal.style.display = 'block';
         }
 
@@ -2139,32 +2133,31 @@ const TEAM_DATA = {
         ];
 
         let spCurrentIdx = 0;
+        let pendingTeam = "";  // drużyna wybrana w kroku 1, zapisywana RAZEM z gwiazdą na końcu
 
-        // Zapis SAMEJ drużyny – niezależny wybór.
-// ==========================================
-        // KREATOR WYBORU: Drużyna -> Gwiazda -> Zapis
-        // ==========================================
-        let pendingFavoriteTeam = null;
-        // Bezpieczne sprawdzenie, czy gracz ma już przypisaną drużynę
-        const favTeamValue = '{{ current_player.favorite_team if current_player else "" }}';
-        const alreadyHasTeam = favTeamValue !== '' && favTeamValue !== 'None';
-
-        // --- KROK 1: Modul Drużyny ---
-        const favBtn = document.getElementById('favSelectBtn');
-        if (favBtn) {
-            favBtn.textContent = "Dalej (Wybierz Gwiazdę) →";
-            // Klonujemy przycisk, aby wyczyścić wszelkie zepsute zdarzenia z poprzednich kliknięć
-            const newFavBtn = favBtn.cloneNode(true);
-            favBtn.parentNode.replaceChild(newFavBtn, favBtn);
-            
-            newFavBtn.addEventListener('click', () => {
-                pendingFavoriteTeam = FAV_TEAMS_LIST[favCurrentIdx];
-                document.getElementById('favoriteTeamModal').style.display = 'none';
-                showStarPlayerModal();
-            });
+        // Wejście w przepływ: najpierw drużyna, potem od razu piłkarz.
+        function startPickFlow() {
+            pendingTeam = "";
+            showFavoriteTeamModal();
         }
+        window.startPickFlow = startPickFlow;
 
-        // Funkcje nawigacji i renderowania dla Gwiazdy (zostają takie same, by wszystko działało)
+        // KROK 1 -> KROK 2: zapamiętaj drużynę i od razu pokaż wybór piłkarza (BEZ zapisu).
+        document.getElementById('favSelectBtn')?.addEventListener('click', () => {
+            pendingTeam = FAV_TEAMS_LIST[favCurrentIdx];
+
+            document.getElementById('favoriteTeamModal').style.display = 'none';
+
+            const starModal = document.getElementById('starPlayerModal');
+            if (!starModal) {
+                alert('Błąd: brak okna wyboru piłkarza. Odśwież stronę.');
+                return;
+            }
+            spCurrentIdx = 0;
+            renderStarPlayerCard(spCurrentIdx);
+            starModal.style.display = 'block';
+        });
+
         function spNav(dir) {
             spCurrentIdx = (spCurrentIdx + dir + STAR_PLAYERS.length) % STAR_PLAYERS.length;
             renderStarPlayerCard(spCurrentIdx);
@@ -2184,13 +2177,16 @@ const TEAM_DATA = {
             document.getElementById('sp-name').textContent = player.name;
             document.getElementById('sp-country').textContent = player.country;
             document.getElementById('sp-flag').src = code ? `${FLAG_BASE_URL}${code}.svg` : '';
+
             document.getElementById('sp-age').textContent = player.age;
             document.getElementById('sp-height').textContent = player.height;
             document.getElementById('sp-weight').textContent = player.weight;
             document.getElementById('sp-foot').textContent = player.foot;
+
             document.getElementById('sp-matches').textContent = player.matches;
             document.getElementById('sp-goals').textContent = player.goals;
             document.getElementById('sp-assists').textContent = player.assists;
+
             document.getElementById('sp-counter').textContent = `${idx + 1} / ${STAR_PLAYERS.length}`;
 
             const card = document.getElementById('spCard');
@@ -2198,63 +2194,49 @@ const TEAM_DATA = {
             setTimeout(() => { card.style.transform = 'scale(1)'; }, 150);
         }
 
-        // --- KROK 2: Modul Gwiazdy i Zapis ---
-        const spBtn = document.getElementById('spSelectFinalBtn');
-        if (spBtn) {
-            spBtn.textContent = "Zapisz ostateczny wybór";
-            const newSpBtn = spBtn.cloneNode(true);
-            spBtn.parentNode.replaceChild(newSpBtn, spBtn);
-            
-            newSpBtn.addEventListener('click', async (e) => {
-                const selectedPlayer = STAR_PLAYERS[spCurrentIdx].name;
-                const playerIdStr = '{{ current_player.id if current_player else 0 }}';
-                const playerId = parseInt(playerIdStr);
+        document.getElementById('spSelectFinalBtn')?.addEventListener('click', async (e) => {
+            const selectedPlayer = STAR_PLAYERS[spCurrentIdx].name;
+            const playerId = {{ current_player.id if current_player else 0 }};
+            const btn = e.currentTarget;
 
-                // Zabezpieczenie: jeśli ktoś odpali z palca Modul Gwiazdy, a nie ma drużyny
-                if (!alreadyHasTeam && !pendingFavoriteTeam) {
-                    alert("Najpierw musisz wybrać swoją ulubioną drużynę!");
-                    document.getElementById('starPlayerModal').style.display = 'none';
-                    showFavoriteTeamModal();
-                    return;
-                }
+            // ZAPIS OBOJGA NARAZ: drużyna (z kroku 1, lub już zapisana) + gwiazda.
+            const teamToSave = pendingTeam || '{{ current_player.favorite_team if current_player else "" }}';
 
-                if (playerId && selectedPlayer) {
-                    const btn = e.currentTarget;
-                    btn.disabled = true;
-                    btn.textContent = 'Zapisywanie...';
-
-                    // Łączymy oba wybory w jeden request do backendu
-                    const payload = { star_player: selectedPlayer };
-                    if (pendingFavoriteTeam && !alreadyHasTeam) {
-                        payload.favorite_team = pendingFavoriteTeam;
-                    }
-
-                    try {
-                        const response = await fetch(`/players/${playerId}/favorite`, {
-                            method: 'PUT',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(payload)
-                        });
-                        
-                        if (!response.ok) {
-                            const err = await response.json();
-                            alert("Błąd zapisu z backendu: " + (err.detail || JSON.stringify(err)));
-                            btn.disabled = false;
-                            btn.textContent = 'Zapisz ostateczny wybór';
-                            return;
-                        }
-                    } catch (err) {
-                        alert("Wystąpił błąd sieci. Spróbuj ponownie.");
+            if (playerId && selectedPlayer) {
+                btn.disabled = true;
+                btn.textContent = 'Zapisywanie…';
+                try {
+                    const res = await fetch(`/players/${playerId}/favorite`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ favorite_team: teamToSave, star_player: selectedPlayer })
+                    });
+                    if (!res.ok) {
+                        let detail = `Błąd serwera (${res.status})`;
+                        try { const d = await res.json(); if (d.detail) detail = d.detail; } catch (_) {}
+                        alert('Nie udało się zapisać: ' + detail);
                         btn.disabled = false;
-                        btn.textContent = 'Zapisz ostateczny wybór';
+                        btn.textContent = 'Zapisz drużynę i gwiazdę';
                         return;
                     }
+                } catch (err) {
+                    alert('Błąd połączenia przy zapisie.');
+                    btn.disabled = false;
+                    btn.textContent = 'Zapisz drużynę i gwiazdę';
+                    return;
                 }
-                
-                document.getElementById('starPlayerModal').style.display = 'none';
-                location.reload();
-            });
-        }
+            }
+            document.getElementById('starPlayerModal').style.display = 'none';
+            location.reload();
+        });
+
+        document.addEventListener('keydown', (e) => {
+            const modal = document.getElementById('favoriteTeamModal');
+            if (modal && modal.style.display !== 'none') {
+                if (e.key === 'ArrowLeft') favNav(-1);
+                if (e.key === 'ArrowRight') favNav(1);
+            }
+        });
 
         async function checkFavoriteTeam() {
             const playerId = {{ current_player.id if current_player else 0 }};
@@ -2275,7 +2257,7 @@ const TEAM_DATA = {
             if (!starModal) return;
 
             // Ustaw karuzelę na aktualnie wybranego piłkarza (jeśli jest).
-            const currentStar = '{{ current_player.star_player or "" }}';
+            const currentStar = '{{ current_player.star_player if current_player else "" }}';
             const starIdx = STAR_PLAYERS.findIndex(p => p.name === currentStar);
             spCurrentIdx = starIdx >= 0 ? starIdx : 0;
 
@@ -2296,7 +2278,7 @@ const TEAM_DATA = {
         }
 
         function updateSidebarStar() {
-            const starName = '{{ current_player.star_player or "" }}';
+            const starName = '{{ current_player.star_player if current_player else "" }}';
             const img = document.getElementById('sidebar-star-img');
             if (!img || !starName) return;
             const player = STAR_PLAYERS.find(p => p.name === starName);
