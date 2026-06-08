@@ -1022,52 +1022,64 @@ def admin_panel(request: Request, db: Session = Depends(get_db)):
         """
 
     # Budowanie kafelków z meczami
-    matches_html = ""
+    pending_html = ""
+    finished_html = ""
+    pending_count = 0
+    finished_count = 0
+
     for m in matches:
         scorers_val = ", ".join(m.scorers) if m.scorers else ""
         is_ko = m.stage != "group"
-        pen_finished = f'<input type="text" id="pen-{m.id}" value="{m.penalties or ""}" placeholder="Karne np. 4:3 (przy remisie)" class="w-full bg-[#1a1e26] border border-amber-500/30 rounded-lg px-2.5 py-1 text-xs text-amber-300 focus:outline-none focus:border-amber-500">' if is_ko else ""
-        pen_pending = f'<input type="text" id="pen-{m.id}" placeholder="Karne np. 4:3 (przy remisie)" class="w-full bg-[#1a1e26] border border-amber-500/30 rounded-lg px-2.5 py-1 text-xs text-amber-300 focus:outline-none focus:border-amber-500">' if is_ko else ""
+        pen_input = f'<input type="text" id="pen-{m.id}" value="{m.penalties or ""}" placeholder="Karne (np. 4:3)" class="w-full bg-[#1a1e26] border border-white/10 rounded-lg px-3 py-2 text-xs text-amber-300 focus:outline-none focus:border-amber-500 mb-2">' if is_ko else ""
+        
+        date_str = m.match_date.strftime("%d.%m %H:%M") if m.match_date else ""
+        card_class = "match-card p-4 rounded-xl border bg-[#14171d] flex flex-col gap-3 shadow-sm transition hover:border-white/20"
+        search_data = f"{m.home_team.lower()} {m.away_team.lower()}"
+
         if m.is_finished:
-            pen_label = f' &nbsp;·&nbsp; karne {m.penalties}' if m.penalties else ''
-            status_badge = f'<span class="text-gray-400 bg-white/5 px-2 py-0.5 rounded text-xs font-medium">Zakończony ({m.result}{pen_label})</span>'
-            action_fields = f"""
-            <div class="flex flex-col gap-2 mt-2 pt-2 border-t border-white/5">
-                <p class="text-[11px] text-gray-500 italic">Popraw wynik / bramki:</p>
-                <div class="flex gap-2">
-                    <input type="text" id="res-{m.id}" value="{m.result or ''}" placeholder="Wynik np. 2:1" class="w-24 bg-[#1a1e26] border border-white/10 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none focus:border-amber-500">
-                    <input type="text" id="sc-{m.id}" value="{scorers_val}" placeholder="Strzelcy (np. Mbappe, Neymar)" class="flex-1 bg-[#1a1e26] border border-white/10 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none focus:border-amber-500">
+            finished_count += 1
+            pen_label = f' <span class="text-amber-500 text-xs">(k. {m.penalties})</span>' if m.penalties else ''
+            finished_html += f"""
+            <div class="{card_class} border-white/5" data-teams="{search_data}">
+                <div class="flex items-center justify-between border-b border-white/5 pb-2">
+                    <span class="text-[10px] font-mono text-gray-500">{date_str} | ID: {m.id}</span>
+                    <span class="text-gray-400 bg-white/5 px-2 py-0.5 rounded text-[10px] font-medium">Zakończony</span>
                 </div>
-                {pen_finished}
-                <button onclick="saveMatch({m.id})" class="w-full bg-white/10 hover:bg-white/20 text-white font-bold text-xs py-1.5 rounded-lg transition">Zaktualizuj wynik</button>
+                <div class="text-sm font-bold text-white text-center">
+                    {m.home_team} <span class="text-emerald-400 mx-1">{m.result}</span> {m.away_team}{pen_label}
+                </div>
+                <div class="mt-auto pt-2 border-t border-white/5">
+                    <p class="text-[10px] text-gray-500 mb-1.5 italic">Popraw wynik / bramki:</p>
+                    <div class="flex gap-2 mb-2">
+                        <input type="text" id="res-{m.id}" value="{m.result or ''}" class="w-16 text-center bg-[#1a1e26] border border-white/10 rounded-lg px-2 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+                        <input type="text" id="sc-{m.id}" value="{scorers_val}" placeholder="Strzelcy (np. Mbappe, Kane)" class="flex-1 bg-[#1a1e26] border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+                    </div>
+                    {pen_input}
+                    <button onclick="saveMatch({m.id})" class="w-full bg-white/10 hover:bg-white/20 text-white font-bold text-xs py-2 rounded-lg transition">Aktualizuj wynik</button>
+                </div>
             </div>
             """
         else:
-            status_badge = '<span class="text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded text-xs font-medium">Oczekuje</span>'
-            action_fields = f"""
-            <div class="flex flex-col gap-2 mt-2 pt-2 border-t border-white/5">
-                <div class="flex gap-2">
-                    <input type="text" id="res-{m.id}" placeholder="Wynik np. 2:1" class="w-24 bg-[#1a1e26] border border-white/10 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none focus:border-amber-500">
-                    <input type="text" id="sc-{m.id}" placeholder="Strzelcy (np. Mbappe, Neymar)" class="flex-1 bg-[#1a1e26] border border-white/10 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none focus:border-amber-500">
+            pending_count += 1
+            pending_html += f"""
+            <div class="{card_class} border-l-2 border-l-amber-500 border-white/5" data-teams="{search_data}">
+                <div class="flex items-center justify-between border-b border-white/5 pb-2">
+                    <span class="text-[10px] font-mono text-gray-500">{date_str} | ID: {m.id}</span>
+                    <span class="text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded text-[10px] font-medium animate-pulse">Oczekuje</span>
                 </div>
-                {pen_pending}
-                <button onclick="saveMatch({m.id})" class="w-full bg-amber-500 hover:bg-amber-600 text-gray-900 font-bold text-xs py-1.5 rounded-lg transition shadow-md">Zatwierdź i Rozlicz Punkty</button>
+                <div class="text-sm font-bold text-white text-center py-1">
+                    {m.home_team} <span class="text-gray-600 mx-1">vs</span> {m.away_team}
+                </div>
+                <div class="mt-auto pt-2">
+                    <div class="flex gap-2 mb-2">
+                        <input type="text" id="res-{m.id}" placeholder="Wynik" class="w-16 text-center bg-[#1a1e26] border border-amber-500/40 rounded-lg px-2 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+                        <input type="text" id="sc-{m.id}" placeholder="Strzelcy (po przecinku)" class="flex-1 bg-[#1a1e26] border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+                    </div>
+                    {pen_input}
+                    <button onclick="saveMatch({m.id})" class="w-full bg-amber-500 hover:bg-amber-600 text-gray-900 font-bold text-xs py-2.5 rounded-lg transition shadow-md">Rozlicz Punkty</button>
+                </div>
             </div>
             """
-        
-        date_str = m.match_date.strftime("%d.%m %H:%M") if m.match_date else ""
-        matches_html += f"""
-        <div class="p-4 rounded-xl border border-white/5 bg-[#14171d] flex flex-col justify-between gap-1 shadow-sm">
-            <div class="flex items-center justify-between border-b border-white/5 pb-1.5 mb-1">
-                <span class="text-[10px] font-mono text-gray-500">{date_str} &nbsp;(ID: {m.id})</span>
-                {status_badge}
-            </div>
-            <div class="text-sm font-semibold text-white py-0.5">
-                {m.home_team} <span class="text-amber-500/60 px-0.5 text-xs font-normal">vs</span> {m.away_team}
-            </div>
-            {action_fields}
-        </div>
-        """
 
     html_content = f"""
     <!DOCTYPE html>
@@ -1079,154 +1091,179 @@ def admin_panel(request: Request, db: Session = Depends(get_db)):
         <script src="https://cdn.tailwindcss.com"></script>
         <style>
             body {{ background-color: #0b0d11; color: #94a3b8; font-family: system-ui, sans-serif; }}
-            ::-webkit-scrollbar {{ width: 6px; }}
-            ::-webkit-scrollbar-thumb {{ background: rgba(255,255,255,0.05); border-radius: 10px; }}
+            ::-webkit-scrollbar {{ width: 6px; height: 6px; }}
+            ::-webkit-scrollbar-thumb {{ background: rgba(255,255,255,0.08); border-radius: 10px; }}
         </style>
     </head>
     <body class="p-4 md:p-8">
-        <div class="max-w-6xl mx-auto">
+        <div class="max-w-7xl mx-auto">
             
-            <div class="flex flex-wrap items-center justify-between border-b border-white/10 pb-4 mb-6 gap-4">
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between border-b border-white/10 pb-5 mb-6 gap-4">
                 <div>
-                    <h1 class="text-2xl font-bold text-white tracking-tight">⚙️ Panel Zarządzania Typerem</h1>
-                    <p class="text-xs text-gray-500 mt-0.5">Rozliczanie meczów turniejowych i podgląd tabeli na żywo</p>
+                    <h1 class="text-2xl font-bold text-white tracking-tight">⚙️ Panel Admina</h1>
+                    <p class="text-xs text-gray-500 mt-1">Zarządzanie wynikami Mistrzostw Świata 2026</p>
                 </div>
-                <div class="flex items-center gap-2 bg-[#14171d] p-1.5 rounded-xl border border-white/5">
-                    <input type="password" id="admin-secret-input" placeholder="Wpisz Twój ADMIN_SECRET" class="bg-[#1a1e26] border border-white/5 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500 w-48">
-                    <button onclick="saveSecret()" class="bg-amber-500 hover:bg-amber-600 text-gray-900 text-xs font-bold px-3 py-1.5 rounded-lg transition shadow">Autoryzuj</button>
-                    <button onclick="buildKnockout()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition shadow">🏆 Zbuduj fazę pucharową</button>
+                <div class="flex flex-wrap items-center gap-2 bg-[#14171d] p-1.5 rounded-xl border border-white/5">
+                    <input type="password" id="admin-secret-input" placeholder="Klucz ADMIN_SECRET" class="bg-[#1a1e26] border border-white/5 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500 w-40">
+                    <button onclick="saveSecret()" class="bg-white/10 hover:bg-white/20 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition">Zapisz</button>
+                    <button onclick="buildKnockout()" class="bg-emerald-600/20 text-emerald-400 border border-emerald-600/30 hover:bg-emerald-600 hover:text-white text-xs font-bold px-3 py-1.5 rounded-lg transition">🏆 Zbuduj Drabinkę</button>
+                    <button onclick="recalculateAll()" class="bg-rose-600/20 text-rose-400 border border-rose-600/30 hover:bg-rose-600 hover:text-white text-xs font-bold px-3 py-1.5 rounded-lg transition">⚠️ Przelicz wszystko</button>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                
-                <div class="lg:col-span-2 space-y-4">
-                    <div class="bg-[#14171d] border border-white/5 rounded-2xl p-4 shadow-xl">
-                        <div class="flex items-center justify-between mb-4 border-b border-white/5 pb-2">
-                            <h2 class="text-xs font-bold uppercase tracking-wider text-gray-400">👥 Lista Graczy w bazie</h2>
-                            <span class="text-[10px] font-mono bg-white/5 px-2 py-0.5 rounded text-gray-400">{len(players)} zarejestrowanych</span>
-                        </div>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left border-collapse">
-                                <thead>
-                                    <tr class="border-b border-white/10 text-xs uppercase tracking-wider text-gray-500">
-                                        <th class="p-3 font-semibold">Gracz</th>
-                                        <th class="p-3 font-semibold">Punkty</th>
-                                        <th class="p-3 font-semibold">Imię i nazwisko</th>
-                                        <th class="p-3 font-semibold">Gwiazda</th>
-                                        <th class="p-3 font-semibold">Zespół</th>
-                                        <th class="p-3 font-semibold text-right">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {players_html}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="space-y-4">
-                    <div class="bg-[#14171d] border border-white/5 rounded-2xl p-4 shadow-xl">
-                        <h2 class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-4 border-b border-white/5 pb-2">⚽ Rozliczanie Terminarza</h2>
-                        <div class="space-y-3 max-h-[75vh] overflow-y-auto pr-1">
-                            {matches_html}
-                        </div>
-                    </div>
-                </div>
-
+            <div class="flex gap-2 mb-6 border-b border-white/5 pb-4 overflow-x-auto">
+                <button onclick="showTab('pending')" id="btn-pending" class="px-5 py-2.5 text-sm font-bold rounded-xl bg-amber-500 text-black shrink-0 transition shadow-lg shadow-amber-500/10">Do rozliczenia ({pending_count})</button>
+                <button onclick="showTab('finished')" id="btn-finished" class="px-5 py-2.5 text-sm font-bold rounded-xl bg-white/5 text-gray-400 hover:text-white shrink-0 transition">Zakończone ({finished_count})</button>
+                <button onclick="showTab('players')" id="btn-players" class="px-5 py-2.5 text-sm font-bold rounded-xl bg-white/5 text-gray-400 hover:text-white shrink-0 transition">Tabela Graczy</button>
             </div>
+
+            <div id="search-container" class="mb-6 relative">
+                <input type="text" id="searchInput" onkeyup="filterMatches()" placeholder="🔍 Wyszukaj drużynę (np. Polska, Brazylia)..." class="w-full bg-[#14171d] border border-white/10 rounded-xl px-5 py-3.5 text-sm text-white focus:outline-none focus:border-amber-500 shadow-sm transition">
+            </div>
+
+            <div id="tab-pending" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+                {pending_html}
+            </div>
+
+            <div id="tab-finished" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 hidden">
+                {finished_html}
+            </div>
+
+            <div id="tab-players" class="hidden">
+                <div class="bg-[#14171d] border border-white/5 rounded-2xl p-1 shadow-xl overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-white/10 text-xs uppercase tracking-wider text-gray-500">
+                                <th class="p-4 font-semibold">Gracz</th>
+                                <th class="p-4 font-semibold">Punkty</th>
+                                <th class="p-4 font-semibold">Imię i nazwisko</th>
+                                <th class="p-4 font-semibold">Gwiazda</th>
+                                <th class="p-4 font-semibold">Zespół</th>
+                                <th class="p-4 font-semibold text-right">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {players_html}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
         </div>
 
         <script>
-            // Automatyczne załadowanie klucza z pamięci przeglądarki przy starcie
+            // Obsługa zapisywania klucza
             document.addEventListener('DOMContentLoaded', () => {{
                 const savedSecret = localStorage.getItem('app_admin_secret');
-                if (savedSecret) {{
-                    document.getElementById('admin-secret-input').value = savedSecret;
-                }}
+                if (savedSecret) {{ document.getElementById('admin-secret-input').value = savedSecret; }}
             }});
 
             function saveSecret() {{
                 const val = document.getElementById('admin-secret-input').value.trim();
                 if(!val) return alert('Wpisz sekretny klucz!');
                 localStorage.setItem('app_admin_secret', val);
-                alert('Klucz autoryzacyjny został zapisany w przeglądarce!');
+                alert('Klucz autoryzacyjny zapisany!');
+            }}
+
+            // Obsługa Zakładek (Tabów)
+            function showTab(tabId) {{
+                document.getElementById('tab-pending').classList.add('hidden');
+                document.getElementById('tab-finished').classList.add('hidden');
+                document.getElementById('tab-players').classList.add('hidden');
+                
+                const inactiveClass = "px-5 py-2.5 text-sm font-bold rounded-xl bg-white/5 text-gray-400 hover:text-white shrink-0 transition";
+                const activeClass = "px-5 py-2.5 text-sm font-bold rounded-xl bg-amber-500 text-black shrink-0 transition shadow-lg shadow-amber-500/10";
+
+                document.getElementById('btn-pending').className = inactiveClass;
+                document.getElementById('btn-finished').className = inactiveClass;
+                document.getElementById('btn-players').className = inactiveClass;
+
+                document.getElementById('tab-' + tabId).classList.remove('hidden');
+                document.getElementById('btn-' + tabId).className = activeClass;
+
+                if (tabId === 'players') {{
+                    document.getElementById('search-container').classList.add('hidden');
+                }} else {{
+                    document.getElementById('search-container').classList.remove('hidden');
+                    filterMatches(); // Odśwież wyszukiwanie dla nowej zakładki
+                }}
+            }}
+
+            // Szybkie Wyszukiwanie Meczów
+            function filterMatches() {{
+                const query = document.getElementById('searchInput').value.toLowerCase();
+                document.querySelectorAll('.match-card').forEach(card => {{
+                    if(card.dataset.teams.includes(query)) {{
+                        card.style.display = 'flex';
+                    }} else {{
+                        card.style.display = 'none';
+                    }}
+                }});
             }}
 
             async function buildKnockout() {{
                 const secret = document.getElementById('admin-secret-input').value.trim();
-                if (!secret) {{ alert('Najpierw podaj ADMIN_SECRET!'); return; }}
-                if (!confirm('Zbudować/odświeżyć fazę pucharową na podstawie wyników? (bezpieczne — nie nadpisuje istniejących meczów)')) return;
+                if (!secret) return alert('Najpierw podaj ADMIN_SECRET!'); 
+                if (!confirm('Zbudować drabinkę pucharową z dostępnych drużyn?')) return;
                 try {{
                     const r = await fetch('/admin/advance', {{ method: 'POST', headers: {{ 'x-admin-secret': secret }} }});
-                    if (r.ok) {{ alert('Gotowe! Drabinka zaktualizowana. Sprawdź zakładkę Drabinka.'); location.reload(); }}
+                    if (r.ok) {{ alert('Gotowe! Drabinka zaktualizowana.'); location.reload(); }}
                     else {{ const e = await r.json(); alert('Błąd: ' + JSON.stringify(e.detail || e)); }}
-                }} catch (err) {{ alert('Błąd połączenia: ' + err); }}
+                }} catch (err) {{ alert('Błąd: ' + err); }}
+            }}
+
+            async function recalculateAll() {{
+                if (!confirm('Czy na pewno chcesz przeliczyć całą bazę danych od nowa? Skrypt usunie złą drabinkę i zbuduje punkty od zera.')) return;
+                try {{
+                    const r = await fetch('/admin/recalculate-all');
+                    const d = await r.json();
+                    alert(d.message || 'Przeliczono!');
+                    location.reload();
+                }} catch(err) {{ alert('Błąd: ' + err); }}
             }}
 
             async function saveMatch(matchId) {{
                 const secret = document.getElementById('admin-secret-input').value.trim();
-                if (!secret) {{
-                    alert('Błąd: Musisz podać ADMIN_SECRET w polu na górze strony!');
-                    return;
-                }}
+                if (!secret) return alert('Błąd: Musisz podać ADMIN_SECRET na górze!');
 
                 const resultString = document.getElementById('res-' + matchId).value.trim();
                 const scorersString = document.getElementById('sc-' + matchId).value.trim();
                 const penEl = document.getElementById('pen-' + matchId);
                 const penString = penEl ? penEl.value.trim() : '';
 
-                if (!resultString) {{
-                    alert('Błąd: Musisz podać ostateczny wynik (np. 1:0)!');
-                    return;
-                }}
+                if (!resultString) return alert('Błąd: Podaj ostateczny wynik (np. 2:1)');
 
-                // W fazie pucharowej remis wymaga karnych (żeby wyłonić zwycięzcę)
                 if (penEl) {{
                     const rp = resultString.split(':');
                     if (rp.length === 2 && rp[0].trim() === rp[1].trim() && !penString) {{
-                        alert('To mecz pucharowy i jest remis — podaj wynik karnych (np. 4:3), żeby wyłonić zwycięzcę.');
-                        return;
+                        return alert('To mecz pucharowy z remisem — podaj wynik karnych (np. 4:3).');
                     }}
                 }}
 
-                // Zamiana strzelców po przecinku na czystą tablicę JSON
                 const scorersArray = scorersString ? scorersString.split(',').map(s => s.trim()).filter(s => s.length > 0) : [];
 
-                if (!confirm('Czy na pewno chcesz zapisać wynik ' + resultString + (penString ? ' (karne ' + penString + ')' : '') + ' dla meczu o ID: ' + matchId + '? System automatycznie przeliczy punkty wszystkim graczom.')) return;
+                if (!confirm('Zapisać wynik ' + resultString + (penString ? ' (k.' + penString + ')' : '') + ' i rozliczyć punkty graczy?')) return;
 
                 try {{
                     const response = await fetch('/matches/' + matchId + '/result', {{
                         method: 'PUT',
-                        headers: {{
-                            'Content-Type': 'application/json',
-                            'x-admin-secret': secret
-                        }},
-                        body: JSON.stringify({{
-                            result: resultString,
-                            scorers: scorersArray,
-                            penalties: penString || null
-                        }})
+                        headers: {{ 'Content-Type': 'application/json', 'x-admin-secret': secret }},
+                        body: JSON.stringify({{ result: resultString, scorers: scorersArray, penalties: penString || null }})
                     }});
 
                     if (response.ok) {{
-                        alert('Sukces! Wynik wprowadzony, punkty przyznane.');
                         location.reload();
                     }} else {{
                         const errData = await response.json();
-                        alert('Błąd serwera: ' + (errData.detail || 'Niepoprawny ADMIN_SECRET lub błąd danych.'));
+                        alert('Błąd serwera: ' + (errData.detail || 'Złe dane.'));
                     }}
-                }} catch (err) {{
-                    alert('Błąd połączenia sieciowego: ' + err.message);
-                }}
+                }} catch (err) {{ alert('Błąd sieci: ' + err.message); }}
             }}
         </script>
     </body>
     </html>
     """
     return html_content
-
 
 @app.get("/admin/recalculate-all")
 def recalculate_all_points(db: Session = Depends(get_db)):
