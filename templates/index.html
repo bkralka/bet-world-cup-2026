@@ -2135,14 +2135,22 @@ const TEAM_DATA = {
         let spCurrentIdx = 0;
         let temporarySelectedTeam = "";
 
-        document.getElementById('favSelectBtn')?.addEventListener('click', () => {
-            temporarySelectedTeam = FAV_TEAMS_LIST[favCurrentIdx];
-            document.getElementById('favoriteTeamModal').style.display = 'none';
+            document.getElementById('favSelectBtn')?.addEventListener('click', () => {
+                temporarySelectedTeam = FAV_TEAMS_LIST[favCurrentIdx];
+                document.getElementById('favoriteTeamModal').style.display = 'none';
 
-            spCurrentIdx = 0;
-            renderStarPlayerCard(spCurrentIdx);
-            document.getElementById('starPlayerModal').style.display = 'block';
-        });
+                // Sprawdź, czy modal gwiazdy istnieje
+                const starModal = document.getElementById('starPlayerModal');
+                if (!starModal) {
+                    console.error('❌ Brak elementu #starPlayerModal w DOM!');
+                    alert('Wystąpił błąd – nie można wybrać gwiazdy. Odśwież stronę i spróbuj ponownie.');
+                    return;
+                }
+
+                spCurrentIdx = 0;
+                renderStarPlayerCard(spCurrentIdx);
+                starModal.style.display = 'block';
+            });
 
         function spNav(dir) {
             spCurrentIdx = (spCurrentIdx + dir + STAR_PLAYERS.length) % STAR_PLAYERS.length;
