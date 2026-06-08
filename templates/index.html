@@ -299,9 +299,9 @@
 <div id="tab-home" class="tab-content active">
 <div class="grid lg:grid-cols-2 gap-6 mb-10">
     <div class="flat-card rounded-2xl p-7">
-<div class="flex justify-between items-start mb-6">
-            <div class="flex flex-col gap-1">
-                <p class="text-[10px] font-semibold uppercase tracking-[0.15em] mb-2" style="color: var(--text-faint);">Gracz</p>
+<div class="flex flex-col gap-2 mb-6">
+            <p class="text-[10px] font-semibold uppercase tracking-[0.15em]" style="color: var(--text-faint);">Gracz</p>
+            <div class="flex flex-wrap items-center gap-3">
                 <h2 class="font-display text-3xl font-bold tracking-tight flex items-center gap-3">
                     {% if current_player %}
                         <span>{{ current_player.username }}</span>
@@ -312,13 +312,13 @@
                         <span style="color: var(--text-faint);">Brak gracza</span>
                     {% endif %}
                 </h2>
-            </div>
 
-            {% if current_player and current_player.current_streak > 0 %}
-            <div class="flex gap-2 items-center px-3 py-1.5 rounded-lg" style="background: var(--accent-soft); border: 1px solid rgba(232,138,91,0.25);">
-                <span class="text-xs font-semibold tracking-wide" style="color: var(--accent);">🔥 {{ current_player.current_streak }} serii</span>
+                {% if current_player and current_player.current_streak > 0 %}
+                <div class="flex gap-1.5 items-center px-2.5 py-1 rounded-lg translate-y-[-2px]" style="background: var(--accent-soft); border: 1px solid rgba(232,138,91,0.25);">
+                    <span class="text-xs font-bold tracking-wide" style="color: var(--accent);">🔥 {{ current_player.current_streak }} serii</span>
+                </div>
+                {% endif %}
             </div>
-            {% endif %}
         </div>
 
         <div class="grid grid-cols-3 gap-3">
@@ -1366,26 +1366,28 @@
                     return;
                 }
 
-                let html = `<table class="w-full min-table table-fixed"><thead><tr><th class="text-left w-2/5 pl-4">Mecz</th><th class="text-center">Data</th><th class="text-center">Typ</th><th class="text-center">Wynik</th><th class="text-center pr-2">Punkty</th></tr></thead><tbody>`;
+        let html = `<table class="w-full min-table table-auto"><thead><tr><th class="text-left pl-4">Mecz</th><th class="text-center hidden sm:table-cell">Data</th><th class="text-center">Typ</th><th class="text-center">Wynik</th><th class="text-center pr-4">Pkt</th></tr></thead><tbody>`;
                 for (const pick of history) {
                     const isCorrect = pick.is_correct === true;
                     const statusClass = pick.is_finished ? (pick.points_earned > 0 ? 'history-correct' : (pick.points_earned < 0 ? 'history-wrong' : '')) : '';
                     const pointsStyle = pick.points_earned > 0 ? 'color: var(--success);' : (pick.points_earned < 0 ? 'color: var(--danger);' : 'color: var(--text-muted);');
                     const homeCode = FLAG_CODES[pick.home_team];
                     const awayCode = FLAG_CODES[pick.away_team];
-                    const homeFlag = homeCode ? `<img src="${FLAG_BASE_URL}${homeCode}.svg" class="flag-icon" style="width:16px;height:12px;margin-right:6px;" onerror="this.style.display='none'">` : '';
-                    const awayFlag = awayCode ? `<img src="${FLAG_BASE_URL}${awayCode}.svg" class="flag-icon" style="width:16px;height:12px;margin-left:6px;margin-right:0;" onerror="this.style.display='none'">` : '';
+                    const homeFlag = homeCode ? `<img src="${FLAG_BASE_URL}${homeCode}.svg" class="flag-icon" style="width:16px;height:12px;margin-right:4px;" onerror="this.style.display='none'">` : '';
+                    const awayFlag = awayCode ? `<img src="${FLAG_BASE_URL}${awayCode}.svg" class="flag-icon" style="width:16px;height:12px;margin-left:4px;margin-right:0;" onerror="this.style.display='none'">` : '';
 
                     let resultText = pick.actual_result || '—';
-                    if (pick.penalties) resultText += ` <span style="color: var(--gold); font-size:10px;">k.${pick.penalties}</span>`;
+                    if (pick.penalties) resultText += ` <br class="sm:hidden"><span style="color: var(--gold); font-size:9px;">k.${pick.penalties}</span>`;
+                    
+                    const dateFormatted = new Date(pick.match_date).toLocaleDateString('pl-PL', {day: '2-digit', month: '2-digit', year: 'numeric'});
 
                     html += `<tr class="${statusClass}" style="cursor:${pick.breakdown ? 'pointer' : 'default'};" onclick="toggleBreakdown('bd-${pick.match_id}')">`;
-                    html += `<td class="font-medium whitespace-nowrap overflow-hidden text-ellipsis pl-4">${homeFlag} ${pick.home_team} <span style="color: var(--text-faint);" class="text-xs mx-1">vs</span> ${pick.away_team} ${awayFlag}</td>`;
-                    html += `<td class="text-center text-xs" style="color: var(--text-muted);">${new Date(pick.match_date).toLocaleDateString('pl-PL')}</td>`;
+                    html += `<td class="font-medium pl-4 py-3 text-xs sm:text-sm leading-tight max-w-[120px] sm:max-w-none truncate">${homeFlag} ${pick.home_team} <br class="sm:hidden"><span style="color: var(--text-faint);" class="text-[10px] mx-1">vs</span> ${pick.away_team} ${awayFlag}</td>`;
+                    html += `<td class="text-center text-xs hidden sm:table-cell" style="color: var(--text-muted);">${dateFormatted}</td>`;
                     html += `<td class="text-center font-mono font-bold text-sm" style="color: var(--success);">${pick.predicted_result}</td>`;
                     html += `<td class="text-center font-mono text-sm" style="color: var(--text-muted);">${resultText}</td>`;
-                    html += `<td class="text-center font-display font-bold text-base pr-2" style="${pointsStyle}">${pick.points_earned || 0}${pick.breakdown ? ' <span style="font-size:9px;color:var(--text-faint);">▾</span>' : ''}</td>`;
-                    html += `</tr>`;
+                    html += `<td class="text-center font-display font-bold text-base pr-4" style="${pointsStyle}">${pick.points_earned || 0}${pick.breakdown ? ' <span style="font-size:9px;color:var(--text-faint);">▾</span>' : ''}</td>`;
+                    html += `</tr>`;        
 
                     // Wiersz rozwijany: rozkład punktów + strzelcy
                     if (pick.is_finished) {
