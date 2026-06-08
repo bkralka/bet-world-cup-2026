@@ -119,6 +119,12 @@ class MatchResultUpdate(BaseModel):
             raise ValueError('Wynik musi być w formacie "X:Y"')
         return v
 
+    @validator('penalties')
+    def validate_penalties_format(cls, v):
+        if v and not re.match(r'^\d{1,2}:\d{1,2}$', v):
+            raise ValueError('Wynik karnych musi być w formacie "X:Y", np. "4:3"')
+        return v
+
 class FavoriteTeamUpdate(BaseModel):
     favorite_team: str
     star_player: str = None

@@ -647,8 +647,8 @@
                 {% set hs = (parts[0]|int) if parts else -1 %}
                 {% set asc = (parts[1]|int) if parts else -1 %}
                 {% set pen = match.penalties.split(':') if match.penalties else None %}
-                {% set ph = (pen[0]|int) if pen else -1 %}
-                {% set pa = (pen[1]|int) if pen else -1 %}
+                {% set ph = (pen[0]|int) if pen and pen|length > 0 else -1 %}
+                {% set pa = (pen[1]|int) if pen and pen|length > 1 else -1 %}
                 {% set hwin = parts and (hs > asc or (hs == asc and pen and ph > pa)) %}
                 {% set awin = parts and (asc > hs or (hs == asc and pen and pa > ph)) %}
                 {% set hpos = positions.get(match.home_team) %}
