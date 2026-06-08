@@ -210,7 +210,7 @@
             justify-content: center;
             font-size: 0.65rem;
             font-weight: 700;
-            margin: 0 1px;
+            flex-shrink: 0;
         }
         .form-w { background-color: var(--success-soft); color: var(--success); }
         .form-d { background-color: rgba(125,211,252,0.12); color: var(--info); }
@@ -530,7 +530,7 @@
                                 <td class="text-center font-semibold" style="color: var(--success);">{{ team.points }}</td>
                                 <td class="text-center font-mono text-xs" style="color: var(--text-muted);">{{ team.goals_for }}:{{ team.goals_against }}</td>
                                 <td class="text-center font-medium" style="color: {% if team.goal_diff >= 0 %}var(--success){% else %}var(--danger){% endif %};">{{ team.goal_diff }}</td>
-                                <td class="text-center pt-3 pb-3 pr-2">{% for c in team.form_str %}<span class="form-icon form-{% if c == 'W' %}w{% elif c == 'D' %}d{% else %}l{% endif %}">{{ c }}</span>{% endfor %}</td>
+                                <td class="text-center pt-3 pb-3 pr-2"><div style="display:flex; gap:3px; justify-content:center; align-items:center; flex-wrap:nowrap;">{% for c in team.form_str %}<span class="form-icon form-{% if c == 'W' %}w{% elif c == 'D' %}d{% else %}l{% endif %}">{{ c }}</span>{% endfor %}</div></td>
                             </tr>
                             {% endfor %}
                         </tbody>
