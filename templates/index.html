@@ -2144,19 +2144,30 @@ const TEAM_DATA = {
         document.getElementById('favSelectBtn')?.addEventListener('click', async (e) => {
             const selectedTeam = FAV_TEAMS_LIST[favCurrentIdx];
             const playerId = {{ current_player.id if current_player else 0 }};
+            const btn = e.currentTarget;
 
             if (playerId && selectedTeam) {
-                const btn = e.currentTarget;
                 btn.disabled = true;
                 btn.textContent = 'Zapisywanie…';
                 try {
-                    await fetch(`/players/${playerId}/favorite`, {
+                    const res = await fetch(`/players/${playerId}/favorite`, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ favorite_team: selectedTeam })
                     });
+                    if (!res.ok) {
+                        let detail = `Błąd serwera (${res.status})`;
+                        try { const d = await res.json(); if (d.detail) detail = d.detail; } catch (_) {}
+                        alert('Nie udało się zapisać drużyny: ' + detail);
+                        btn.disabled = false;
+                        btn.textContent = 'Zapisz drużynę';
+                        return;
+                    }
                 } catch (err) {
-                    console.error('Błąd zapisu drużyny:', err);
+                    alert('Błąd połączenia przy zapisie drużyny.');
+                    btn.disabled = false;
+                    btn.textContent = 'Zapisz drużynę';
+                    return;
                 }
             }
             document.getElementById('favoriteTeamModal').style.display = 'none';
@@ -2202,20 +2213,32 @@ const TEAM_DATA = {
         document.getElementById('spSelectFinalBtn')?.addEventListener('click', async (e) => {
             const selectedPlayer = STAR_PLAYERS[spCurrentIdx].name;
             const playerId = {{ current_player.id if current_player else 0 }};
+            const btn = e.currentTarget;
 
             // Zapis SAMEJ gwiazdy – niezależny wybór.
             if (playerId && selectedPlayer) {
-                const btn = e.currentTarget;
                 btn.disabled = true;
                 btn.textContent = 'Zapisywanie…';
                 try {
-                    await fetch(`/players/${playerId}/favorite`, {
+                    const res = await fetch(`/players/${playerId}/favorite`, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ star_player: selectedPlayer })
                     });
+                    if (!res.ok) {
+                        let detail = `Błąd serwera (${res.status})`;
+                        try { const d = await res.json(); if (d.detail) detail = d.detail; } catch (_) {}
+                        alert('Nie udało się zapisać gwiazdy: ' + detail +
+                              '\n\n(Jeśli błąd dotyczy "drużyny" lub kod to 422 – na serwerze działa stara wersja main.py, trzeba ją zaktualizować i zrestartować.)');
+                        btn.disabled = false;
+                        btn.textContent = 'Zapisz gwiazdę';
+                        return;
+                    }
                 } catch (err) {
-                    console.error('Błąd zapisu gwiazdy:', err);
+                    alert('Błąd połączenia przy zapisie gwiazdy.');
+                    btn.disabled = false;
+                    btn.textContent = 'Zapisz gwiazdę';
+                    return;
                 }
             }
             document.getElementById('starPlayerModal').style.display = 'none';
