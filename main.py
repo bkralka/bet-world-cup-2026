@@ -876,73 +876,74 @@ def update_match_result(match_id: int, result: MatchResultUpdate, db: Session = 
     db.commit()
 
     picks = db.query(models.UserPick).filter(models.UserPick.match_id == match_id).all()
+    picks_by_player = {p.player_id: p for p in picks}
+    
+    # Pobieramy wszystkich graczy, aby wyłapać tych, którzy zaspali i nie oddali typu
+    all_players = db.query(models.Player).all()
 
-    for pick in picks:
-        player = db.query(models.Player).filter(models.Player.id == pick.player_id).first()
-        if not player: continue
+    for player in all_players:
+        pick = picks_by_player.get(player.id)
 
-        pd = calculate_points_with_bonus(
-            pick.predicted_result, result.result, match.stage,
-            match.home_team, match.away_team, player.favorite_team,
-            player.star_player, result.scorers
-        )
-        match_total = pd["total_points"]   # punkty za sam typ (z bonusami meczowymi)
+        if pick:
+            # GRACZ OBSTAWIŁ TEN MECZ - normalne rozliczenie
+            pd = calculate_points_with_bonus(
+                pick.predicted_result, result.result, match.stage,
+                match.home_team, match.away_team, player.favorite_team,
+                player.star_player, result.scorers
+            )
+            match_total = pd["total_points"]
 
-        if was_finished:
-            # KOREKTA — cofnij poprzedni wynik meczowy, dolicz nowy
-            bd = dict(pick.points_breakdown or {})
-            old_sb = bd.get("streak_bonus", 0)
-            
-            # Jeśli korekta sprawia, że typ jest wciąż trafiony, zachowujemy stary bonus za serię.
-            # Jeśli zmienia go na pudło, zdejmujemy bonus z tego spotkania.
-            new_sb = old_sb if pd["base_points"] > 0 else 0
-            grand_total = match_total + new_sb
+            if was_finished:
+                # KOREKTA
+                bd = dict(pick.points_breakdown or {})
+                old_sb = bd.get("streak_bonus", 0)
+                new_sb = old_sb if pd["base_points"] > 0 else 0
+                grand_total = match_total + new_sb
 
-            # Aktualizujemy ogólną punktację o różnicę między nowym a starym wynikiem
-            player.total_points += (grand_total - (pick.points_earned or 0))
-            pick.points_earned = grand_total
-            
-            bd.update({
-                "base": pd["base_points"], "high_score": pd["high_score_bonus"], "underdog": pd["underdog_bonus"],
-                "favorite": pd["favorite_bonus"], "star": pd["star_player_bonus"],
-                "multiplier": pd["multiplier"], "match_total": match_total, 
-                "streak_bonus": new_sb, "grand_total": grand_total
-            })
-            pick.points_breakdown = bd
-        else:
-            # PIERWSZE rozliczenie
-            sb = 0
-            if pd["base_points"] > 0:
-                player.correct_predictions += 1
-                player.current_streak += 1
-                if player.current_streak > player.longest_streak:
-                    player.longest_streak = player.current_streak
-                sb = streak_bonus(player.current_streak)   # bonus za serię
+                player.total_points += (grand_total - (pick.points_earned or 0))
+                pick.points_earned = grand_total
+                
+                bd.update({
+                    "base": pd["base_points"], "high_score": pd["high_score_bonus"], "underdog": pd["underdog_bonus"],
+                    "favorite": pd["favorite_bonus"], "star": pd["star_player_bonus"],
+                    "multiplier": pd["multiplier"], "match_total": match_total, 
+                    "streak_bonus": new_sb, "grand_total": grand_total
+                })
+                pick.points_breakdown = bd
             else:
+                # PIERWSZE rozliczenie
+                sb = 0
+                if pd["base_points"] > 0:
+                    player.correct_predictions += 1
+                    player.current_streak += 1
+                    if player.current_streak > player.longest_streak:
+                        player.longest_streak = player.current_streak
+                    sb = streak_bonus(player.current_streak)
+                else:
+                    player.current_streak = 0
+
+                grand_total = match_total + sb
+                pick.points_earned = grand_total
+                
+                player.total_points += grand_total
+                player.favorite_team_points += pd["favorite_bonus"]
+                player.star_player_points += pd["star_player_bonus"]
+                
+                pick.points_breakdown = {
+                    "base": pd["base_points"], "high_score": pd["high_score_bonus"], "underdog": pd["underdog_bonus"],
+                    "favorite": pd["favorite_bonus"], "star": pd["star_player_bonus"], "multiplier": pd["multiplier"],
+                    "streak_bonus": sb, "streak_len": player.current_streak,
+                    "match_total": match_total, "grand_total": grand_total
+                }
+        else:
+            # GRACZ NIE OBSTAWIŁ TEGO MECZU
+            if not was_finished:
+                # Surowe zasady: nie zagrałeś = resetujemy Twoją serię do zera
                 player.current_streak = 0
 
-            # Sumujemy punkty z meczu oraz wypracowany bonus za serię
-            grand_total = match_total + sb
+    db.commit()
 
-            # Przypisujemy do zakładu łączną kwotę!
-            pick.points_earned = grand_total
-            
-            player.total_points += grand_total
-            player.favorite_team_points += pd["favorite_bonus"]
-            player.star_player_points += pd["star_player_bonus"]
-            
-            pick.points_breakdown = {
-                "base": pd["base_points"], "high_score": pd["high_score_bonus"], "underdog": pd["underdog_bonus"],
-                "favorite": pd["favorite_bonus"], "star": pd["star_player_bonus"], "multiplier": pd["multiplier"],
-                "streak_bonus": sb, "streak_len": player.current_streak,
-                "match_total": match_total, "grand_total": grand_total
-            }
-
-        db.commit()
-
-    # Automatyczne tworzenie kolejnej rundy, gdy bieżąca jest rozegrana
     advance_tournament_if_ready(db)
-
     return {"status": "updated"}
 
 @app.put("/matches/{match_id}/lock", dependencies=[Depends(verify_admin)])
@@ -1274,20 +1275,17 @@ def admin_panel(request: Request, db: Session = Depends(get_db)):
 
 @app.get("/admin/recalculate-all")
 def recalculate_all_points(db: Session = Depends(get_db)):
-    """Skrypt naprawczy: czyści złą drabinkę (wraz z typami na nią oddanymi), zeruje punkty i przelicza wszystko od nowa."""
+    """Skrypt naprawczy w wersji rygorystycznej (brak typu = koniec serii)."""
     try:
-        # 🔥 NOWA POPRAWKA: Najpierw usuwamy typy graczy przypisane do fazy pucharowej
         db.query(models.UserPick).filter(
             models.UserPick.match_id.in_(
                 db.query(models.Match.id).filter(models.Match.stage != "group")
             )
         ).delete(synchronize_session=False)
 
-        # Następnie bezpiecznie usuwamy same mecze fazy pucharowej
         db.query(models.Match).filter(models.Match.stage != "group").delete(synchronize_session=False)
         db.commit()
 
-        # 1. Reset wszystkich wyliczalnych statystyk graczy do zera
         players = db.query(models.Player).all()
         for p in players:
             p.total_points = 0
@@ -1298,7 +1296,6 @@ def recalculate_all_points(db: Session = Depends(get_db)):
             p.star_player_points = 0
         db.commit()
 
-        # 2. Pobranie wszystkich ZAKOŃCZONYCH meczów grupowych chronologicznie
         finished_matches = db.query(models.Match).filter(
             models.Match.is_finished == True
         ).order_by(models.Match.match_date.asc(), models.Match.id.asc()).all()
@@ -1309,52 +1306,54 @@ def recalculate_all_points(db: Session = Depends(get_db)):
         for match in finished_matches:
             match_count += 1
             picks = db.query(models.UserPick).filter(models.UserPick.match_id == match.id).all()
+            picks_by_player = {p.player_id: p for p in picks}
             
-            for pick in picks:
-                player = db.query(models.Player).filter(models.Player.id == pick.player_id).first()
-                if not player: continue
+            for player in players:
+                pick = picks_by_player.get(player.id)
 
-                pick_count += 1
+                if pick:
+                    pick_count += 1
+                    pd = calculate_points_with_bonus(
+                        pick.predicted_result, match.result, match.stage,
+                        match.home_team, match.away_team, player.favorite_team,
+                        player.star_player, match.scorers
+                    )
+                    match_total = pd["total_points"]
 
-                pd = calculate_points_with_bonus(
-                    pick.predicted_result, match.result, match.stage,
-                    match.home_team, match.away_team, player.favorite_team,
-                    player.star_player, match.scorers
-                )
-                match_total = pd["total_points"]
+                    sb = 0
+                    if pd["base_points"] > 0:
+                        player.correct_predictions += 1
+                        player.current_streak += 1
+                        if player.current_streak > player.longest_streak:
+                            player.longest_streak = player.current_streak
+                        sb = streak_bonus(player.current_streak)
+                    else:
+                        player.current_streak = 0
 
-                sb = 0
-                if pd["base_points"] > 0:
-                    player.correct_predictions += 1
-                    player.current_streak += 1
-                    if player.current_streak > player.longest_streak:
-                        player.longest_streak = player.current_streak
-                    sb = streak_bonus(player.current_streak)
+                    grand_total = match_total + sb
+
+                    pick.points_earned = grand_total
+                    pick.points_breakdown = {
+                        "base": pd["base_points"], "high_score": pd["high_score_bonus"], "underdog": pd["underdog_bonus"],
+                        "favorite": pd["favorite_bonus"], "star": pd["star_player_bonus"], "multiplier": pd["multiplier"],
+                        "streak_bonus": sb, "streak_len": player.current_streak,
+                        "match_total": match_total, "grand_total": grand_total
+                    }
+
+                    player.total_points += grand_total
+                    player.favorite_team_points += pd["favorite_bonus"]
+                    player.star_player_points += pd["star_player_bonus"]
                 else:
+                    # KARYGODNE PRZEOCZENIE - zerujemy serię historycznie
                     player.current_streak = 0
-
-                grand_total = match_total + sb
-
-                pick.points_earned = grand_total
-                pick.points_breakdown = {
-                    "base": pd["base_points"], "high_score": pd["high_score_bonus"], "underdog": pd["underdog_bonus"],
-                    "favorite": pd["favorite_bonus"], "star": pd["star_player_bonus"], "multiplier": pd["multiplier"],
-                    "streak_bonus": sb, "streak_len": player.current_streak,
-                    "match_total": match_total, "grand_total": grand_total
-                }
-
-                player.total_points += grand_total
-                player.favorite_team_points += pd["favorite_bonus"]
-                player.star_player_points += pd["star_player_bonus"]
 
             db.commit()
 
-        # 3. Generujemy NOWĄ drabinkę pucharową
         advance_tournament_if_ready(db)
 
         return {
             "status": "success",
-            "message": f"Drabinka zresetowana! Przeliczono {match_count} meczów grupowych i {pick_count} typów graczy."
+            "message": f"Przeliczono z użyciem surowych zasad serii! Meczów: {match_count}, Typów: {pick_count}."
         }
     except Exception as e:
         db.rollback()
