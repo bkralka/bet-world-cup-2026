@@ -2141,39 +2141,30 @@ const TEAM_DATA = {
         let spCurrentIdx = 0;
 
         // Zapis SAMEJ drużyny – niezależny wybór.
-        document.getElementById('favSelectBtn')?.addEventListener('click', async (e) => {
-            const selectedTeam = FAV_TEAMS_LIST[favCurrentIdx];
-            const playerId = {{ current_player.id if current_player else 0 }};
-            const btn = e.currentTarget;
+// ==========================================
+        // KREATOR WYBORU: Drużyna -> Gwiazda -> Zapis
+        // ==========================================
+        let pendingFavoriteTeam = null;
+        // Bezpieczne sprawdzenie, czy gracz ma już przypisaną drużynę
+        const favTeamValue = '{{ current_player.favorite_team if current_player else "" }}';
+        const alreadyHasTeam = favTeamValue !== '' && favTeamValue !== 'None';
 
-            if (playerId && selectedTeam) {
-                btn.disabled = true;
-                btn.textContent = 'Zapisywanie…';
-                try {
-                    const res = await fetch(`/players/${playerId}/favorite`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ favorite_team: selectedTeam })
-                    });
-                    if (!res.ok) {
-                        let detail = `Błąd serwera (${res.status})`;
-                        try { const d = await res.json(); if (d.detail) detail = d.detail; } catch (_) {}
-                        alert('Nie udało się zapisać drużyny: ' + detail);
-                        btn.disabled = false;
-                        btn.textContent = 'Zapisz drużynę';
-                        return;
-                    }
-                } catch (err) {
-                    alert('Błąd połączenia przy zapisie drużyny.');
-                    btn.disabled = false;
-                    btn.textContent = 'Zapisz drużynę';
-                    return;
-                }
-            }
-            document.getElementById('favoriteTeamModal').style.display = 'none';
-            location.reload();
-        });
+        // --- KROK 1: Modul Drużyny ---
+        const favBtn = document.getElementById('favSelectBtn');
+        if (favBtn) {
+            favBtn.textContent = "Dalej (Wybierz Gwiazdę) →";
+            // Klonujemy przycisk, aby wyczyścić wszelkie zepsute zdarzenia z poprzednich kliknięć
+            const newFavBtn = favBtn.cloneNode(true);
+            favBtn.parentNode.replaceChild(newFavBtn, favBtn);
+            
+            newFavBtn.addEventListener('click', () => {
+                pendingFavoriteTeam = FAV_TEAMS_LIST[favCurrentIdx];
+                document.getElementById('favoriteTeamModal').style.display = 'none';
+                showStarPlayerModal();
+            });
+        }
 
+        // Funkcje nawigacji i renderowania dla Gwiazdy (zostają takie same, by wszystko działało)
         function spNav(dir) {
             spCurrentIdx = (spCurrentIdx + dir + STAR_PLAYERS.length) % STAR_PLAYERS.length;
             renderStarPlayerCard(spCurrentIdx);
@@ -2193,16 +2184,13 @@ const TEAM_DATA = {
             document.getElementById('sp-name').textContent = player.name;
             document.getElementById('sp-country').textContent = player.country;
             document.getElementById('sp-flag').src = code ? `${FLAG_BASE_URL}${code}.svg` : '';
-
             document.getElementById('sp-age').textContent = player.age;
             document.getElementById('sp-height').textContent = player.height;
             document.getElementById('sp-weight').textContent = player.weight;
             document.getElementById('sp-foot').textContent = player.foot;
-
             document.getElementById('sp-matches').textContent = player.matches;
             document.getElementById('sp-goals').textContent = player.goals;
             document.getElementById('sp-assists').textContent = player.assists;
-
             document.getElementById('sp-counter').textContent = `${idx + 1} / ${STAR_PLAYERS.length}`;
 
             const card = document.getElementById('spCard');
@@ -2210,45 +2198,63 @@ const TEAM_DATA = {
             setTimeout(() => { card.style.transform = 'scale(1)'; }, 150);
         }
 
-        document.getElementById('spSelectFinalBtn')?.addEventListener('click', async (e) => {
-            const selectedPlayer = STAR_PLAYERS[spCurrentIdx].name;
-            const playerId = {{ current_player.id if current_player else 0 }};
+        // --- KROK 2: Modul Gwiazdy i Zapis ---
+        const spBtn = document.getElementById('spSelectFinalBtn');
+        if (spBtn) {
+            spBtn.textContent = "Zapisz ostateczny wybór";
+            const newSpBtn = spBtn.cloneNode(true);
+            spBtn.parentNode.replaceChild(newSpBtn, spBtn);
+            
+            newSpBtn.addEventListener('click', async (e) => {
+                const selectedPlayer = STAR_PLAYERS[spCurrentIdx].name;
+                const playerIdStr = '{{ current_player.id if current_player else 0 }}';
+                const playerId = parseInt(playerIdStr);
 
-            if (playerId && selectedPlayer) {
-                const btn = e.currentTarget;
-                btn.disabled = true;
-                btn.textContent = 'Zapisywanie…';
-                try {
-                    const response = await fetch(`/players/${playerId}/favorite`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ star_player: selectedPlayer })
-                    });
-                    
-                    if (!response.ok) {
-                        const err = await response.json();
-                        alert("Błąd zapisu: " + (err.detail || JSON.stringify(err)));
-                        btn.disabled = false;
-                        btn.textContent = 'Zapisz gwiazdę';
-                        return; // Zatrzymujemy przeładowanie strony!
-                    }
-                } catch (err) {
-                    console.error('Błąd zapisu gwiazdy:', err);
-                    alert("Wystąpił błąd sieci.");
+                // Zabezpieczenie: jeśli ktoś odpali z palca Modul Gwiazdy, a nie ma drużyny
+                if (!alreadyHasTeam && !pendingFavoriteTeam) {
+                    alert("Najpierw musisz wybrać swoją ulubioną drużynę!");
+                    document.getElementById('starPlayerModal').style.display = 'none';
+                    showFavoriteTeamModal();
                     return;
                 }
-            }
-            document.getElementById('starPlayerModal').style.display = 'none';
-            location.reload();
-        });
 
-        document.addEventListener('keydown', (e) => {
-            const modal = document.getElementById('favoriteTeamModal');
-            if (modal && modal.style.display !== 'none') {
-                if (e.key === 'ArrowLeft') favNav(-1);
-                if (e.key === 'ArrowRight') favNav(1);
-            }
-        });
+                if (playerId && selectedPlayer) {
+                    const btn = e.currentTarget;
+                    btn.disabled = true;
+                    btn.textContent = 'Zapisywanie...';
+
+                    // Łączymy oba wybory w jeden request do backendu
+                    const payload = { star_player: selectedPlayer };
+                    if (pendingFavoriteTeam && !alreadyHasTeam) {
+                        payload.favorite_team = pendingFavoriteTeam;
+                    }
+
+                    try {
+                        const response = await fetch(`/players/${playerId}/favorite`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+                        
+                        if (!response.ok) {
+                            const err = await response.json();
+                            alert("Błąd zapisu z backendu: " + (err.detail || JSON.stringify(err)));
+                            btn.disabled = false;
+                            btn.textContent = 'Zapisz ostateczny wybór';
+                            return;
+                        }
+                    } catch (err) {
+                        alert("Wystąpił błąd sieci. Spróbuj ponownie.");
+                        btn.disabled = false;
+                        btn.textContent = 'Zapisz ostateczny wybór';
+                        return;
+                    }
+                }
+                
+                document.getElementById('starPlayerModal').style.display = 'none';
+                location.reload();
+            });
+        }
 
         async function checkFavoriteTeam() {
             const playerId = {{ current_player.id if current_player else 0 }};
