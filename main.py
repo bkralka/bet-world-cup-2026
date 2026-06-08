@@ -1230,9 +1230,13 @@ def admin_panel(request: Request, db: Session = Depends(get_db)):
 
 @app.get("/admin/recalculate-all")
 def recalculate_all_points(db: Session = Depends(get_db)):
-    """Skrypt naprawczy: zeruje punktację graczy i przelicza wszystkie typy 
-    od zera chronologicznie, uwzględniając poprawne bonusy i serie."""
+    """Skrypt naprawczy: czyści złą drabinkę, zeruje punkty i przelicza wszystko od nowa."""
     try:
+        # 🔥 KLUCZOWA ZMIANA: Wycinamy starą, uszkodzoną drabinkę pucharową z bazy,
+        # dzięki czemu funkcja poniżej wygeneruje pełne, oficjalne 16 par od zera.
+        db.query(models.Match).filter(models.Match.stage != "group").delete()
+        db.commit()
+
         # 1. Reset wszystkich wyliczalnych statystyk graczy do zera
         players = db.query(models.Player).all()
         for p in players:
@@ -1244,7 +1248,7 @@ def recalculate_all_points(db: Session = Depends(get_db)):
             p.star_player_points = 0
         db.commit()
 
-        # 2. Pobranie wszystkich ZAKOŃCZONYCH meczów CHRONOLOGICZNIE (bardzo ważne dla serii!)
+        # 2. Pobranie wszystkich ZAKOŃCZONYCH meczów grupowych chronologicznie
         finished_matches = db.query(models.Match).filter(
             models.Match.is_finished == True
         ).order_by(models.Match.match_date.asc(), models.Match.id.asc()).all()
@@ -1254,7 +1258,6 @@ def recalculate_all_points(db: Session = Depends(get_db)):
 
         for match in finished_matches:
             match_count += 1
-            # Pobierz typy oddane na ten konkretny mecz
             picks = db.query(models.UserPick).filter(models.UserPick.match_id == match.id).all()
             
             for pick in picks:
@@ -1263,7 +1266,6 @@ def recalculate_all_points(db: Session = Depends(get_db)):
 
                 pick_count += 1
 
-                # Wyliczamy punkty i bonusy za sam mecz
                 pd = calculate_points_with_bonus(
                     pick.predicted_result, match.result, match.stage,
                     match.home_team, match.away_team, player.favorite_team,
@@ -1271,21 +1273,18 @@ def recalculate_all_points(db: Session = Depends(get_db)):
                 )
                 match_total = pd["total_points"]
 
-                # Odtwarzamy chronologiczną serię trafień
                 sb = 0
                 if pd["base_points"] > 0:
                     player.correct_predictions += 1
                     player.current_streak += 1
                     if player.current_streak > player.longest_streak:
                         player.longest_streak = player.current_streak
-                    sb = streak_bonus(player.current_streak)  # Nowy, poprawny bonus za serię
+                    sb = streak_bonus(player.current_streak)
                 else:
                     player.current_streak = 0
 
-                # Łączymy punkty z meczu i bonus za serię
                 grand_total = match_total + sb
 
-                # Aktualizujemy rekord pojedynczego zakładu w bazie
                 pick.points_earned = grand_total
                 pick.points_breakdown = {
                     "base": pd["base_points"], "high_score": pd["high_score_bonus"], "underdog": pd["underdog_bonus"],
@@ -1294,20 +1293,19 @@ def recalculate_all_points(db: Session = Depends(get_db)):
                     "match_total": match_total, "grand_total": grand_total
                 }
 
-                # Aktualizujemy stan konta gracza
                 player.total_points += grand_total
                 player.favorite_team_points += pd["favorite_bonus"]
                 player.star_player_points += pd["star_player_bonus"]
 
             db.commit()
 
-        # 3. Na koniec upewniamy się, że drabinka pucharowa jest prawidłowo zbudowana
+        # 3. Generujemy NOWĄ drabinkę pucharową (baza jest czysta, więc stworzy równe 16 par!)
         advance_tournament_if_ready(db)
 
         return {
             "status": "success",
-            "message": f"Baza danych została zsynchronizowana. Przeliczono {match_count} meczów i {pick_count} typów graczy."
+            "message": f"Drabinka została całkowicie zresetowana i zbudowana poprawnie! Przeliczono {match_count} meczów grupowych."
         }
     except Exception as e:
         db.rollback()
-        return {"status": "error", "message": f"Błąd krytyczny podczas przeliczania: {str(e)}"}
+        return {"status": "error", "message": f"Błąd krytyczny: {str(e)}"}
