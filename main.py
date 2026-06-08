@@ -604,21 +604,16 @@ def set_favorite_team(
     if not player:
         raise HTTPException(status_code=404, detail="Player not found")
 
-    # Drużyna i gwiazda zapisywane są NIEZALEŻNIE.
-    # Każde pole można ustawić tylko raz – potem jest zablokowane na zawsze,
-    # ale ustawienie jednego nie blokuje drugiego.
+    # Drużyna i gwiazda przychodzą razem (jeden zapis), ale obsługujemy też pojedyncze.
+    # Każde pole ustawiamy tylko jeśli jeszcze puste – ponowne wysłanie nie powoduje błędu,
+    # więc połączony zapis zawsze się powiedzie. Blokada dopiero, gdy oba ustawione.
 
-    if favorite.favorite_team:
-        if player.favorite_team:
-            raise HTTPException(status_code=400, detail="Drużyna jest już wybrana i nie można jej zmienić")
+    if favorite.favorite_team and not player.favorite_team:
         player.favorite_team = favorite.favorite_team
 
-    if favorite.star_player:
-        if player.star_player:
-            raise HTTPException(status_code=400, detail="Gwiazda jest już wybrana i nie można jej zmienić")
+    if favorite.star_player and not player.star_player:
         player.star_player = favorite.star_player
 
-    # Pełna blokada dopiero, gdy oba wybory są dokonane.
     if player.favorite_team and player.star_player:
         player.favorite_locked = True
 
