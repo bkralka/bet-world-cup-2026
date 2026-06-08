@@ -498,9 +498,17 @@ def read_dashboard(request: Request, db: Session = Depends(get_db)):
 
     player_id = request.cookies.get("player_id")
     current_player = None
+    current_rank = "-"  # <--- Dodane miejsce na pozycję w rankingu
+    
     if player_id:
         try:
             current_player = db.query(models.Player).filter(models.Player.id == int(player_id)).first()
+            # <--- Pętla sprawdzająca pozycję gracza
+            if current_player:
+                for idx, p in enumerate(all_players):
+                    if p.id == current_player.id:
+                        current_rank = idx + 1
+                        break
         except (ValueError, TypeError): pass
 
     pick_stats = {m.id: {"home": 0, "draw": 0, "away": 0, "total": 0} for m in matches}
@@ -518,12 +526,10 @@ def read_dashboard(request: Request, db: Session = Depends(get_db)):
     knockout_bracket = build_knockout_bracket(db)
     upcoming_match_ids = get_upcoming_matches(db, 5)
 
-    # Mapa pozycji w grupie dla każdej drużyny, np. {"Meksyk": "1A", "Czechy": "2A"}
     team_positions = {}
     for group, teams in group_standings.items():
         for idx, t in enumerate(teams):
             team_positions[t["name"]] = f"{idx + 1}{group}"
-
 
     active_picks = []
     recent_picks = []
@@ -533,7 +539,6 @@ def read_dashboard(request: Request, db: Session = Depends(get_db)):
                 match = db.query(models.Match).filter(models.Match.id == pick.match_id).first()
                 if match and not match.is_finished:
                     active_picks.append(pick)
-        # 5 ostatnich rozliczonych typów (najświeższe pierwsze)
         settled = db.query(models.UserPick).filter(
             models.UserPick.player_id == current_player.id
         ).join(models.Match).filter(models.Match.is_finished == True).order_by(models.Match.match_date.desc()).limit(5).all()
@@ -544,7 +549,9 @@ def read_dashboard(request: Request, db: Session = Depends(get_db)):
         context={
             "players": players, "matches": matches, "leaderboard": leaderboard,
             "all_players": all_players, "picks": picks,
-            "current_player": current_player, "active_picks": active_picks,
+            "current_player": current_player, 
+            "current_rank": current_rank,  # <--- Wysłanie do HTML'a
+            "active_picks": active_picks,
             "recent_picks": recent_picks,
             "group_standings": group_standings, "knockout_bracket": knockout_bracket,
             "pick_stats": pick_stats, "now": now_utc, "timedelta": timedelta, "upcoming_match_ids": upcoming_match_ids,

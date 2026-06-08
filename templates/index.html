@@ -260,11 +260,12 @@
                         <p class="text-xs" style="color: var(--text-faint);">Zdobądź największą liczbę punktów!</p>
                     </div>
                 </div>
-                <div class="flex gap-3 items-center">
+                    <div class="flex gap-3 items-center">
                     {% if current_player %}
                         <span class="text-sm font-medium hidden md:inline-flex items-center gap-1.5" style="color: var(--text-muted);">
                             Grasz jako:
                             <span style="color: var(--text);" class="font-semibold">{{ current_player.username }}</span>
+                            <span class="text-[10px] font-extrabold bg-amber-500/10 text-amber-400 border border-amber-500/20 px-1.5 py-0.5 rounded-lg mx-1">#{{ current_rank }}</span>
                             {% if current_player.current_streak >= 0 %}
                                 <span class="text-[10px] px-1.5 py-0.5 rounded tracking-wide" style="background: var(--accent-soft); color: var(--accent);">🔥 {{ current_player.current_streak }}</span>
                             {% endif %}
@@ -298,12 +299,15 @@
 <div id="tab-home" class="tab-content active">
 <div class="grid lg:grid-cols-2 gap-6 mb-10">
     <div class="flat-card rounded-2xl p-7">
-        <div class="flex justify-between items-start mb-6">
+<div class="flex justify-between items-start mb-6">
             <div class="flex flex-col gap-1">
                 <p class="text-[10px] font-semibold uppercase tracking-[0.15em] mb-2" style="color: var(--text-faint);">Gracz</p>
-                <h2 class="font-display text-3xl font-bold tracking-tight">
+                <h2 class="font-display text-3xl font-bold tracking-tight flex items-center gap-3">
                     {% if current_player %}
-                        {{ current_player.username }}
+                        <span>{{ current_player.username }}</span>
+                        <span class="text-sm font-extrabold bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-1 rounded-lg translate-y-[-2px]">
+                            #{{ current_rank }}
+                        </span>
                     {% else %}
                         <span style="color: var(--text-faint);">Brak gracza</span>
                     {% endif %}
