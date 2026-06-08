@@ -46,6 +46,9 @@ def ensure_columns():
             ("multiplier", "INTEGER DEFAULT 1"),
             ("penalties", "VARCHAR"),
         ],
+        "user_picks": [
+            ("points_breakdown", "JSON"),
+        ],
     }
     try:
         insp = inspect(engine)
@@ -108,7 +111,7 @@ class UserPickCreate(BaseModel):
 class MatchResultUpdate(BaseModel):
     result: str
     scorers: List[str] = []
-    penalties: str = None
+    penalties: Optional[str] = None
 
     @validator('result')
     def validate_result_format(cls, v):
@@ -134,6 +137,17 @@ STAGE_MULTIPLIERS = {
     "semi": 2,
     "final": 3
 }
+
+def streak_bonus(streak: int) -> int:
+    """Bonus punktowy za serię trafień (naliczany przy osiągnięciu danej długości serii).
+    3-6 → +1, 7-9 → +2, 10 → +3, 11 → +4, ... (rośnie o 1 za każdy kolejny od 10)."""
+    if streak < 3:
+        return 0
+    if streak <= 6:
+        return 1
+    if streak <= 9:
+        return 2
+    return streak - 7  # 10→3, 11→4, 12→5, 13→6, 14→7, 15→8, ...
 
 def now_utc():
     return datetime.now()
@@ -163,11 +177,12 @@ def calculate_points_with_bonus(predicted: str, actual: str, match_stage: str, h
             base_points = -1
 
         # 2. Bonus za wysoką liczbę bramek (tylko przy dokładnym wyniku)
+        #    próg 4.5 bramki → +1 (czyli 5 goli), próg 5.5 bramki → +2 (czyli 6+ goli)
         high_score_bonus = 0
         if base_points == 3:
-            if total_goals >= 5:
+            if total_goals >= 6:
                 high_score_bonus = 2
-            elif total_goals == 4:
+            elif total_goals >= 5:
                 high_score_bonus = 1
 
         # 3. Bonus za underdoga (tylko przy trafionym typie – base_points > 0)
@@ -204,13 +219,16 @@ def calculate_points_with_bonus(predicted: str, actual: str, match_stage: str, h
 
         return {
             "base_points": base_points,
+            "high_score_bonus": high_score_bonus,
+            "underdog_bonus": underdog_bonus,
             "favorite_bonus": favorite_bonus,
             "star_player_bonus": star_player_bonus,
+            "multiplier": multiplier,
             "total_points": total_points
         }
     except Exception as e:
         print(f"Error calculating points: {e}")
-        return {"total_points": 0, "base_points": 0, "favorite_bonus": 0, "star_player_bonus": 0}
+        return {"total_points": 0, "base_points": 0, "high_score_bonus": 0, "underdog_bonus": 0, "favorite_bonus": 0, "star_player_bonus": 0, "multiplier": 1}
 
 TEAM_TO_GROUP = {
     "Meksyk": "A", "Korea Południowa": "A", "RPA": "A", "Czechy": "A",
@@ -502,12 +520,18 @@ def read_dashboard(request: Request, db: Session = Depends(get_db)):
 
 
     active_picks = []
+    recent_picks = []
     if current_player:
         for pick in picks:
             if pick.player_id == current_player.id:
                 match = db.query(models.Match).filter(models.Match.id == pick.match_id).first()
                 if match and not match.is_finished:
                     active_picks.append(pick)
+        # 5 ostatnich rozliczonych typów (najświeższe pierwsze)
+        settled = db.query(models.UserPick).filter(
+            models.UserPick.player_id == current_player.id
+        ).join(models.Match).filter(models.Match.is_finished == True).order_by(models.Match.match_date.desc()).limit(5).all()
+        recent_picks = settled
 
     return templates.TemplateResponse(
         request=request, name="index.html",
@@ -515,6 +539,7 @@ def read_dashboard(request: Request, db: Session = Depends(get_db)):
             "players": players, "matches": matches, "leaderboard": leaderboard,
             "all_players": all_players, "picks": picks,
             "current_player": current_player, "active_picks": active_picks,
+            "recent_picks": recent_picks,
             "group_standings": group_standings, "knockout_bracket": knockout_bracket,
             "pick_stats": pick_stats, "now": now_utc, "timedelta": timedelta, "upcoming_match_ids": upcoming_match_ids,
             "team_positions": team_positions
@@ -740,23 +765,55 @@ def advance_tournament_if_ready(db):
             for i, (home, away) in enumerate(pairs):
                 _ko_create(db, home, away, "round_32", base + timedelta(days=i//4, hours=(i%4)*3))
 
-    # 2) Kolejne rundy: zwycięzcy parowani po kolei
-    for stage, nxt in [("round_32","round_16"), ("round_16","quarter"), ("quarter","semi")]:
-        if has(stage) and all_done(stage) and not has(nxt):
-            w = winners_of(stage)
-            base = KO_DATES[nxt]
-            for j in range(0, len(w)-1, 2):
-                _ko_create(db, w[j], w[j+1], nxt, base + timedelta(days=j//2))
+    # 2) Kolejne rundy — buduj/aktualizuj na bieżąco: zwycięzca rozstrzygniętego meczu
+    #    od razu trafia do następnej rundy, nierozstrzygnięte miejsca pokazują "—".
+    TBD = "—"
+    def slot_winner(m):
+        return _ko_winner(m) or TBD
 
-    # 3) Półfinały zakończone → finał + mecz o 3. miejsce
-    if has("semi") and all_done("semi") and not has("final"):
-        sm = db.query(models.Match).filter(models.Match.stage == "semi", models.Match.is_finished == True).order_by(models.Match.id).all()
-        w = [_ko_winner(m) for m in sm]
-        l = [_ko_loser(m) for m in sm]
-        if len(w) >= 2:
-            _ko_create(db, w[0], w[1], "final", KO_DATES["final"])
-        if len(l) >= 2:
-            _ko_create(db, l[0], l[1], "third_place", KO_DATES["third_place"])
+    for stage, nxt in [("round_32", "round_16"), ("round_16", "quarter"), ("quarter", "semi")]:
+        if not has(stage):
+            continue
+        prev = db.query(models.Match).filter(models.Match.stage == stage).order_by(models.Match.match_date, models.Match.id).all()
+        n_pairs = len(prev) // 2
+        if n_pairs == 0:
+            continue
+        existing = db.query(models.Match).filter(models.Match.stage == nxt).order_by(models.Match.match_date, models.Match.id).all()
+        base = KO_DATES[nxt]
+        for i in range(n_pairs):
+            home = slot_winner(prev[2*i])
+            away = slot_winner(prev[2*i+1])
+            if i < len(existing):
+                nm = existing[i]
+                if not nm.is_finished:  # nie nadpisuj już rozegranego meczu
+                    nm.home_team = home
+                    nm.away_team = away
+            else:
+                db.add(models.Match(home_team=home, away_team=away, match_date=base + timedelta(days=i//2),
+                                    stage=nxt, multiplier=STAGE_MULTIPLIERS.get(nxt, 1), is_locked=False, is_finished=False, result=None))
+        db.commit()
+
+    # 3) Półfinały → finał + mecz o 3. miejsce (też na bieżąco)
+    if has("semi"):
+        sm = db.query(models.Match).filter(models.Match.stage == "semi").order_by(models.Match.match_date, models.Match.id).all()
+        if len(sm) >= 2:
+            fh, fa = slot_winner(sm[0]), slot_winner(sm[1])
+            lh, la = (_ko_loser(sm[0]) or TBD), (_ko_loser(sm[1]) or TBD)
+            ef = db.query(models.Match).filter(models.Match.stage == "final").first()
+            if ef:
+                if not ef.is_finished:
+                    ef.home_team, ef.away_team = fh, fa
+            else:
+                db.add(models.Match(home_team=fh, away_team=fa, match_date=KO_DATES["final"], stage="final",
+                                    multiplier=STAGE_MULTIPLIERS.get("final", 3), is_locked=False, is_finished=False, result=None))
+            et = db.query(models.Match).filter(models.Match.stage == "third_place").first()
+            if et:
+                if not et.is_finished:
+                    et.home_team, et.away_team = lh, la
+            else:
+                db.add(models.Match(home_team=lh, away_team=la, match_date=KO_DATES["third_place"], stage="third_place",
+                                    multiplier=STAGE_MULTIPLIERS.get("third_place", 2), is_locked=False, is_finished=False, result=None))
+            db.commit()
 
     db.commit()
 
@@ -806,29 +863,45 @@ def update_match_result(match_id: int, result: MatchResultUpdate, db: Session = 
         player = db.query(models.Player).filter(models.Player.id == pick.player_id).first()
         if not player: continue
 
-        points_data = calculate_points_with_bonus(
+        pd = calculate_points_with_bonus(
             pick.predicted_result, result.result, match.stage,
             match.home_team, match.away_team, player.favorite_team,
             player.star_player, result.scorers
         )
+        match_total = pd["total_points"]   # punkty za sam typ (z bonusami meczowymi)
 
         if was_finished:
-            # KOREKTA — cofnij poprzednio naliczony wynik, dolicz nowy (bez ruszania serii)
-            player.total_points += (points_data["total_points"] - (pick.points_earned or 0))
-            pick.points_earned = points_data["total_points"]
+            # KOREKTA — cofnij poprzedni wynik meczowy, dolicz nowy (serii nie ruszamy)
+            player.total_points += (match_total - (pick.points_earned or 0))
+            pick.points_earned = match_total
+            bd = dict(pick.points_breakdown or {})
+            bd.update({"base": pd["base_points"], "high_score": pd["high_score_bonus"], "underdog": pd["underdog_bonus"],
+                       "favorite": pd["favorite_bonus"], "star": pd["star_player_bonus"],
+                       "multiplier": pd["multiplier"], "match_total": match_total})
+            pick.points_breakdown = bd
         else:
             # PIERWSZE rozliczenie
-            pick.points_earned = points_data["total_points"]
-            player.total_points += points_data["total_points"]
-            player.favorite_team_points += points_data.get("favorite_bonus", 0)
-            player.star_player_points += points_data.get("star_player_bonus", 0)
-            if points_data["base_points"] > 0:
+            pick.points_earned = match_total
+            player.total_points += match_total
+            player.favorite_team_points += pd["favorite_bonus"]
+            player.star_player_points += pd["star_player_bonus"]
+            sb = 0
+            if pd["base_points"] > 0:
                 player.correct_predictions += 1
                 player.current_streak += 1
                 if player.current_streak > player.longest_streak:
                     player.longest_streak = player.current_streak
+                sb = streak_bonus(player.current_streak)   # bonus za serię
+                if sb > 0:
+                    player.total_points += sb
             else:
                 player.current_streak = 0
+            pick.points_breakdown = {
+                "base": pd["base_points"], "high_score": pd["high_score_bonus"], "underdog": pd["underdog_bonus"],
+                "favorite": pd["favorite_bonus"], "star": pd["star_player_bonus"], "multiplier": pd["multiplier"],
+                "streak_bonus": sb, "streak_len": player.current_streak,
+                "match_total": match_total, "grand_total": match_total + sb
+            }
 
         db.commit()
 
@@ -869,8 +942,10 @@ def get_next_match_info(db: Session = Depends(get_db)):
 
 @app.get("/players/{player_id}/history/")
 def get_player_history(player_id: int, db: Session = Depends(get_db)):
-    # Dodane .asc() wymusza sortowanie od najstarszego meczu do najnowszego
-    picks = db.query(models.UserPick).filter(models.UserPick.player_id == player_id).join(models.Match).order_by(models.Match.match_date.asc()).all()
+    player = db.query(models.Player).filter(models.Player.id == player_id).first()
+    star = player.star_player if player else None
+    # Sortowanie malejące — najświeższe mecze na górze
+    picks = db.query(models.UserPick).filter(models.UserPick.player_id == player_id).join(models.Match).order_by(models.Match.match_date.desc()).all()
     history = []
     for pick in picks:
         match = pick.match
@@ -881,7 +956,12 @@ def get_player_history(player_id: int, db: Session = Depends(get_db)):
             "match_date": match.match_date.isoformat(),
             "predicted_result": pick.predicted_result,
             "actual_result": match.result if match.is_finished else None,
+            "penalties": match.penalties if match.is_finished else None,
+            "scorers": match.scorers or [],
+            "star_player": star,
+            "stage": match.stage,
             "points_earned": pick.points_earned,
+            "breakdown": pick.points_breakdown or None,
             "is_finished": match.is_finished,
         })
     return history

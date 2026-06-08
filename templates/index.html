@@ -446,42 +446,39 @@
 {% if current_player %}
 <div class="grid lg:grid-cols-2 gap-6 mb-10">
     <div class="flat-card rounded-2xl p-7">
-        <p class="text-[10px] font-semibold uppercase tracking-[0.15em] mb-3" style="color: var(--text-faint);">Twoja pozycja</p>
-        {% set ns = namespace(pos=0, found=false, prev_points=none) %}
-        {% for p in all_players %}
-            {% if not ns.found %}
-                {% set ns.pos = ns.pos + 1 %}
-                {% if p.id == current_player.id %}
-                    {% set ns.found = true %}
-                {% else %}
-                    {% set ns.prev_points = p.total_points %}
-                {% endif %}
-            {% endif %}
-        {% endfor %}
-        <div class="flex items-end gap-3">
-            <span class="font-display text-5xl font-bold" style="color: var(--accent);">#{{ ns.pos }}</span>
-            <span class="text-sm mb-2" style="color: var(--text-muted);">z {{ all_players|length }} {% if all_players|length == 1 %}gracza{% else %}graczy{% endif %}</span>
+        <div class="flex items-center justify-between mb-3">
+            <p class="text-[10px] font-semibold uppercase tracking-[0.15em]" style="color: var(--text-faint);">✓ Twoje ostatnie typy</p>
+            <span class="text-[10px] px-2 py-0.5 rounded" style="background: var(--bg-elevated); color: var(--text-muted);">rozliczone</span>
         </div>
-        {% if ns.pos == 1 %}
-            <p class="text-sm mt-3" style="color: var(--gold);">🏆 Prowadzisz w rankingu — tak trzymaj!</p>
-        {% elif ns.prev_points is not none %}
-            <p class="text-sm mt-3" style="color: var(--text-muted);">
-                Brakuje Ci <span class="font-semibold" style="color: var(--success);">{{ ns.prev_points - current_player.total_points }} pkt</span> do wyprzedzenia gracza przed Tobą
-            </p>
+        {% if recent_picks %}
+        <div class="space-y-2">
+            {% for pick in recent_picks %}
+            {% set pts = pick.points_earned %}
+            <div class="flex items-center justify-between p-2.5 rounded-lg" style="background: var(--bg-elevated); border-left: 3px solid {% if pts > 0 %}var(--success){% elif pts < 0 %}var(--danger){% else %}var(--text-faint){% endif %};">
+                <div class="min-w-0">
+                    <p class="text-sm truncate">{{ pick.match.home_team }} <span style="color: var(--text-faint);">vs</span> {{ pick.match.away_team }}</p>
+                    <p class="text-[11px]" style="color: var(--text-faint);">Twój typ <span class="font-mono" style="color: var(--text-muted);">{{ pick.predicted_result }}</span> · wynik <span class="font-mono" style="color: var(--text-muted);">{{ pick.match.result }}</span></p>
+                </div>
+                <span class="font-display font-bold text-base ml-2 flex-shrink-0" style="color: {% if pts > 0 %}var(--success){% elif pts < 0 %}var(--danger){% else %}var(--text-muted){% endif %};">{{ '+' if pts > 0 else '' }}{{ pts }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-sm py-6 text-center" style="color: var(--text-faint);">Brak rozliczonych typów.<br>Pojawią się tu po zakończeniu obstawionych meczów.</p>
         {% endif %}
     </div>
 
     <div class="flat-card rounded-2xl p-7">
         <div class="flex items-center justify-between mb-3">
-            <p class="text-[10px] font-semibold uppercase tracking-[0.15em]" style="color: var(--text-faint);">Twoje aktywne typy</p>
-            <span class="text-[10px] px-2 py-0.5 rounded" style="background: var(--bg-elevated); color: var(--text-muted);">{{ active_picks|length }} {% if active_picks|length == 1 %}typ{% elif active_picks|length in [2,3,4] %}typy{% else %}typów{% endif %}</span>
+            <p class="text-[10px] font-semibold uppercase tracking-[0.15em]" style="color: var(--accent);">⏳ Twoje aktywne typy</p>
+            <span class="text-[10px] px-2 py-0.5 rounded" style="background: var(--accent-soft); color: var(--accent);">{{ active_picks|length }} {% if active_picks|length == 1 %}typ{% elif active_picks|length in [2,3,4] %}typy{% else %}typów{% endif %}</span>
         </div>
         {% if active_picks %}
         <div class="space-y-2">
             {% for pick in active_picks|sort(attribute='match.match_date') %}
-            <div class="flex items-center justify-between p-2.5 rounded-lg" style="background: var(--bg-elevated);">
+            <div class="flex items-center justify-between p-2.5 rounded-lg" style="background: var(--bg-elevated); border-left: 3px solid var(--accent);">
                 <span class="text-sm truncate">{{ pick.match.home_team }} <span style="color: var(--text-faint);">vs</span> {{ pick.match.away_team }}</span>
-                <span class="font-mono font-bold text-sm ml-2 flex-shrink-0" style="color: var(--success);">{{ pick.predicted_result }}</span>
+                <span class="font-mono font-bold text-sm ml-2 flex-shrink-0" style="color: var(--accent);">{{ pick.predicted_result }}</span>
             </div>
             {% endfor %}
         </div>
@@ -519,6 +516,7 @@
                                 <th class="text-left w-2/5 pl-4">Grupa {{ group }}</th>
                                 <th class="text-center">M</th>
                                 <th class="text-center">Pkt</th>
+                                <th class="text-center">Bramki</th>
                                 <th class="text-center">G+/-</th>
                                 <th class="text-center pr-2">Forma</th>
                             </tr>
@@ -529,6 +527,7 @@
                                 <td class="font-medium whitespace-nowrap overflow-hidden text-ellipsis pl-4"><span class="team-name" data-team="{{ team.name }}">{{ team.name }}</span></td>
                                 <td class="text-center" style="color: var(--text-muted);">{{ team.played }}</td>
                                 <td class="text-center font-semibold" style="color: var(--success);">{{ team.points }}</td>
+                                <td class="text-center font-mono text-xs" style="color: var(--text-muted);">{{ team.goals_for }}-{{ team.goals_against }}</td>
                                 <td class="text-center font-medium" style="color: {% if team.goal_diff >= 0 %}var(--success){% else %}var(--danger){% endif %};">{{ team.goal_diff }}</td>
                                 <td class="text-center pt-3 pb-3 pr-2">{% for c in team.form_str %}<span class="form-icon form-{% if c == 'W' %}w{% elif c == 'D' %}d{% else %}l{% endif %}">{{ c }}</span>{% endfor %}</td>
                             </tr>
@@ -556,7 +555,15 @@
                                 {% endif %}
                                 <div class="font-semibold text-sm w-2/5 text-left whitespace-nowrap overflow-hidden text-ellipsis"><span class="team-name" data-team="{{ match.away_team }}">{{ match.away_team }}</span></div>
                             </div>
-                            <p class="text-center text-xs mt-2.5" style="color: var(--text-muted);">{{ match.match_date.strftime('%d.%m.%Y · %H:%M') }}</p>
+                            <p class="text-center text-xs mt-2.5" style="color: var(--text-muted);">{{ match.match_date.strftime('%d.%m.%Y · %H:%M') }}{% if match.is_finished and match.penalties %} · <span style="color: var(--gold);">karne {{ match.penalties }}</span>{% endif %}</p>
+
+                            {% if match.is_finished and match.scorers %}
+                            <div class="flex flex-wrap justify-center gap-1.5 mt-2">
+                                {% for s in match.scorers %}
+                                <span class="text-[10px] px-2 py-0.5 rounded-full" style="background: var(--bg-elevated); color: var(--text-muted);">⚽ {{ s }}</span>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
 
                             {% set stats = pick_stats.get(match.id, {'home': 0, 'draw': 0, 'away': 0, 'total': 0}) %}
                             {% if stats.total > 0 %}
@@ -887,11 +894,28 @@
                     <div class="grid md:grid-cols-2 gap-2">
                         <div class="flex justify-between items-center p-3 rounded-lg" style="background: var(--bg-elevated);"><span class="text-sm">🐺 Underdog (U) wygrywa</span><span class="font-display font-bold text-sm" style="color: var(--success);">+2</span></div>
                         <div class="flex justify-between items-center p-3 rounded-lg" style="background: var(--bg-elevated);"><span class="text-sm">🐺 Underdog (U) remisuje</span><span class="font-display font-bold text-sm">+1</span></div>
-                        <div class="flex justify-between items-center p-3 rounded-lg" style="background: var(--bg-elevated);"><span class="text-sm">⚽ 4 bramki łącznie</span><span class="font-display font-bold text-sm">+1</span></div>
-                        <div class="flex justify-between items-center p-3 rounded-lg" style="background: var(--bg-elevated);"><span class="text-sm">🔥 5+ bramek łącznie</span><span class="font-display font-bold text-sm">+2</span></div>
+                        <div class="flex justify-between items-center p-3 rounded-lg" style="background: var(--bg-elevated);"><span class="text-sm">⚽ Min. 4,5 bramki w meczu</span><span class="font-display font-bold text-sm">+1</span></div>
+                        <div class="flex justify-between items-center p-3 rounded-lg" style="background: var(--bg-elevated);"><span class="text-sm">🔥 Min. 5,5 bramki w meczu</span><span class="font-display font-bold text-sm">+2</span></div>
                         <div class="flex justify-between items-center p-3 rounded-lg" style="background: var(--bg-elevated);"><span class="text-sm">⭐ Ulubiona drużyna wygrywa</span><span class="font-display font-bold text-sm" style="color: var(--gold);">+1</span></div>
                         <div class="flex justify-between items-center p-3 rounded-lg" style="background: var(--bg-elevated);"><span class="text-sm">🏃 Twoja gwiazda strzela gola</span><span class="font-display font-bold text-sm" style="color: var(--gold);">+1 / gol</span></div>
                     </div>
+                    <p class="text-[11px] mt-2" style="color: var(--text-faint);">Próg „4,5 bramki" oznacza, że bonus liczy się od 5 goli w meczu, a „5,5 bramki" od 6 goli.</p>
+                </div>
+
+                <div class="mt-7">
+                    <p class="text-[10px] font-semibold uppercase tracking-wider mb-1" style="color: var(--text-faint);">🔥 Bonus za serię trafień (streak)</p>
+                    <p class="text-xs mb-3" style="color: var(--text-faint);">Im dłuższa seria trafionych typów z rzędu, tym większy bonus. Naliczany przy każdym kolejnym trafieniu. Pudło zeruje serię.</p>
+                    <div class="grid grid-cols-3 md:grid-cols-4 gap-2">
+                        <div class="text-center p-2.5 rounded-lg" style="background: var(--bg-elevated);"><p class="text-[10px]" style="color: var(--text-muted);">Seria 3–6</p><p class="font-display font-bold text-sm" style="color: var(--success);">+1</p></div>
+                        <div class="text-center p-2.5 rounded-lg" style="background: var(--bg-elevated);"><p class="text-[10px]" style="color: var(--text-muted);">Seria 7–9</p><p class="font-display font-bold text-sm" style="color: var(--success);">+2</p></div>
+                        <div class="text-center p-2.5 rounded-lg" style="background: var(--bg-elevated);"><p class="text-[10px]" style="color: var(--text-muted);">Seria 10</p><p class="font-display font-bold text-sm" style="color: var(--gold);">+3</p></div>
+                        <div class="text-center p-2.5 rounded-lg" style="background: var(--bg-elevated);"><p class="text-[10px]" style="color: var(--text-muted);">Seria 11</p><p class="font-display font-bold text-sm" style="color: var(--gold);">+4</p></div>
+                        <div class="text-center p-2.5 rounded-lg" style="background: var(--bg-elevated);"><p class="text-[10px]" style="color: var(--text-muted);">Seria 12</p><p class="font-display font-bold text-sm" style="color: var(--gold);">+5</p></div>
+                        <div class="text-center p-2.5 rounded-lg" style="background: var(--bg-elevated);"><p class="text-[10px]" style="color: var(--text-muted);">Seria 13</p><p class="font-display font-bold text-sm" style="color: var(--gold);">+6</p></div>
+                        <div class="text-center p-2.5 rounded-lg" style="background: var(--bg-elevated);"><p class="text-[10px]" style="color: var(--text-muted);">Seria 14</p><p class="font-display font-bold text-sm" style="color: var(--gold);">+7</p></div>
+                        <div class="text-center p-2.5 rounded-lg" style="background: var(--bg-elevated);"><p class="text-[10px]" style="color: var(--text-muted);">Seria 15+</p><p class="font-display font-bold text-sm" style="color: var(--gold);">+8…</p></div>
+                    </div>
+                    <p class="text-[11px] mt-2" style="color: var(--text-faint);">Od serii 10 bonus rośnie o 1 za każde kolejne trafienie (10→+3, 11→+4, 12→+5…).</p>
                 </div>
 
                 <div class="mt-7">
@@ -1341,24 +1365,75 @@
                 let html = `<table class="w-full min-table table-fixed"><thead><tr><th class="text-left w-2/5 pl-4">Mecz</th><th class="text-center">Data</th><th class="text-center">Typ</th><th class="text-center">Wynik</th><th class="text-center pr-2">Punkty</th></tr></thead><tbody>`;
                 for (const pick of history) {
                     const isCorrect = pick.is_correct === true;
-                    const statusClass = pick.is_finished ? (isCorrect ? 'history-correct' : 'history-wrong') : '';
-                    const pointsStyle = pick.points_earned === 3 ? 'color: var(--success);' : (pick.points_earned > 0 ? '' : 'color: var(--danger);');
+                    const statusClass = pick.is_finished ? (pick.points_earned > 0 ? 'history-correct' : (pick.points_earned < 0 ? 'history-wrong' : '')) : '';
+                    const pointsStyle = pick.points_earned > 0 ? 'color: var(--success);' : (pick.points_earned < 0 ? 'color: var(--danger);' : 'color: var(--text-muted);');
                     const homeCode = FLAG_CODES[pick.home_team];
                     const awayCode = FLAG_CODES[pick.away_team];
                     const homeFlag = homeCode ? `<img src="${FLAG_BASE_URL}${homeCode}.svg" class="flag-icon" style="width:16px;height:12px;margin-right:6px;" onerror="this.style.display='none'">` : '';
                     const awayFlag = awayCode ? `<img src="${FLAG_BASE_URL}${awayCode}.svg" class="flag-icon" style="width:16px;height:12px;margin-left:6px;margin-right:0;" onerror="this.style.display='none'">` : '';
 
-                    html += `<tr class="${statusClass}">`;
+                    let resultText = pick.actual_result || '—';
+                    if (pick.penalties) resultText += ` <span style="color: var(--gold); font-size:10px;">k.${pick.penalties}</span>`;
+
+                    html += `<tr class="${statusClass}" style="cursor:${pick.breakdown ? 'pointer' : 'default'};" onclick="toggleBreakdown('bd-${pick.match_id}')">`;
                     html += `<td class="font-medium whitespace-nowrap overflow-hidden text-ellipsis pl-4">${homeFlag} ${pick.home_team} <span style="color: var(--text-faint);" class="text-xs mx-1">vs</span> ${pick.away_team} ${awayFlag}</td>`;
                     html += `<td class="text-center text-xs" style="color: var(--text-muted);">${new Date(pick.match_date).toLocaleDateString('pl-PL')}</td>`;
                     html += `<td class="text-center font-mono font-bold text-sm" style="color: var(--success);">${pick.predicted_result}</td>`;
-                    html += `<td class="text-center font-mono text-sm" style="color: var(--text-muted);">${pick.actual_result || '—'}</td>`;
-                    html += `<td class="text-center font-display font-bold text-base pr-2" style="${pointsStyle}">${pick.points_earned || 0}</td>`;
+                    html += `<td class="text-center font-mono text-sm" style="color: var(--text-muted);">${resultText}</td>`;
+                    html += `<td class="text-center font-display font-bold text-base pr-2" style="${pointsStyle}">${pick.points_earned || 0}${pick.breakdown ? ' <span style="font-size:9px;color:var(--text-faint);">▾</span>' : ''}</td>`;
                     html += `</tr>`;
+
+                    // Wiersz rozwijany: rozkład punktów + strzelcy
+                    if (pick.is_finished) {
+                        html += `<tr id="bd-${pick.match_id}" style="display:none;"><td colspan="5" class="px-4 pb-3" style="background: var(--bg-elevated);">`;
+                        html += renderBreakdown(pick);
+                        html += `</td></tr>`;
+                    }
                 }
                 html += '</tbody></table>';
                 container.innerHTML = html;
             } catch (e) { console.error(e); }
+        }
+
+        function toggleBreakdown(id) {
+            const el = document.getElementById(id);
+            if (el) el.style.display = el.style.display === 'none' ? 'table-row' : 'none';
+        }
+
+        function renderBreakdown(pick) {
+            const b = pick.breakdown;
+            let parts = [];
+            if (b) {
+                const labels = {
+                    base: 'Trafienie typu',
+                    high_score: 'Bonus za bramki',
+                    underdog: 'Bonus underdog',
+                    favorite: 'Ulubiona drużyna',
+                    star: 'Gol gwiazdy',
+                    streak_bonus: 'Bonus za serię'
+                };
+                for (const k of ['base','high_score','underdog','favorite','star','streak_bonus']) {
+                    const v = b[k] || 0;
+                    if (v !== 0) {
+                        const col = v > 0 ? 'var(--success)' : 'var(--danger)';
+                        parts.push(`<span style="display:inline-block; margin:2px 6px 2px 0; padding:2px 8px; border-radius:6px; background: var(--bg-surface); font-size:11px;">${labels[k]}: <b style="color:${col};">${v > 0 ? '+' : ''}${v}</b></span>`);
+                    }
+                }
+                if (b.multiplier && b.multiplier !== 1) parts.push(`<span style="display:inline-block; margin:2px 6px 2px 0; padding:2px 8px; border-radius:6px; background: var(--bg-surface); font-size:11px;">Mnożnik fazy: <b style="color:var(--gold);">×${b.multiplier}</b></span>`);
+                if (b.streak_len && b.streak_len >= 3) parts.push(`<span style="display:inline-block; margin:2px 6px 2px 0; padding:2px 8px; border-radius:6px; background: var(--bg-surface); font-size:11px;">🔥 Seria: <b>${b.streak_len}</b></span>`);
+            }
+            let out = `<div class="pt-2"><p class="text-[10px] uppercase tracking-wider mb-1" style="color: var(--text-faint);">Rozkład punktów</p>`;
+            out += parts.length ? `<div>${parts.join('')}</div>` : `<p class="text-xs" style="color: var(--text-faint);">Brak punktów z tego meczu.</p>`;
+            // strzelcy
+            if (pick.scorers && pick.scorers.length) {
+                const sc = pick.scorers.map(s => {
+                    const isStar = pick.star_player && s === pick.star_player;
+                    return `<span style="display:inline-block; margin:2px 6px 2px 0; padding:2px 8px; border-radius:6px; background: var(--bg-surface); font-size:11px; ${isStar ? 'color: var(--gold); font-weight:700;' : ''}">${isStar ? '⭐ ' : '⚽ '}${s}</span>`;
+                }).join('');
+                out += `<p class="text-[10px] uppercase tracking-wider mt-2 mb-1" style="color: var(--text-faint);">Strzelcy</p><div>${sc}</div>`;
+            }
+            out += `</div>`;
+            return out;
         }
 
         function activateTab(tabName) {
@@ -1714,7 +1789,7 @@ function openTeamDetail(name) {
             1: { icon: "🏆", title: "Bet World Cup 2026", subtitle: "Typer Mistrzostw Świata", text: "Typujesz dokładne wyniki meczów mundialu. Trafiasz — zdobywasz punkty. Mylisz zwycięzcę — tracisz punkty. Wygrywa ten, kto uzbiera ich najwięcej." },
             2: { icon: "📋", title: "Zasady", subtitle: "Krótka wersja", items: ["Typuj <strong>dokładny wynik</strong> (np. '2:1')", "Obstawiasz <strong>5 najbliższych meczów</strong> z terminarza", "Typ <strong>edytujesz</strong> aż do gwizdka", "Nikt nie odpada — gra się <strong>na punkty</strong>", "Wygrywa gracz z <strong style='color:var(--gold);'>najwyższym wynikiem</strong>"] },
             3: { icon: "🎯", title: "Punktacja", subtitle: "Jak zdobywasz punkty", items: ["<strong style='color:var(--success);'>+3 pkt</strong> — dokładny wynik", "<strong>+1 pkt</strong> — dobry zwycięzca / remis", "<strong style='color:var(--danger);'>−1 pkt</strong> — błędnie wytypowany zwycięzca"] },
-            4: { icon: "✨", title: "Bonusy", subtitle: "Zaryzykuj, zarób więcej", items: ["Underdog wygrywa → <strong style='color:var(--success);'>+2</strong>", "Underdog remisuje → <strong>+1</strong>", "4 bramki łącznie → <strong>+1</strong>", "5+ bramek łącznie → <strong>+2</strong>", "Faza pucharowa ×1.5 / ×2 / ×3", "Ulubiona drużyna wygrywa → <strong style='color:var(--gold);'>+1</strong>"] },
+            4: { icon: "✨", title: "Bonusy", subtitle: "Zaryzykuj, zarób więcej", items: ["Underdog wygrywa → <strong style='color:var(--success);'>+2</strong>", "Underdog remisuje → <strong>+1</strong>", "Min. 4,5 bramki (5 goli) → <strong>+1</strong>", "Min. 5,5 bramki (6 goli) → <strong>+2</strong>", "Seria trafień → <strong style='color:var(--gold);'>+1 do +8</strong>", "Faza pucharowa ×1.5 / ×2 / ×3", "Ulubiona drużyna wygrywa → <strong style='color:var(--gold);'>+1</strong>"] },
             5: { icon: "📖", title: "Przykład", subtitle: "Arabia Saudyjska vs Argentyna", text: "Typujesz <strong style='color:var(--success);'>2:1</strong>. Wynik: <strong>2:1</strong>.<br><br>3 (dokładny) + 2 (underdog) = <span style='color:var(--success); font-size:1.5rem; font-weight:700; font-family: DM Sans;'>5 punktów</span>" }
         };
 
@@ -1985,21 +2060,21 @@ const TEAM_DATA = {
         const STAR_PLAYERS = [
             { name: "Cristiano Ronaldo", country: "Portugalia", matches: 205, goals: 128, assists: 46, age: 41, height: "187 cm", weight: "83 kg", foot: "Prawa", img: "/static/players/ronaldo.jpg" },
             { name: "Lionel Messi", country: "Argentyna", matches: 180, goals: 106, assists: 56, age: 38, height: "170 cm", weight: "72 kg", foot: "Lewa", img: "/static/players/messi.jpg" },
-            { name: "Kylian Mbappé", country: "Francja", matches: 77, goals: 46, assists: 31, age: 27, height: "178 cm", weight: "73 kg", foot: "Prawa", img: "/static/players/mbappe.jpg" },
+            { name: "Kylian Mbappe", country: "Francja", matches: 77, goals: 46, assists: 31, age: 27, height: "178 cm", weight: "73 kg", foot: "Prawa", img: "/static/players/mbappe.jpg" },
             { name: "Harry Kane", country: "Anglia", matches: 89, goals: 62, assists: 19, age: 32, height: "188 cm", weight: "86 kg", foot: "Prawa", img: "/static/players/kane.jpg" },
             { name: "Lamine Yamal", country: "Hiszpania", matches: 12, goals: 4, assists: 6, age: 18, height: "178 cm", weight: "72 kg", foot: "Lewa", img: "/static/players/yamal.jpg" },
             { name: "Raphinha", country: "Brazylia", matches: 22, goals: 6, assists: 5, age: 29, height: "176 cm", weight: "68 kg", foot: "Lewa", img: "/static/players/raphinha.jpg" },
             { name: "Erling Haaland", country: "Norwegia", matches: 39, goals: 36, assists: 3, age: 25, height: "195 cm", weight: "88 kg", foot: "Lewa", img: "/static/players/haaland.jpg" },
             { name: "Jude Bellingham", country: "Anglia", matches: 40, goals: 6, assists: 8, age: 22, height: "186 cm", weight: "75 kg", foot: "Prawa", img: "/static/players/bellingham.jpg" },
-            { name: "Vinícius Júnior", country: "Brazylia", matches: 35, goals: 5, assists: 5, age: 25, height: "176 cm", weight: "73 kg", foot: "Prawa", img: "/static/players/vinicius.jpg" },
-            { name: "Ousmane Dembélé", country: "Francja", matches: 51, goals: 6, assists: 4, age: 29, height: "178 cm", weight: "67 kg", foot: "Obie", img: "/static/players/dembele.jpg" },
+            { name: "Vinicius Junior", country: "Brazylia", matches: 35, goals: 5, assists: 5, age: 25, height: "176 cm", weight: "73 kg", foot: "Prawa", img: "/static/players/vinicius.jpg" },
+            { name: "Ousmane Dembele", country: "Francja", matches: 51, goals: 6, assists: 4, age: 29, height: "178 cm", weight: "67 kg", foot: "Obie", img: "/static/players/dembele.jpg" },
             { name: "Kai Havertz", country: "Niemcy", matches: 53, goals: 20, assists: 15, age: 26, height: "193 cm", weight: "83 kg", foot: "Lewa", img: "/static/players/havertz.jpg" },
             { name: "Florian Wirtz", country: "Niemcy", matches: 25, goals: 4, assists: 6, age: 23, height: "176 cm", weight: "71 kg", foot: "Prawa", img: "/static/players/wirtz.jpg" },
             { name: "Michael Olise", country: "Francja", matches: 8, goals: 2, assists: 3, age: 24, height: "184 cm", weight: "73 kg", foot: "Lewa", img: "/static/players/olise.jpg" },
             { name: "Cole Palmer", country: "Anglia", matches: 15, goals: 4, assists: 5, age: 24, height: "189 cm", weight: "74 kg", foot: "Lewa", img: "/static/players/palmer.jpg" },
             { name: "Bukayo Saka", country: "Anglia", matches: 42, goals: 14, assists: 13, age: 24, height: "178 cm", weight: "72 kg", foot: "Lewa", img: "/static/players/saka.jpg" },
-            { name: "Lautaro Martínez", country: "Argentyna", matches: 68, goals: 30, assists: 8, age: 28, height: "174 cm", weight: "72 kg", foot: "Prawa", img: "/static/players/martinez.jpg" },
-            { name: "Rafael Leão", country: "Portugalia", matches: 33, goals: 4, assists: 6, age: 26, height: "188 cm", weight: "81 kg", foot: "Prawa", img: "/static/players/leao.jpg" },
+            { name: "Lautaro Martinez", country: "Argentyna", matches: 68, goals: 30, assists: 8, age: 28, height: "174 cm", weight: "72 kg", foot: "Prawa", img: "/static/players/martinez.jpg" },
+            { name: "Rafael Leao", country: "Portugalia", matches: 33, goals: 4, assists: 6, age: 26, height: "188 cm", weight: "81 kg", foot: "Prawa", img: "/static/players/leao.jpg" },
             { name: "Cody Gakpo", country: "Holandia", matches: 35, goals: 13, assists: 5, age: 27, height: "193 cm", weight: "76 kg", foot: "Prawa", img: "/static/players/gakpo.jpg" },
             { name: "Neymar", country: "Brazylia", matches: 128, goals: 79, assists: 58, age: 34, height: "175 cm", weight: "68 kg", foot: "Prawa", img: "/static/players/neymar.jpg" },
             { name: "Bruno Fernandes", country: "Portugalia", matches: 80, goals: 28, assists: 20, age: 31, height: "179 cm", weight: "69 kg", foot: "Prawa", img: "/static/players/bruno.jpg" },
@@ -2012,15 +2087,15 @@ const TEAM_DATA = {
             { name: "Mohamed Salah", country: "Egipt", matches: 100, goals: 60, assists: 40, age: 33, height: "175 cm", weight: "71 kg", foot: "Lewa", img: "/static/players/salah.jpg" },
             { name: "Son Heung-min", country: "Korea Południowa", matches: 135, goals: 53, assists: 30, age: 33, height: "183 cm", weight: "78 kg", foot: "Obie", img: "/static/players/son.jpg" },
             { name: "Achraf Hakimi", country: "Maroko", matches: 85, goals: 11, assists: 12, age: 27, height: "181 cm", weight: "73 kg", foot: "Prawa", img: "/static/players/hakimi.jpg" },
-            { name: "Sadio Mané", country: "Senegal", matches: 115, goals: 45, assists: 25, age: 33, height: "175 cm", weight: "69 kg", foot: "Prawa", img: "/static/players/mane.jpg" },
+            { name: "Sadio Mane", country: "Senegal", matches: 115, goals: 45, assists: 25, age: 33, height: "175 cm", weight: "69 kg", foot: "Prawa", img: "/static/players/mane.jpg" },
             { name: "Alexander Isak", country: "Szwecja", matches: 55, goals: 18, assists: 6, age: 26, height: "192 cm", weight: "77 kg", foot: "Prawa", img: "/static/players/isak.jpg" },
-            { name: "Martin Ødegaard", country: "Norwegia", matches: 60, goals: 10, assists: 12, age: 27, height: "178 cm", weight: "68 kg", foot: "Lewa", img: "/static/players/odegaard.jpg" },
-            { name: "Hakan Çalhanoğlu", country: "Turcja", matches: 95, goals: 22, assists: 15, age: 32, height: "178 cm", weight: "76 kg", foot: "Obie", img: "/static/players/calhanoglu.jpg" },
+            { name: "Martin Odegaard", country: "Norwegia", matches: 60, goals: 10, assists: 12, age: 27, height: "178 cm", weight: "68 kg", foot: "Lewa", img: "/static/players/odegaard.jpg" },
+            { name: "Hakan Calhanoglu", country: "Turcja", matches: 95, goals: 22, assists: 15, age: 32, height: "178 cm", weight: "76 kg", foot: "Obie", img: "/static/players/calhanoglu.jpg" },
             { name: "Christian Pulisic", country: "USA", matches: 80, goals: 32, assists: 20, age: 27, height: "177 cm", weight: "73 kg", foot: "Prawa", img: "/static/players/pulisic.jpg" },
             { name: "Alphonso Davies", country: "Kanada", matches: 55, goals: 16, assists: 16, age: 25, height: "183 cm", weight: "75 kg", foot: "Lewa", img: "/static/players/davies.jpg" },
             { name: "Riyad Mahrez", country: "Algieria", matches: 95, goals: 30, assists: 25, age: 35, height: "179 cm", weight: "67 kg", foot: "Lewa", img: "/static/players/mahrez.jpg" },
             { name: "Mehdi Taremi", country: "Iran", matches: 90, goals: 50, assists: 20, age: 33, height: "187 cm", weight: "78 kg", foot: "Prawa", img: "/static/players/taremi.jpg" },
-            { name: "Luis Díaz", country: "Kolumbia", matches: 70, goals: 20, assists: 10, age: 29, height: "178 cm", weight: "73 kg", foot: "Prawa", img: "/static/players/luisdiaz.jpg" },
+            { name: "Luis Diaz", country: "Kolumbia", matches: 70, goals: 20, assists: 10, age: 29, height: "178 cm", weight: "73 kg", foot: "Prawa", img: "/static/players/luisdiaz.jpg" },
             { name: "Takefusa Kubo", country: "Japonia", matches: 40, goals: 8, assists: 6, age: 24, height: "173 cm", weight: "67 kg", foot: "Lewa", img: "/static/players/kubo.jpg" },
             { name: "Chris Wood", country: "Nowa Zelandia", matches: 85, goals: 45, assists: 10, age: 34, height: "191 cm", weight: "84 kg", foot: "Prawa", img: "/static/players/wood.jpg" },
             { name: "Matheus Cunha", country: "Brazylia", matches: 25, goals: 5, assists: 4, age: 26, height: "184 cm", weight: "82 kg", foot: "Prawa", img: "/static/players/cunha.jpg" },

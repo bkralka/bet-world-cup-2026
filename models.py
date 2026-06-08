@@ -58,6 +58,7 @@ class UserPick(Base):
     predicted_result = Column(String)
     points_earned = Column(Integer, default=0)
     bonus_points = Column(Integer, default=0)
+    points_breakdown = Column(JSON, nullable=True)  # rozkład punktów: za co dokładnie (typ, bonusy, seria)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     player = relationship("Player", back_populates="picks")
