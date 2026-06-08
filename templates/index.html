@@ -297,217 +297,214 @@
     </div>
 
 <div id="tab-home" class="tab-content active">
-<div class="grid lg:grid-cols-2 gap-6 mb-10">
-    <div class="flat-card rounded-2xl p-7">
-<div class="flex flex-col gap-2 mb-6">
-            <p class="text-[10px] font-semibold uppercase tracking-[0.15em]" style="color: var(--text-faint);">Gracz</p>
-            <div class="flex flex-wrap items-center gap-3">
-                <h2 class="font-display text-3xl font-bold tracking-tight flex items-center gap-3">
-                    {% if current_player %}
-                        <span>{{ current_player.username }}</span>
-                        <span class="text-sm font-extrabold bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-1 rounded-lg translate-y-[-2px]">
-                            #{{ current_rank }}
-                        </span>
-                    {% else %}
-                        <span style="color: var(--text-faint);">Brak gracza</span>
+    <div class="grid lg:grid-cols-2 gap-4 sm:gap-6 mb-10">
+        <div class="flat-card rounded-2xl p-5 sm:p-7">
+            <div class="flex flex-col gap-2 mb-6">
+                <p class="text-[10px] font-semibold uppercase tracking-[0.15em]" style="color: var(--text-faint);">Gracz</p>
+                <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+                    <h2 class="font-display text-2xl sm:text-3xl font-bold tracking-tight flex flex-wrap items-center gap-2 break-all sm:break-normal">
+                        {% if current_player %}
+                            <span>{{ current_player.username }}</span>
+                            <span class="text-sm font-extrabold bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-1 rounded-lg">
+                                #{{ current_rank }}
+                            </span>
+                        {% else %}
+                            <span style="color: var(--text-faint);">Brak gracza</span>
+                        {% endif %}
+                    </h2>
+
+                    {% if current_player and current_player.current_streak > 0 %}
+                    <div class="flex gap-1.5 items-center px-2.5 py-1 rounded-lg" style="background: var(--accent-soft); border: 1px solid rgba(232,138,91,0.25);">
+                        <span class="text-xs font-bold tracking-wide" style="color: var(--accent);">🔥 {{ current_player.current_streak }} serii</span>
+                    </div>
                     {% endif %}
-                </h2>
-
-                {% if current_player and current_player.current_streak > 0 %}
-                <div class="flex gap-1.5 items-center px-2.5 py-1 rounded-lg translate-y-[-2px]" style="background: var(--accent-soft); border: 1px solid rgba(232,138,91,0.25);">
-                    <span class="text-xs font-bold tracking-wide" style="color: var(--accent);">🔥 {{ current_player.current_streak }} serii</span>
                 </div>
-                {% endif %}
-            </div>
-        </div>
-
-        <div class="grid grid-cols-3 gap-3">
-            <div class="rounded-xl p-4" style="background: var(--bg-elevated); border: 1px solid var(--border-subtle);">
-                <p class="text-[10px] font-medium uppercase tracking-wider mb-2" style="color: var(--text-faint);">Punkty</p>
-                <p class="font-display text-3xl font-bold" style="color: var(--success);">
-                    {{ current_player.total_points if current_player else 0 }}
-                </p>
             </div>
 
-            <div class="rounded-xl p-4" style="background: var(--bg-elevated); border: 1px solid var(--border-subtle);">
-                <p class="text-[10px] font-medium uppercase tracking-wider mb-2" style="color: var(--text-faint);">Trafione</p>
-                <p class="font-display text-3xl font-bold">
-                    {{ current_player.correct_predictions if current_player else 0 }}
-                </p>
+            <div class="grid grid-cols-3 gap-2 sm:gap-3">
+                <div class="rounded-xl p-3 sm:p-4" style="background: var(--bg-elevated); border: 1px solid var(--border-subtle);">
+                    <p class="text-[10px] font-medium uppercase tracking-wider mb-1 sm:mb-2" style="color: var(--text-faint);">Punkty</p>
+                    <p class="font-display text-2xl sm:text-3xl font-bold" style="color: var(--success);">
+                        {{ current_player.total_points if current_player else 0 }}
+                    </p>
+                </div>
+
+                <div class="rounded-xl p-3 sm:p-4" style="background: var(--bg-elevated); border: 1px solid var(--border-subtle);">
+                    <p class="text-[10px] font-medium uppercase tracking-wider mb-1 sm:mb-2" style="color: var(--text-faint);">Trafione</p>
+                    <p class="font-display text-2xl sm:text-3xl font-bold">
+                        {{ current_player.correct_predictions if current_player else 0 }}
+                    </p>
+                </div>
+
+                <div class="rounded-xl p-3 sm:p-4" style="background: var(--bg-elevated); border: 1px solid var(--border-subtle);">
+                    <p class="text-[10px] font-medium uppercase tracking-wider mb-1 sm:mb-2" style="color: var(--text-faint);">Seria 🔥</p>
+                    <p class="font-display text-2xl sm:text-3xl font-bold" style="color: var(--accent);">
+                        {{ current_player.current_streak if current_player else 0 }}
+                    </p>
+                </div>
             </div>
 
-            <div class="rounded-xl p-4" style="background: var(--bg-elevated); border: 1px solid var(--border-subtle);">
-                <p class="text-[10px] font-medium uppercase tracking-wider mb-2" style="color: var(--text-faint);">Seria 🔥</p>
-                <p class="font-display text-3xl font-bold" style="color: var(--accent);">
-                    {{ current_player.current_streak if current_player else 0 }}
-                </p>
-            </div>
-        </div>
+            {% if current_player and current_player.favorite_team %}
+            <div class="mt-5 pt-5 border-t" style="border-color: var(--border-subtle);">
+                <p class="text-[10px] font-medium uppercase tracking-wider mb-3" style="color: var(--text-faint);">Twoje wybory</p>
 
-
-        {% if current_player and current_player.favorite_team %}
-        <div class="mt-5 pt-5 border-t" style="border-color: var(--border-subtle);">
-            <p class="text-[10px] font-medium uppercase tracking-wider mb-3" style="color: var(--text-faint);">Twoje wybory</p>
-
-        <div>
-            <div class="flex flex-col gap-3">
-                <div class="rounded-2xl overflow-hidden transition {% if current_player.favorite_locked %}cursor-default{% else %}cursor-pointer hover:opacity-90{% endif %}" style="background: var(--bg-elevated); border: 1px solid var(--border-subtle);"
-                    {% if not current_player.favorite_locked %}onclick="showFavoriteTeamModal()"{% endif %}>
-                    <div class="flex items-center gap-4 p-4">
-                        <div class="relative flex-shrink-0">
-                            <img id="sidebar-fav-flag" src="" class="w-28 h-20 object-cover rounded-xl shadow-md">
+                <div class="flex flex-col gap-3">
+                    <div class="rounded-2xl overflow-hidden transition {% if current_player.favorite_locked %}cursor-default{% else %}cursor-pointer hover:opacity-90{% endif %}" style="background: var(--bg-elevated); border: 1px solid var(--border-subtle);"
+                        {% if not current_player.favorite_locked %}onclick="showFavoriteTeamModal()"{% endif %}>
+                        <div class="flex items-center gap-3 sm:gap-4 p-3 sm:p-4">
+                            <div class="relative flex-shrink-0">
+                                <img id="sidebar-fav-flag" src="" class="w-20 h-14 sm:w-28 sm:h-20 object-cover rounded-xl shadow-md">
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-[10px] font-semibold uppercase tracking-wider mb-0.5" style="color: var(--text-faint);">⭐ Twoja drużyna</p>
+                                <p class="font-display font-bold text-xl sm:text-2xl truncate" style="color: var(--gold);">{{ current_player.favorite_team }}</p>
+                            </div>
                         </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-[10px] font-semibold uppercase tracking-wider mb-0.5" style="color: var(--text-faint);">⭐ Twoja drużyna</p>
-                            <p class="font-display font-bold text-2xl truncate" style="color: var(--gold);">{{ current_player.favorite_team }}</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center justify-between px-4 py-3" style="background: rgba(251,191,36,0.07); border-top: 1px solid var(--border-subtle);">
-                        <span class="text-xs" style="color: var(--text-muted);">+1 pkt za każdą wygraną</span>
-                        <div class="flex items-baseline gap-1">
-                            <span class="font-display font-bold text-2xl" style="color: var(--gold);">{{ current_player.favorite_team_points }}</span>
-                            <span class="text-[10px] uppercase tracking-wider" style="color: var(--text-faint);">pkt</span>
+                        <div class="flex items-center justify-between px-3 sm:px-4 py-2 sm:py-3" style="background: rgba(251,191,36,0.07); border-top: 1px solid var(--border-subtle);">
+                            <span class="text-[10px] sm:text-xs" style="color: var(--text-muted);">+1 pkt za wygraną</span>
+                            <div class="flex items-baseline gap-1">
+                                <span class="font-display font-bold text-xl sm:text-2xl" style="color: var(--gold);">{{ current_player.favorite_team_points }}</span>
+                                <span class="text-[10px] uppercase tracking-wider" style="color: var(--text-faint);">pkt</span>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                {% if current_player.star_player %}
-                <div class="rounded-2xl overflow-hidden transition {% if current_player.favorite_locked %}cursor-default{% else %}cursor-pointer hover:opacity-90{% endif %}" style="background: var(--bg-elevated); border: 1px solid var(--border-subtle);"
-                     {% if not current_player.favorite_locked %}onclick="showStarPlayerModal()"{% endif %}>
-                    <div class="flex items-center gap-4 p-4">
-                        <div class="w-24 h-28 rounded-xl overflow-hidden shadow-md flex-shrink-0" style="background: var(--bg-surface);">
-                            <img id="sidebar-star-img" src="" class="w-full h-full object-cover object-top" style="display: none;">
+                    {% if current_player.star_player %}
+                    <div class="rounded-2xl overflow-hidden transition {% if current_player.favorite_locked %}cursor-default{% else %}cursor-pointer hover:opacity-90{% endif %}" style="background: var(--bg-elevated); border: 1px solid var(--border-subtle);"
+                         {% if not current_player.favorite_locked %}onclick="showStarPlayerModal()"{% endif %}>
+                        <div class="flex items-center gap-3 sm:gap-4 p-3 sm:p-4">
+                            <div class="w-16 h-20 sm:w-24 sm:h-28 rounded-xl overflow-hidden shadow-md flex-shrink-0" style="background: var(--bg-surface);">
+                                <img id="sidebar-star-img" src="" class="w-full h-full object-cover object-top" style="display: none;">
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-[10px] font-semibold uppercase tracking-wider mb-0.5" style="color: var(--text-faint);">🏃 Twoja gwiazda</p>
+                                <p class="font-display font-bold text-lg sm:text-2xl leading-tight" id="sidebar-star-name">{{ current_player.star_player }}</p>
+                            </div>
                         </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-[10px] font-semibold uppercase tracking-wider mb-0.5" style="color: var(--text-faint);">🏃 Twoja gwiazda</p>
-                            <p class="font-display font-bold text-2xl leading-tight" id="sidebar-star-name">{{ current_player.star_player }}</p>
+                        <div class="flex items-center justify-between px-3 sm:px-4 py-2 sm:py-3" style="background: rgba(251,191,36,0.07); border-top: 1px solid var(--border-subtle);">
+                            <span class="text-[10px] sm:text-xs" style="color: var(--text-muted);">+1 pkt za gola</span>
+                            <div class="flex items-baseline gap-1">
+                                <span class="font-display font-bold text-xl sm:text-2xl" style="color: var(--gold);">{{ current_player.star_player_points }}</span>
+                                <span class="text-[10px] uppercase tracking-wider" style="color: var(--text-faint);">pkt</span>
+                            </div>
                         </div>
                     </div>
-                    <div class="flex items-center justify-between px-4 py-3" style="background: rgba(251,191,36,0.07); border-top: 1px solid var(--border-subtle);">
-                        <span class="text-xs" style="color: var(--text-muted);">+1 pkt za każdego gola</span>
-                        <div class="flex items-baseline gap-1">
-                            <span class="font-display font-bold text-2xl" style="color: var(--gold);">{{ current_player.star_player_points }}</span>
-                            <span class="text-[10px] uppercase tracking-wider" style="color: var(--text-faint);">pkt</span>
-                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% else %}
+            <div class="mt-5 pt-5 border-t" style="border-color: var(--border-subtle);">
+                <div class="rounded-xl p-4 text-center" style="background: var(--bg-elevated); border: 1px solid var(--border-subtle);">
+                    <p class="text-sm font-semibold mb-1">Gotowy do gry?</p>
+                    <p class="text-xs mb-3" style="color: var(--text-muted);">Wybierz drużynę i gwiazdę, by zdobyć bonusy.</p>
+                    <button onclick="showFavoriteTeamModal()" class="font-semibold px-4 py-2 rounded-lg text-sm transition" style="background: var(--gold); color: var(--bg-base);">
+                        <span>Wybierz teraz</span>
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="flat-card rounded-2xl p-5 sm:p-7 flex flex-col justify-center overflow-hidden">
+            <p class="text-[10px] font-semibold uppercase tracking-[0.15em] mb-3 text-center" style="color: var(--text-faint);">Następny mecz za</p>
+            <div id="countdown-container">
+                <div id="next-match-info" class="mb-6 text-center">
+                    <p class="text-sm font-semibold" id="next-match-teams">Ładowanie...</p>
+                </div>
+                <div class="countdown flex justify-center gap-2 sm:gap-5 text-center">
+                    <div>
+                        <div class="countdown-number text-3xl sm:text-4xl" id="days">00</div>
+                        <p class="text-[10px] mt-1" style="color: var(--text-faint);">dni</p>
+                    </div>
+                    <div class="text-3xl sm:text-4xl" style="color: var(--text-faint);">:</div>
+                    <div>
+                        <div class="countdown-number text-3xl sm:text-4xl" id="hours">00</div>
+                        <p class="text-[10px] mt-1" style="color: var(--text-faint);">godz</p>
+                    </div>
+                    <div class="text-3xl sm:text-4xl" style="color: var(--text-faint);">:</div>
+                    <div>
+                        <div class="countdown-number text-3xl sm:text-4xl" id="minutes">00</div>
+                        <p class="text-[10px] mt-1" style="color: var(--text-faint);">min</p>
+                    </div>
+                    <div class="text-3xl sm:text-4xl" style="color: var(--text-faint);">:</div>
+                    <div>
+                        <div class="countdown-number text-3xl sm:text-4xl" id="seconds">00</div>
+                        <p class="text-[10px] mt-1" style="color: var(--text-faint);">sek</p>
                     </div>
                 </div>
-                {% endif %}
+            </div>
+
+            <div class="mt-6 pt-5 border-t w-full" style="border-color: var(--border-subtle);">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="text-sm" style="color: var(--text-muted);">♫</span>
+                    <p class="text-[10px] font-medium uppercase tracking-wider" style="color: var(--text-faint);">Playlista</p>
+                </div>
+                <iframe data-testid="embed-iframe" style="border-radius:12px" src="https://open.spotify.com/embed/playlist/2DUuRUBdKxgUmYczGN28XF?utm_source=generator&theme=0" width="100%" height="280" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
             </div>
         </div>
-        </div>
-        {% else %}
-        <div class="mt-5 pt-5 border-t" style="border-color: var(--border-subtle);">
-            <div class="rounded-xl p-4 text-center" style="background: var(--bg-elevated); border: 1px solid var(--border-subtle);">
-                <p class="text-sm font-semibold mb-1">Gotowy do gry?</p>
-                <p class="text-xs mb-3" style="color: var(--text-muted);">Wybierz drużynę i gwiazdę, by zdobyć bonusy.</p>
-                <button onclick="showFavoriteTeamModal()" class="font-semibold px-4 py-2 rounded-lg text-sm transition" style="background: var(--gold); color: var(--bg-base);">
-                    <span>Wybierz teraz</span>
-                </button>
-            </div>
-        </div>
-        {% endif %}
     </div>
 
-    <div class="flat-card rounded-2xl p-7 flex flex-col justify-center">
-        <p class="text-[10px] font-semibold uppercase tracking-[0.15em] mb-3 text-center" style="color: var(--text-faint);">Następny mecz za</p>
-        <div id="countdown-container">
-            <div id="next-match-info" class="mb-6 text-center">
-                <p class="text-sm font-semibold" id="next-match-teams">Ładowanie...</p>
+    {% if current_player %}
+    <div class="grid lg:grid-cols-2 gap-4 sm:gap-6 mb-10">
+        <div class="flat-card rounded-2xl p-5 sm:p-7">
+            <div class="flex items-center justify-between mb-3">
+                <p class="text-[10px] font-semibold uppercase tracking-[0.15em]" style="color: var(--text-faint);">✓ Twoje ostatnie typy</p>
+                <span class="text-[10px] px-2 py-0.5 rounded" style="background: var(--bg-elevated); color: var(--text-muted);">rozliczone</span>
             </div>
-            <div class="countdown flex justify-center gap-5 text-center">
-                <div>
-                    <div class="countdown-number text-4xl" id="days">00</div>
-                    <p class="text-[10px] mt-1" style="color: var(--text-faint);">dni</p>
+            {% if recent_picks %}
+            <div class="space-y-2">
+                {% for pick in recent_picks %}
+                {% set pts = pick.points_earned %}
+                <div class="flex items-center justify-between p-2.5 rounded-lg" style="background: var(--bg-elevated); border-left: 3px solid {% if pts > 0 %}var(--success){% elif pts < 0 %}var(--danger){% else %}var(--text-faint){% endif %};">
+                    <div class="min-w-0 pr-2">
+                        <p class="text-sm truncate">{{ pick.match.home_team }} <span style="color: var(--text-faint);">vs</span> {{ pick.match.away_team }}</p>
+                        <p class="text-[11px] truncate" style="color: var(--text-faint);">Twój typ <span class="font-mono" style="color: var(--text-muted);">{{ pick.predicted_result }}</span> · wynik <span class="font-mono" style="color: var(--text-muted);">{{ pick.match.result }}</span></p>
+                    </div>
+                    <span class="font-display font-bold text-base ml-auto flex-shrink-0" style="color: {% if pts > 0 %}var(--success){% elif pts < 0 %}var(--danger){% else %}var(--text-muted){% endif %};">{{ '+' if pts > 0 else '' }}{{ pts }}</span>
                 </div>
-                <div class="text-4xl" style="color: var(--text-faint);">:</div>
-                <div>
-                    <div class="countdown-number text-4xl" id="hours">00</div>
-                    <p class="text-[10px] mt-1" style="color: var(--text-faint);">godz</p>
-                </div>
-                <div class="text-4xl" style="color: var(--text-faint);">:</div>
-                <div>
-                    <div class="countdown-number text-4xl" id="minutes">00</div>
-                    <p class="text-[10px] mt-1" style="color: var(--text-faint);">min</p>
-                </div>
-                <div class="text-4xl" style="color: var(--text-faint);">:</div>
-                <div>
-                    <div class="countdown-number text-4xl" id="seconds">00</div>
-                    <p class="text-[10px] mt-1" style="color: var(--text-faint);">sek</p>
-                </div>
+                {% endfor %}
             </div>
+            {% else %}
+            <p class="text-sm py-6 text-center" style="color: var(--text-faint);">Brak rozliczonych typów.<br>Pojawią się tu po zakończeniu obstawionych meczów.</p>
+            {% endif %}
         </div>
 
-        <div class="mt-6 pt-5 border-t" style="border-color: var(--border-subtle);">
-            <div class="flex items-center gap-2 mb-3">
-                <span class="text-sm" style="color: var(--text-muted);">♫</span>
-                <p class="text-[10px] font-medium uppercase tracking-wider" style="color: var(--text-faint);">Playlista</p>
+        <div class="flat-card rounded-2xl p-5 sm:p-7">
+            <div class="flex items-center justify-between mb-3">
+                <p class="text-[10px] font-semibold uppercase tracking-[0.15em]" style="color: var(--accent);">⏳ Twoje aktywne typy</p>
+                <span class="text-[10px] px-2 py-0.5 rounded" style="background: var(--accent-soft); color: var(--accent);">{{ active_picks|length }} {% if active_picks|length == 1 %}typ{% elif active_picks|length in [2,3,4] %}typy{% else %}typów{% endif %}</span>
             </div>
-            <iframe data-testid="embed-iframe" style="border-radius:12px" src="https://open.spotify.com/embed/playlist/2DUuRUBdKxgUmYczGN28XF?utm_source=generator&theme=0" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
-        </div>
-    </div>
-</div>
-
-{% if current_player %}
-<div class="grid lg:grid-cols-2 gap-6 mb-10">
-    <div class="flat-card rounded-2xl p-7">
-        <div class="flex items-center justify-between mb-3">
-            <p class="text-[10px] font-semibold uppercase tracking-[0.15em]" style="color: var(--text-faint);">✓ Twoje ostatnie typy</p>
-            <span class="text-[10px] px-2 py-0.5 rounded" style="background: var(--bg-elevated); color: var(--text-muted);">rozliczone</span>
-        </div>
-        {% if recent_picks %}
-        <div class="space-y-2">
-            {% for pick in recent_picks %}
-            {% set pts = pick.points_earned %}
-            <div class="flex items-center justify-between p-2.5 rounded-lg" style="background: var(--bg-elevated); border-left: 3px solid {% if pts > 0 %}var(--success){% elif pts < 0 %}var(--danger){% else %}var(--text-faint){% endif %};">
-                <div class="min-w-0">
-                    <p class="text-sm truncate">{{ pick.match.home_team }} <span style="color: var(--text-faint);">vs</span> {{ pick.match.away_team }}</p>
-                    <p class="text-[11px]" style="color: var(--text-faint);">Twój typ <span class="font-mono" style="color: var(--text-muted);">{{ pick.predicted_result }}</span> · wynik <span class="font-mono" style="color: var(--text-muted);">{{ pick.match.result }}</span></p>
+            {% if active_picks %}
+            <div class="space-y-2">
+                {% for pick in active_picks|sort(attribute='match.match_date') %}
+                <div class="flex items-center justify-between p-2.5 rounded-lg" style="background: var(--bg-elevated); border-left: 3px solid var(--accent);">
+                    <span class="text-sm truncate pr-2">{{ pick.match.home_team }} <span style="color: var(--text-faint);">vs</span> {{ pick.match.away_team }}</span>
+                    <span class="font-mono font-bold text-sm ml-auto flex-shrink-0" style="color: var(--accent);">{{ pick.predicted_result }}</span>
                 </div>
-                <span class="font-display font-bold text-base ml-2 flex-shrink-0" style="color: {% if pts > 0 %}var(--success){% elif pts < 0 %}var(--danger){% else %}var(--text-muted){% endif %};">{{ '+' if pts > 0 else '' }}{{ pts }}</span>
+                {% endfor %}
             </div>
-            {% endfor %}
+            {% else %}
+            <p class="text-sm py-6 text-center" style="color: var(--text-faint);">Nie masz jeszcze typów.<br>Wejdź w zakładkę „Mecze" i obstaw nadchodzące spotkania!</p>
+            {% endif %}
         </div>
-        {% else %}
-        <p class="text-sm py-6 text-center" style="color: var(--text-faint);">Brak rozliczonych typów.<br>Pojawią się tu po zakończeniu obstawionych meczów.</p>
-        {% endif %}
     </div>
-
-    <div class="flat-card rounded-2xl p-7">
-        <div class="flex items-center justify-between mb-3">
-            <p class="text-[10px] font-semibold uppercase tracking-[0.15em]" style="color: var(--accent);">⏳ Twoje aktywne typy</p>
-            <span class="text-[10px] px-2 py-0.5 rounded" style="background: var(--accent-soft); color: var(--accent);">{{ active_picks|length }} {% if active_picks|length == 1 %}typ{% elif active_picks|length in [2,3,4] %}typy{% else %}typów{% endif %}</span>
-        </div>
-        {% if active_picks %}
-        <div class="space-y-2">
-            {% for pick in active_picks|sort(attribute='match.match_date') %}
-            <div class="flex items-center justify-between p-2.5 rounded-lg" style="background: var(--bg-elevated); border-left: 3px solid var(--accent);">
-                <span class="text-sm truncate">{{ pick.match.home_team }} <span style="color: var(--text-faint);">vs</span> {{ pick.match.away_team }}</span>
-                <span class="font-mono font-bold text-sm ml-2 flex-shrink-0" style="color: var(--accent);">{{ pick.predicted_result }}</span>
+    {% else %}
+    {% set finished_count = matches|selectattr('is_finished')|list|length %}
+    <div class="flat-card rounded-2xl p-5 sm:p-7 mb-10 text-center">
+        <p class="text-[10px] font-semibold uppercase tracking-[0.15em] mb-4" style="color: var(--text-faint);">Puls turnieju</p>
+        <div class="grid grid-cols-2 gap-4 mb-6">
+            <div>
+                <p class="font-display text-3xl font-bold">{{ all_players|length }}</p>
+                <p class="text-[10px] uppercase tracking-wider mt-1" style="color: var(--text-faint);">graczy łącznie</p>
             </div>
-            {% endfor %}
+            <div>
+                <p class="font-display text-3xl font-bold" style="color: var(--accent);">{{ finished_count }}</p>
+                <p class="text-[10px] uppercase tracking-wider mt-1" style="color: var(--text-faint);">meczów za nami</p>
+            </div>
         </div>
-        {% else %}
-        <p class="text-sm py-6 text-center" style="color: var(--text-faint);">Nie masz jeszcze typów.<br>Wejdź w zakładkę „Mecze" i obstaw nadchodzące spotkania!</p>
-        {% endif %}
+        <button onclick="openAuth('register')" class="font-semibold px-6 py-2.5 rounded-lg text-sm transition" style="background: var(--accent); color: var(--bg-base);">Dołącz do gry →</button>
     </div>
-</div>
-{% else %}
-{% set finished_count = matches|selectattr('is_finished')|list|length %}
-<div class="flat-card rounded-2xl p-7 mb-10 text-center">
-    <p class="text-[10px] font-semibold uppercase tracking-[0.15em] mb-4" style="color: var(--text-faint);">Puls turnieju</p>
-    <div class="grid grid-cols-2 gap-4 mb-6">
-        <div>
-            <p class="font-display text-3xl font-bold">{{ all_players|length }}</p>
-            <p class="text-[10px] uppercase tracking-wider mt-1" style="color: var(--text-faint);">graczy łącznie</p>
-        </div>
-        <div>
-            <p class="font-display text-3xl font-bold" style="color: var(--accent);">{{ finished_count }}</p>
-            <p class="text-[10px] uppercase tracking-wider mt-1" style="color: var(--text-faint);">meczów za nami</p>
-        </div>
-    </div>
-    <button onclick="openAuth('register')" class="font-semibold px-6 py-2.5 rounded-lg text-sm transition" style="background: var(--accent); color: var(--bg-base);">Dołącz do gry →</button>
-</div>
-{% endif %}
+    {% endif %}
 </div>
 
         <div id="tab-groups" class="tab-content">
@@ -1354,7 +1351,7 @@
             tickCountdown();
         }
 
-        async function loadHistory() {
+async function loadHistory() {
             const playerId = {{ current_player.id if current_player else 0 }};
             if (!playerId) return;
             try {
@@ -1366,7 +1363,18 @@
                     return;
                 }
 
-        let html = `<table class="w-full min-table table-auto"><thead><tr><th class="text-left pl-4">Mecz</th><th class="text-center hidden sm:table-cell">Data</th><th class="text-center">Typ</th><th class="text-center">Wynik</th><th class="text-center pr-4">Pkt</th></tr></thead><tbody>`;
+                let html = `<table class="w-full min-table table-auto">
+                    <thead>
+                        <tr>
+                            <th class="text-left pl-2 sm:pl-4">Mecz</th>
+                            <th class="text-center hidden md:table-cell">Data</th>
+                            <th class="text-center">Typ</th>
+                            <th class="text-center">Wynik</th>
+                            <th class="text-center pr-2">Pkt</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+                
                 for (const pick of history) {
                     const isCorrect = pick.is_correct === true;
                     const statusClass = pick.is_finished ? (pick.points_earned > 0 ? 'history-correct' : (pick.points_earned < 0 ? 'history-wrong' : '')) : '';
@@ -1377,21 +1385,18 @@
                     const awayFlag = awayCode ? `<img src="${FLAG_BASE_URL}${awayCode}.svg" class="flag-icon" style="width:16px;height:12px;margin-left:4px;margin-right:0;" onerror="this.style.display='none'">` : '';
 
                     let resultText = pick.actual_result || '—';
-                    if (pick.penalties) resultText += ` <br class="sm:hidden"><span style="color: var(--gold); font-size:9px;">k.${pick.penalties}</span>`;
-                    
-                    const dateFormatted = new Date(pick.match_date).toLocaleDateString('pl-PL', {day: '2-digit', month: '2-digit', year: 'numeric'});
+                    if (pick.penalties) resultText += `<br class="md:hidden"><span style="color: var(--gold); font-size:9px; margin-left:2px;">k.${pick.penalties}</span>`;
 
                     html += `<tr class="${statusClass}" style="cursor:${pick.breakdown ? 'pointer' : 'default'};" onclick="toggleBreakdown('bd-${pick.match_id}')">`;
-                    html += `<td class="font-medium pl-4 py-3 text-xs sm:text-sm leading-tight max-w-[120px] sm:max-w-none truncate">${homeFlag} ${pick.home_team} <br class="sm:hidden"><span style="color: var(--text-faint);" class="text-[10px] mx-1">vs</span> ${pick.away_team} ${awayFlag}</td>`;
-                    html += `<td class="text-center text-xs hidden sm:table-cell" style="color: var(--text-muted);">${dateFormatted}</td>`;
-                    html += `<td class="text-center font-mono font-bold text-sm" style="color: var(--success);">${pick.predicted_result}</td>`;
-                    html += `<td class="text-center font-mono text-sm" style="color: var(--text-muted);">${resultText}</td>`;
-                    html += `<td class="text-center font-display font-bold text-base pr-4" style="${pointsStyle}">${pick.points_earned || 0}${pick.breakdown ? ' <span style="font-size:9px;color:var(--text-faint);">▾</span>' : ''}</td>`;
-                    html += `</tr>`;        
+                    html += `<td class="font-medium pl-2 sm:pl-4 py-3 text-[11px] sm:text-sm leading-tight max-w-[130px] sm:max-w-none truncate">${homeFlag} ${pick.home_team} <br class="md:hidden"><span style="color: var(--text-faint);" class="text-[9px] sm:text-[10px] mx-1">vs</span><br class="md:hidden"> ${pick.away_team} ${awayFlag}</td>`;
+                    html += `<td class="text-center text-xs hidden md:table-cell" style="color: var(--text-muted);">${new Date(pick.match_date).toLocaleDateString('pl-PL')}</td>`;
+                    html += `<td class="text-center font-mono font-bold text-[11px] sm:text-sm" style="color: var(--success);">${pick.predicted_result}</td>`;
+                    html += `<td class="text-center font-mono text-[11px] sm:text-sm" style="color: var(--text-muted);">${resultText}</td>`;
+                    html += `<td class="text-center font-display font-bold text-sm sm:text-base pr-2" style="${pointsStyle}">${pick.points_earned || 0}${pick.breakdown ? ' <span style="font-size:9px;color:var(--text-faint);">▾</span>' : ''}</td>`;
+                    html += `</tr>`;
 
-                    // Wiersz rozwijany: rozkład punktów + strzelcy
                     if (pick.is_finished) {
-                        html += `<tr id="bd-${pick.match_id}" style="display:none;"><td colspan="5" class="px-4 pb-3" style="background: var(--bg-elevated);">`;
+                        html += `<tr id="bd-${pick.match_id}" style="display:none;"><td colspan="5" class="px-2 sm:px-4 pb-3" style="background: var(--bg-elevated);">`;
                         html += renderBreakdown(pick);
                         html += `</td></tr>`;
                     }
