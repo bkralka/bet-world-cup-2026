@@ -138,9 +138,9 @@ UNDERDOG_TEAMS = {
 STAGE_MULTIPLIERS = {
     "group": 1,
     "round_32": 1,
-    "round_16": 1,
-    "quarter": 1.5,
-    "semi": 2,
+    "round_16": 1.5,
+    "quarter": 2,
+    "semi": 2.5,
     "final": 3
 }
 
