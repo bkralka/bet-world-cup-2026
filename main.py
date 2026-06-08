@@ -877,20 +877,28 @@ def update_match_result(match_id: int, result: MatchResultUpdate, db: Session = 
         match_total = pd["total_points"]   # punkty za sam typ (z bonusami meczowymi)
 
         if was_finished:
-            # KOREKTA — cofnij poprzedni wynik meczowy, dolicz nowy (serii nie ruszamy)
-            player.total_points += (match_total - (pick.points_earned or 0))
-            pick.points_earned = match_total
+            # KOREKTA — cofnij poprzedni wynik meczowy, dolicz nowy
             bd = dict(pick.points_breakdown or {})
-            bd.update({"base": pd["base_points"], "high_score": pd["high_score_bonus"], "underdog": pd["underdog_bonus"],
-                       "favorite": pd["favorite_bonus"], "star": pd["star_player_bonus"],
-                       "multiplier": pd["multiplier"], "match_total": match_total})
+            old_sb = bd.get("streak_bonus", 0)
+            
+            # Jeśli korekta sprawia, że typ jest wciąż trafiony, zachowujemy stary bonus za serię.
+            # Jeśli zmienia go na pudło, zdejmujemy bonus z tego spotkania.
+            new_sb = old_sb if pd["base_points"] > 0 else 0
+            grand_total = match_total + new_sb
+
+            # Aktualizujemy ogólną punktację o różnicę między nowym a starym wynikiem
+            player.total_points += (grand_total - (pick.points_earned or 0))
+            pick.points_earned = grand_total
+            
+            bd.update({
+                "base": pd["base_points"], "high_score": pd["high_score_bonus"], "underdog": pd["underdog_bonus"],
+                "favorite": pd["favorite_bonus"], "star": pd["star_player_bonus"],
+                "multiplier": pd["multiplier"], "match_total": match_total, 
+                "streak_bonus": new_sb, "grand_total": grand_total
+            })
             pick.points_breakdown = bd
         else:
             # PIERWSZE rozliczenie
-            pick.points_earned = match_total
-            player.total_points += match_total
-            player.favorite_team_points += pd["favorite_bonus"]
-            player.star_player_points += pd["star_player_bonus"]
             sb = 0
             if pd["base_points"] > 0:
                 player.correct_predictions += 1
@@ -898,15 +906,24 @@ def update_match_result(match_id: int, result: MatchResultUpdate, db: Session = 
                 if player.current_streak > player.longest_streak:
                     player.longest_streak = player.current_streak
                 sb = streak_bonus(player.current_streak)   # bonus za serię
-                if sb > 0:
-                    player.total_points += sb
             else:
                 player.current_streak = 0
+
+            # Sumujemy punkty z meczu oraz wypracowany bonus za serię
+            grand_total = match_total + sb
+
+            # Przypisujemy do zakładu łączną kwotę!
+            pick.points_earned = grand_total
+            
+            player.total_points += grand_total
+            player.favorite_team_points += pd["favorite_bonus"]
+            player.star_player_points += pd["star_player_bonus"]
+            
             pick.points_breakdown = {
                 "base": pd["base_points"], "high_score": pd["high_score_bonus"], "underdog": pd["underdog_bonus"],
                 "favorite": pd["favorite_bonus"], "star": pd["star_player_bonus"], "multiplier": pd["multiplier"],
                 "streak_bonus": sb, "streak_len": player.current_streak,
-                "match_total": match_total, "grand_total": match_total + sb
+                "match_total": match_total, "grand_total": grand_total
             }
 
         db.commit()
