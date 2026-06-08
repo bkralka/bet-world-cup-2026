@@ -118,8 +118,11 @@
             display: inline-flex;
             align-items: center;
             gap: 2px;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
+            min-width: 0;
+            max-width: 100%;
         }
+        .team-name img.flag-icon { flex-shrink: 0; }
 
         .underdog-badge {
             display: inline-flex;
@@ -215,6 +218,12 @@
         .form-w { background-color: var(--success-soft); color: var(--success); }
         .form-d { background-color: rgba(125,211,252,0.12); color: var(--info); }
         .form-l { background-color: var(--danger-soft); color: var(--danger); }
+
+        @media (max-width: 640px) {
+            table.min-table th { padding: 10px 3px; font-size: 0.58rem; letter-spacing: 0.04em; }
+            table.min-table td { padding: 10px 3px; font-size: 0.78rem; }
+            .form-icon { width: 15px; height: 15px; font-size: 0.55rem; }
+        }
 
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
@@ -518,18 +527,18 @@
                                 <th class="text-center">M</th>
                                 <th class="text-center">Pkt</th>
                                 <th class="text-center">B</th>
-                                <th class="text-center">G+/-</th>
+                                <th class="text-center hidden sm:table-cell">G+/-</th>
                                 <th class="text-center pr-2">Forma</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for team in teams %}
                             <tr>
-                                <td class="font-medium whitespace-nowrap overflow-hidden text-ellipsis pl-4"><span class="team-name" data-team="{{ team.name }}">{{ team.name }}</span></td>
+                                <td class="font-medium whitespace-nowrap overflow-hidden text-ellipsis pl-4 pr-1"><span class="team-name" data-team="{{ team.name }}">{{ team.name }}</span></td>
                                 <td class="text-center" style="color: var(--text-muted);">{{ team.played }}</td>
                                 <td class="text-center font-semibold" style="color: var(--success);">{{ team.points }}</td>
                                 <td class="text-center font-mono text-xs" style="color: var(--text-muted);">{{ team.goals_for }}:{{ team.goals_against }}</td>
-                                <td class="text-center font-medium" style="color: {% if team.goal_diff >= 0 %}var(--success){% else %}var(--danger){% endif %};">{{ team.goal_diff }}</td>
+                                <td class="text-center font-medium hidden sm:table-cell" style="color: {% if team.goal_diff >= 0 %}var(--success){% else %}var(--danger){% endif %};">{{ team.goal_diff }}</td>
                                 <td class="text-center pt-3 pb-3 pr-2"><div style="display:flex; gap:3px; justify-content:center; align-items:center; flex-wrap:nowrap;">{% for c in team.form_str %}<span class="form-icon form-{% if c == 'W' %}w{% elif c == 'D' %}d{% else %}l{% endif %}">{{ c }}</span>{% endfor %}</div></td>
                             </tr>
                             {% endfor %}
