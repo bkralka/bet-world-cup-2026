@@ -2213,31 +2213,28 @@ const TEAM_DATA = {
         document.getElementById('spSelectFinalBtn')?.addEventListener('click', async (e) => {
             const selectedPlayer = STAR_PLAYERS[spCurrentIdx].name;
             const playerId = {{ current_player.id if current_player else 0 }};
-            const btn = e.currentTarget;
 
-            // Zapis SAMEJ gwiazdy – niezależny wybór.
             if (playerId && selectedPlayer) {
+                const btn = e.currentTarget;
                 btn.disabled = true;
                 btn.textContent = 'Zapisywanie…';
                 try {
-                    const res = await fetch(`/players/${playerId}/favorite`, {
+                    const response = await fetch(`/players/${playerId}/favorite`, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ star_player: selectedPlayer })
                     });
-                    if (!res.ok) {
-                        let detail = `Błąd serwera (${res.status})`;
-                        try { const d = await res.json(); if (d.detail) detail = d.detail; } catch (_) {}
-                        alert('Nie udało się zapisać gwiazdy: ' + detail +
-                              '\n\n(Jeśli błąd dotyczy "drużyny" lub kod to 422 – na serwerze działa stara wersja main.py, trzeba ją zaktualizować i zrestartować.)');
+                    
+                    if (!response.ok) {
+                        const err = await response.json();
+                        alert("Błąd zapisu: " + (err.detail || JSON.stringify(err)));
                         btn.disabled = false;
                         btn.textContent = 'Zapisz gwiazdę';
-                        return;
+                        return; // Zatrzymujemy przeładowanie strony!
                     }
                 } catch (err) {
-                    alert('Błąd połączenia przy zapisie gwiazdy.');
-                    btn.disabled = false;
-                    btn.textContent = 'Zapisz gwiazdę';
+                    console.error('Błąd zapisu gwiazdy:', err);
+                    alert("Wystąpił błąd sieci.");
                     return;
                 }
             }
@@ -2272,7 +2269,7 @@ const TEAM_DATA = {
             if (!starModal) return;
 
             // Ustaw karuzelę na aktualnie wybranego piłkarza (jeśli jest).
-            const currentStar = '{{ current_player.star_player if current_player else "" }}';
+            const currentStar = '{{ current_player.star_player or "" }}';
             const starIdx = STAR_PLAYERS.findIndex(p => p.name === currentStar);
             spCurrentIdx = starIdx >= 0 ? starIdx : 0;
 
@@ -2293,7 +2290,7 @@ const TEAM_DATA = {
         }
 
         function updateSidebarStar() {
-            const starName = '{{ current_player.star_player if current_player else "" }}';
+            const starName = '{{ current_player.star_player or "" }}';
             const img = document.getElementById('sidebar-star-img');
             if (!img || !starName) return;
             const player = STAR_PLAYERS.find(p => p.name === starName);
