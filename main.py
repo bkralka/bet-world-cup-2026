@@ -527,6 +527,33 @@ def read_dashboard(request: Request, db: Session = Depends(get_db)):
     )
     settled_picks = {pid: cnt for pid, cnt in settled_counts.items()}
 
+    # Odznaki rankingowe — wyróżnienia w kategoriach (liderów danej kategorii)
+    exact_counts = dict(
+        db.query(models.UserPick.player_id, _func.count(models.UserPick.id))
+        .join(models.Match)
+        .filter(models.Match.is_finished == True, models.UserPick.predicted_result == models.Match.result)
+        .group_by(models.UserPick.player_id).all()
+    )
+    player_badges = {}
+    def _award(pid, emoji, label):
+        if pid is not None:
+            player_badges.setdefault(pid, []).append({"e": emoji, "l": label})
+
+    def _award_max_dict(vals, emoji, label, min_val=1):
+        if vals:
+            mx = max(vals.values())
+            if mx >= min_val:
+                for pid, v in vals.items():
+                    if v == mx:
+                        _award(pid, emoji, label)
+
+    def _award_max_attr(attr, emoji, label, min_val=1):
+        vals = {p.id: getattr(p, attr) or 0 for p in all_players}
+        _award_max_dict(vals, emoji, label, min_val)
+
+    _award_max_dict(exact_counts, "🎯", "Snajper — najwięcej dokładnych typów", 1)
+    _award_max_attr("longest_streak", "🔥", "Seryjny — najdłuższa seria", 3)
+
     player_id = request.cookies.get("player_id")
     current_player = None
     current_rank = "-"  # <--- Dodane miejsce na pozycję w rankingu
@@ -579,7 +606,7 @@ def read_dashboard(request: Request, db: Session = Depends(get_db)):
         request=request, name="index.html",
         context={
             "players": players, "matches": matches, "leaderboard": leaderboard,
-            "all_players": all_players, "picks": picks, "settled_picks": settled_picks,
+            "all_players": all_players, "picks": picks, "settled_picks": settled_picks, "player_badges": player_badges,
             "current_player": current_player, 
             "current_rank": current_rank,  # <--- Wysłanie do HTML'a
             "active_picks": active_picks,

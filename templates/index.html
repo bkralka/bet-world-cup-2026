@@ -884,9 +884,9 @@
                         <div class="flex items-center gap-3 sm:gap-4 min-w-0">
                             <span class="w-7 font-display font-bold text-center text-sm flex-shrink-0" style="color: {% if is_top3 %}{{ medal_color[rank] }}{% elif is_chase %}var(--accent){% else %}var(--text-muted){% endif %};">{{ rank }}</span>
                             <div class="min-w-0">
-                                <span class="font-semibold text-sm cursor-pointer truncate block" onclick="openPlayerProfile({{ player.id }})">{{ player.username }}</span>
+                                <span class="font-semibold text-sm cursor-pointer truncate block" onclick="openPlayerProfile({{ player.id }})">{{ player.username }}{% for b in player_badges.get(player.id, []) %} <span title="{{ b.l }}" style="cursor:help;">{{ b.e }}</span>{% endfor %}</span>
                                 <span class="text-[11px]" style="color: var(--text-faint);">
-                                    {{ player.correct_predictions }} traf.{% if settled > 0 %} · {{ ((player.correct_predictions / settled) * 100) | round | int }}% skut.{% endif %}{% if rank == 1 %} · <span style="color: var(--gold);">lider 👑</span>{% endif %}
+                                    {% if settled > 0 %}{{ player.correct_predictions }}/{{ settled }} traf. · {{ ((player.correct_predictions / settled) * 100) | round | int }}%{% else %}{{ player.correct_predictions }} traf.{% endif %}{% if rank == 1 %} · <span style="color: var(--gold);">lider 👑</span>{% endif %}
                                 </span>
                             </div>
                         </div>
@@ -984,6 +984,16 @@
                         <div class="text-center p-2.5 rounded-lg" style="background: var(--bg-elevated);"><p class="text-[10px]" style="color: var(--text-muted);">Seria 15+</p><p class="font-display font-bold text-sm" style="color: var(--gold);">+8…</p></div>
                     </div>
                     <p class="text-[11px] mt-2" style="color: var(--text-faint);">Od serii 10 bonus rośnie o 1 za każde kolejne trafienie (10→+3, 11→+4, 12→+5…).</p>
+                </div>
+
+                <div class="mt-7">
+                    <p class="text-[10px] font-semibold uppercase tracking-wider mb-1" style="color: var(--text-faint);">🏅 Odznaki w rankingu</p>
+                    <p class="text-xs mb-3" style="color: var(--text-faint);">Wyróżnienia przy nicku w rankingu — trafiają do najlepszych w danej kategorii i zmieniają się na bieżąco.</p>
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-3 p-3 rounded-lg" style="background: var(--bg-elevated);"><span class="text-lg">👑</span><div><p class="text-sm font-semibold">Lider</p><p class="text-[11px]" style="color: var(--text-muted);">Gracz z największą liczbą punktów (1. miejsce).</p></div></div>
+                        <div class="flex items-center gap-3 p-3 rounded-lg" style="background: var(--bg-elevated);"><span class="text-lg">🎯</span><div><p class="text-sm font-semibold">Snajper</p><p class="text-[11px]" style="color: var(--text-muted);">Najwięcej trafionych <strong>dokładnych</strong> wyników (typ idealnie zgodny z rezultatem).</p></div></div>
+                        <div class="flex items-center gap-3 p-3 rounded-lg" style="background: var(--bg-elevated);"><span class="text-lg">🔥</span><div><p class="text-sm font-semibold">Seryjny</p><p class="text-[11px]" style="color: var(--text-muted);">Najdłuższa seria trafień z rzędu w całym turnieju.</p></div></div>
+                    </div>
                 </div>
 
                 <div class="mt-7">
