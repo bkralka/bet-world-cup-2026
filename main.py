@@ -22,6 +22,19 @@ app = FastAPI(title="OnePick Cup 2026 API")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
+@app.middleware("http")
+async def no_cache_for_dynamic_pages(request: Request, call_next):
+    """Blokuje cache'owanie stron z danymi użytkownika, żeby nikt nie zobaczył
+    konta innego gracza zapisanego w cache przeglądarki/pośrednika.
+    Pliki statyczne (/static) mogą być normalnie cache'owane."""
+    response = await call_next(request)
+    if not request.url.path.startswith("/static"):
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, private, max-age=0"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+        response.headers["Vary"] = "Cookie"
+    return response
+
 ADMIN_SECRET = os.environ.get("ADMIN_SECRET", "change_me_in_env")
 
 def ensure_columns():

@@ -288,7 +288,7 @@
                         <button onclick="openAuth('register')" class="text-xs font-semibold px-4 py-1.5 rounded-lg transition" style="background: var(--accent); color: var(--bg-base);">Zarejestruj się</button>
                     {% endif %}
 
-                    <span id="liveBadge" class="px-3 py-1.5 rounded-lg text-xs font-semibold uppercase animate-pulse-slow" style="display:none; background: var(--danger-soft); color: var(--danger); border: 1px solid rgba(248,113,113,0.25); letter-spacing: 0.08em;">● Na żywo</span>
+                    <span id="liveBadge" class="px-3 py-1.5 rounded-lg text-xs font-semibold uppercase animate-pulse-slow" style="display:none; background: var(--danger-soft); color: var(--danger); border: 1px solid rgba(248,113,113,0.25); letter-spacing: 0.08em;">● Mecz w trakcie</span>
                 </div>
             </div>
         </div>
@@ -1032,7 +1032,7 @@
             <h2 id="authTitle" class="font-display font-bold text-xl text-center mb-6">Zaloguj się</h2>
 
             <input type="text" id="authUsername" placeholder="Login (nick)" class="w-full rounded-xl p-3.5 mb-3 outline-none transition" style="background: var(--bg-elevated); border: 1px solid var(--border-subtle); color: var(--text);">
-            <input type="text" id="authFullName" placeholder="Imię i nazwisko" class="w-full rounded-xl p-3.5 mb-3 outline-none transition" style="background: var(--bg-elevated); border: 1px solid var(--border-subtle); color: var(--text); display:none;">
+            <input type="text" id="authFullName" placeholder="Imię" class="w-full rounded-xl p-3.5 mb-3 outline-none transition" style="background: var(--bg-elevated); border: 1px solid var(--border-subtle); color: var(--text); display:none;">
             <input type="password" id="authPassword" placeholder="Hasło" class="w-full rounded-xl p-3.5 mb-5 outline-none transition" style="background: var(--bg-elevated); border: 1px solid var(--border-subtle); color: var(--text);">
 
             <button id="authSubmitBtn" onclick="handleAuth(window.authMode || 'login')" class="w-full font-semibold py-3 rounded-xl transition" style="background: var(--success); color: var(--bg-base);">Zaloguj się</button>
@@ -1790,7 +1790,7 @@ function openTeamDetail(name) {
                 return;
             }
             if(action === 'register' && !fullName) {
-                err.textContent = "Podaj imię i nazwisko!";
+                err.textContent = "Podaj imię!";
                 err.classList.remove('hidden');
                 return;
             }
