@@ -156,7 +156,15 @@ def streak_bonus(streak: int) -> int:
     return streak - 7  # 10→3, 11→4, 12→5, 13→6, 14→7, 15→8, ...
 
 def now_utc():
-    return datetime.now()
+    """Aktualny czas w strefie polskiej (Europe/Warsaw), jako naive datetime.
+    Daty meczów są wpisywane w czasie polskim, więc wszystko liczy się spójnie —
+    niezależnie od tego, czy serwer (Render/Docker) działa w UTC."""
+    try:
+        from zoneinfo import ZoneInfo
+        return datetime.now(ZoneInfo("Europe/Warsaw")).replace(tzinfo=None)
+    except Exception:
+        # awaryjnie: czas letni w Polsce to UTC+2 (turniej rozgrywany jest latem)
+        return datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(hours=2)
 
 def get_upcoming_matches(db: Session, limit: int = 8):
     """Zwraca listę ID meczów, które są najbliższe (niezakończone, nie zablokowane, data > teraz)."""
