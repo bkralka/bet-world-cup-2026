@@ -558,6 +558,12 @@
                 {% set future_matches = matches|sort(attribute='is_finished') %}
                 {% for match in future_matches %}
                 <div class="match-card p-4 sm:p-5">
+                    {% set stage_labels = {'round_32':'1/16 finału','round_16':'1/8 finału','quarter':'Ćwierćfinał','semi':'Półfinał','third_place':'Mecz o 3. miejsce','final':'Finał'} %}
+                    {% if match.stage and match.stage != 'group' %}
+                    <div class="text-center mb-3">
+                        <span class="text-[10px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full" style="{% if match.stage == 'final' %}background: rgba(251,191,36,0.12); color: var(--gold);{% else %}background: var(--accent-soft); color: var(--accent);{% endif %}">{% if match.stage == 'final' %}🏆 {% endif %}{{ stage_labels.get(match.stage, 'Faza pucharowa') }}{% if match.multiplier and match.multiplier > 1 %} · ×{{ match.multiplier }}{% endif %}</span>
+                    </div>
+                    {% endif %}
                     <div class="flex flex-wrap items-center gap-3 sm:gap-4">
                         <div class="flex-1 min-w-0 sm:min-w-[280px]">
                             <div class="flex items-center gap-2 sm:gap-3 justify-between">
@@ -830,18 +836,62 @@
         </div>
 
         <div id="tab-ranking" class="tab-content">
+            {% set leader_points = all_players[0].total_points if all_players else 0 %}
+
+            {% if all_players|length >= 1 %}
+            <!-- PODIUM TOP 3 -->
+            <div class="grid grid-cols-3 gap-2 sm:gap-4 mb-6 items-end">
+                {% set medals = ['🥇','🥈','🥉'] %}
+                {% set heights = ['pt-5 pb-7','pt-4 pb-5','pt-4 pb-5'] %}
+                {% set order = [1, 0, 2] %}
+                {% for pos in order %}
+                    {% if all_players|length > pos %}
+                    {% set p = all_players[pos] %}
+                    {% set medal_colors = ['var(--gold)','#cbd5e1','#d8a06a'] %}
+                    <div class="rounded-2xl px-2 sm:px-4 {{ heights[pos] }} text-center cursor-pointer transition flex flex-col items-center {% if pos == 0 %}order-2{% elif pos == 1 %}order-1{% else %}order-3{% endif %}"
+                         onclick="openPlayerProfile({{ p.id }})"
+                         style="background: var(--bg-elevated); border: 1px solid {% if pos == 0 %}rgba(251,191,36,0.4){% else %}var(--border-subtle){% endif %}; {% if pos == 0 %}box-shadow: 0 0 24px rgba(251,191,36,0.12);{% endif %}">
+                        <div class="text-2xl sm:text-3xl mb-1">{{ medals[pos] }}</div>
+                        <div class="font-display font-bold text-sm sm:text-base truncate max-w-full" style="color: var(--text);">{{ p.username }}</div>
+                        <div class="font-mono font-bold text-lg sm:text-2xl mt-1" style="color: {{ medal_colors[pos] }};">{{ p.total_points }}</div>
+                        <div class="text-[10px] uppercase tracking-wider" style="color: var(--text-faint);">punktów</div>
+                        <div class="flex items-center gap-2 mt-2 text-[10px]" style="color: var(--text-muted);">
+                            <span title="Trafione typy">{{ p.correct_predictions }} ✓</span>
+                            {% if p.current_streak >= 3 %}<span title="Seria" style="color: var(--accent);">🔥 {{ p.current_streak }}</span>{% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- TABELA POZOSTALI -->
             <div class="table-wrapper p-1">
-                <h3 class="font-display font-bold text-base p-5 pb-2">Ranking wszystkich graczy</h3>
+                <h3 class="font-display font-bold text-base p-5 pb-3">Pełna klasyfikacja</h3>
                 <div class="divide-y" style="border-color: var(--border-subtle);">
                     {% for player in all_players %}
-                    <div class="flex justify-between items-center p-4 transition rounded-lg" onmouseover="this.style.background='var(--bg-elevated)'" onmouseout="this.style.background='transparent'">
-                        <div class="flex items-center gap-4">
-                            <span class="w-6 font-display font-bold text-center text-sm" style="color: {% if loop.index <= 3 %}var(--gold){% else %}var(--text-muted){% endif %};">{{ loop.index }}</span>
-                            <span class="font-semibold text-sm cursor-pointer" onclick="openPlayerProfile({{ player.id }})">{{ player.username }}</span>
+                    {% set rank = loop.index %}
+                    {% set settled = settled_picks.get(player.id, 0) %}
+                    {% set behind = leader_points - player.total_points %}
+                    {% set is_top3 = rank <= 3 %}
+                    {% set is_chase = rank >= 4 and rank <= 7 %}
+                    {% set medal_color = {1:'#fbbf24', 2:'#cbd5e1', 3:'#d8a06a'} %}
+                    {% set medal_bg = {1:'rgba(251,191,36,0.08)', 2:'rgba(203,213,225,0.06)', 3:'rgba(216,160,106,0.06)'} %}
+                    {% set row_bg = medal_bg.get(rank, 'transparent') if is_top3 else 'transparent' %}
+                    <div class="flex justify-between items-center p-3 sm:p-4 transition"
+                         style="{% if is_top3 %}border-left: 3px solid {{ medal_color[rank] }}; background: {{ medal_bg[rank] }};{% elif is_chase %}border-left: 2px solid var(--accent-soft);{% else %}border-left: 3px solid transparent;{% endif %}"
+                         onmouseover="this.style.background='var(--bg-elevated)'" onmouseout="this.style.background='{{ row_bg }}'">
+                        <div class="flex items-center gap-3 sm:gap-4 min-w-0">
+                            <span class="w-7 font-display font-bold text-center text-sm flex-shrink-0" style="color: {% if is_top3 %}{{ medal_color[rank] }}{% elif is_chase %}var(--accent){% else %}var(--text-muted){% endif %};">{{ rank }}</span>
+                            <div class="min-w-0">
+                                <span class="font-semibold text-sm cursor-pointer truncate block" onclick="openPlayerProfile({{ player.id }})">{{ player.username }}</span>
+                                <span class="text-[11px]" style="color: var(--text-faint);">
+                                    {{ player.correct_predictions }} traf.{% if settled > 0 %} · {{ ((player.correct_predictions / settled) * 100) | round | int }}% skut.{% endif %}{% if rank > 1 and behind > 0 %} · <span style="color: var(--danger);">-{{ behind }} do lidera</span>{% elif rank == 1 %} · <span style="color: var(--gold);">lider 👑</span>{% endif %}
+                                </span>
+                            </div>
                         </div>
-                        <div class="flex items-center gap-4">
-                            <span class="text-xs font-semibold whitespace-nowrap px-2 py-1 rounded" style="background: var(--accent-soft); color: var(--accent);" title="Aktualna seria">🔥 {{ player.current_streak }}</span>
-                            <span class="text-xs font-medium whitespace-nowrap px-2 py-1 rounded hidden sm:inline" style="background: var(--bg-elevated); color: var(--text-muted);" title="Trafione typy">{{ player.correct_predictions }} ✓</span>
+                        <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+                            {% if player.current_streak >= 3 %}<span class="text-xs font-semibold whitespace-nowrap px-2 py-1 rounded hidden sm:inline" style="background: var(--accent-soft); color: var(--accent);" title="Aktualna seria">🔥 {{ player.current_streak }}</span>{% endif %}
                             <span class="font-mono font-bold text-base" style="color: var(--success);">{{ player.total_points }} <span class="text-xs" style="color: var(--text-muted);">pkt</span></span>
                         </div>
                     </div>

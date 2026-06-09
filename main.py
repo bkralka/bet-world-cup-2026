@@ -517,6 +517,16 @@ def read_dashboard(request: Request, db: Session = Depends(get_db)):
     leaderboard = db.query(models.Player).order_by(models.Player.total_points.desc()).limit(10).all()
     all_players = db.query(models.Player).order_by(models.Player.total_points.desc()).all()
 
+    # Liczba rozliczonych typów na gracza (do obliczenia skuteczności w rankingu)
+    from sqlalchemy import func as _func
+    settled_counts = dict(
+        db.query(models.UserPick.player_id, _func.count(models.UserPick.id))
+        .join(models.Match)
+        .filter(models.Match.is_finished == True)
+        .group_by(models.UserPick.player_id).all()
+    )
+    settled_picks = {pid: cnt for pid, cnt in settled_counts.items()}
+
     player_id = request.cookies.get("player_id")
     current_player = None
     current_rank = "-"  # <--- Dodane miejsce na pozycję w rankingu
@@ -569,7 +579,7 @@ def read_dashboard(request: Request, db: Session = Depends(get_db)):
         request=request, name="index.html",
         context={
             "players": players, "matches": matches, "leaderboard": leaderboard,
-            "all_players": all_players, "picks": picks,
+            "all_players": all_players, "picks": picks, "settled_picks": settled_picks,
             "current_player": current_player, 
             "current_rank": current_rank,  # <--- Wysłanie do HTML'a
             "active_picks": active_picks,
