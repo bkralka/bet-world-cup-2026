@@ -1529,28 +1529,36 @@ async function loadHistory() {
                     const pickDisplay = h.hidden
                         ? `<span style="color: var(--text-faint); font-style: italic;">ukryty</span>`
                         : `<span class="font-mono font-bold" style="color: var(--success);">${h.predicted_result || '—'}</span>`;
-                    const resultDisplay = h.actual_result
-                        ? `<span class="font-mono" style="color: var(--text-muted);">${h.actual_result}</span>`
-                        : `<span style="color: var(--text-faint);">—</span>`;
-                    const ptsStyle = h.points_earned === 3 ? 'color: var(--success);'
-                        : (h.points_earned > 0 ? '' : (h.is_finished ? 'color: var(--danger);' : 'color: var(--text-faint);'));
+                    let resultStr = h.actual_result || '—';
+                    if (h.penalties) resultStr += ` <span style="color: var(--gold); font-size:9px;">k.${h.penalties}</span>`;
+                    const resultDisplay = `<span class="font-mono" style="color: var(--text-muted);">${resultStr}</span>`;
+                    const ptsStyle = h.points_earned > 0 ? 'color: var(--success);'
+                        : (h.points_earned < 0 ? 'color: var(--danger);' : 'color: var(--text-faint);');
                     const borderColor = h.is_finished
-                        ? (h.is_correct ? 'var(--success)' : 'var(--danger)')
+                        ? (h.points_earned > 0 ? 'var(--success)' : (h.points_earned < 0 ? 'var(--danger)' : 'var(--text-faint)'))
                         : 'transparent';
+                    const canExpand = h.is_finished && !h.hidden;
+                    const rowId = `ppbd-${h.match_id}`;
 
-                    return `<div class="flex items-center justify-between text-xs p-2 rounded" style="background: var(--bg-elevated); border-left: 2px solid ${borderColor};">
-                        <div class="flex-1 truncate">
-                            <span class="font-medium">${h.home_team}</span>
-                            <span style="color: var(--text-faint);"> vs </span>
-                            <span class="font-medium">${h.away_team}</span>
-                        </div>
-                        <div class="flex items-center gap-3 ml-3">
-                            <span style="color: var(--text-faint);" class="text-[10px]">${dateStr}</span>
-                            ${pickDisplay}
-                            ${resultDisplay}
-                            <span class="font-display font-bold text-sm w-8 text-right" style="${ptsStyle}">${h.points_earned || 0}</span>
-                        </div>
-                    </div>`;
+                    let row = `<div class="text-xs rounded" style="background: var(--bg-elevated); border-left: 2px solid ${borderColor}; cursor:${canExpand ? 'pointer' : 'default'};" ${canExpand ? `onclick="toggleBreakdown('${rowId}')"` : ''}>
+                        <div class="flex items-center justify-between p-2">
+                            <div class="flex-1 truncate">
+                                <span class="font-medium">${h.home_team}</span>
+                                <span style="color: var(--text-faint);"> vs </span>
+                                <span class="font-medium">${h.away_team}</span>
+                            </div>
+                            <div class="flex items-center gap-3 ml-3">
+                                <span style="color: var(--text-faint);" class="text-[10px]">${dateStr}</span>
+                                ${pickDisplay}
+                                ${resultDisplay}
+                                <span class="font-display font-bold text-sm w-8 text-right" style="${ptsStyle}">${h.points_earned || 0}${canExpand ? ' <span style="font-size:8px;color:var(--text-faint);">▾</span>' : ''}</span>
+                            </div>
+                        </div>`;
+                    if (canExpand) {
+                        row += `<div id="${rowId}" style="display:none;" class="px-2 pb-2">${renderBreakdown(h)}</div>`;
+                    }
+                    row += `</div>`;
+                    return row;
                 }).join('');
             } catch (e) { console.error(e); }
         }

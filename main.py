@@ -581,18 +581,25 @@ def get_player_public(player_id: int, db: Session = Depends(get_db)):
 
 @app.get("/players/{player_id}/picks/public")
 def get_player_picks_public(player_id: int, db: Session = Depends(get_db)):
-    picks = db.query(models.UserPick).filter(models.UserPick.player_id == player_id).join(models.Match).order_by(models.Match.match_date.asc()).all()
+    player = db.query(models.Player).filter(models.Player.id == player_id).first()
+    star = player.star_player if player else None
+    picks = db.query(models.UserPick).filter(models.UserPick.player_id == player_id).join(models.Match).order_by(models.Match.match_date.desc()).all()
     res = []
     for pick in picks:
         m = pick.match
         res.append({
+            "match_id": m.id,
             "match_date": m.match_date.isoformat(),
             "home_team": m.home_team,
             "away_team": m.away_team,
             "predicted_result": pick.predicted_result,
             "hidden": False,
             "actual_result": m.result,
+            "penalties": m.penalties if m.is_finished else None,
+            "scorers": m.scorers or [],
+            "star_player": star,
             "points_earned": pick.points_earned,
+            "breakdown": pick.points_breakdown or None,
             "is_finished": m.is_finished,
             "is_correct": pick.points_earned == 3 if m.is_finished else None
         })
