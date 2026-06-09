@@ -158,7 +158,7 @@ def streak_bonus(streak: int) -> int:
 def now_utc():
     return datetime.now()
 
-def get_upcoming_matches(db: Session, limit: int = 5):
+def get_upcoming_matches(db: Session, limit: int = 8):
     """Zwraca listę ID meczów, które są najbliższe (niezakończone, nie zablokowane, data > teraz)."""
     now = now_utc()
     matches = db.query(models.Match).filter(
@@ -524,7 +524,7 @@ def read_dashboard(request: Request, db: Session = Depends(get_db)):
 
     group_standings = calculate_group_standings(db)
     knockout_bracket = build_knockout_bracket(db)
-    upcoming_match_ids = get_upcoming_matches(db, 5)
+    upcoming_match_ids = get_upcoming_matches(db, 8)
 
     team_positions = {}
     for group, teams in group_standings.items():
@@ -638,10 +638,10 @@ def create_pick(pick: UserPickCreate, db: Session = Depends(get_db)):
     if now_utc() >= match.match_date - timedelta(minutes=10):
         raise HTTPException(status_code=400, detail="Obstawianie zamknięte — zostało mniej niż 10 minut do meczu")
 
-    # ----- NOWA LOGIKA: tylko pierwsze 4 nadchodzące mecze -----
-    upcoming_ids = get_upcoming_matches(db, limit=5)
+    # ----- LOGIKA: tylko 8 najbliższych nadchodzących meczów -----
+    upcoming_ids = get_upcoming_matches(db, limit=8)
     if pick.match_id not in upcoming_ids:
-        raise HTTPException(status_code=400, detail="Można typować tylko 5 najbliższych meczy (kolejność dat)")
+        raise HTTPException(status_code=400, detail="Można typować tylko 8 najbliższych meczy (kolejność dat)")
 
     # Jeśli typ na ten mecz już istnieje → to EDYCJA, aktualizujemy bez limitu
     existing = db.query(models.UserPick).filter(
@@ -654,13 +654,13 @@ def create_pick(pick: UserPickCreate, db: Session = Depends(get_db)):
         db.commit()
         return existing
 
-    # NOWY typ — sprawdź limit 5 meczów z bieżącej puli
+    # NOWY typ — sprawdź limit 8 meczów z bieżącej puli
     user_picks_count = db.query(models.UserPick).filter(
         models.UserPick.player_id == pick.player_id,
         models.UserPick.match_id.in_(upcoming_ids)
     ).count()
-    if user_picks_count >= 5:
-        raise HTTPException(status_code=400, detail="Możesz obstawić maksymalnie 5 meczy (wszystkie już wybrane)")
+    if user_picks_count >= 8:
+        raise HTTPException(status_code=400, detail="Możesz obstawić maksymalnie 8 meczy (wszystkie już wybrane)")
 
     new_pick = models.UserPick(player_id=pick.player_id, match_id=pick.match_id, predicted_result=pick.predicted_result)
     db.add(new_pick)

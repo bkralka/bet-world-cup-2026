@@ -862,7 +862,7 @@
                 <div class="mb-7">
                     <p class="text-[10px] font-semibold uppercase tracking-wider mb-3" style="color: var(--text-faint);">Typowanie meczów</p>
                     <div class="p-4 rounded-xl text-sm leading-relaxed space-y-2.5" style="background: var(--bg-elevated);">
-                        <p>🎯 Aktywne okno typowania to zawsze <strong style="color: var(--accent);">5 najbliższych meczów</strong>.</p>
+                        <p>🎯 Aktywne okno typowania to zawsze <strong style="color: var(--accent);">8 najbliższych meczów</strong>.</p>
                         <p>✏️ Swobodna <strong>edycja</strong> typu aż do pierwszego gwizdka.</p>
                         <p>🔒 Po starcie meczu typ zostaje <strong style="color: var(--danger);">zablokowany</strong>.</p>
                         <p>📋 Zawsze typujesz dokładny wynik, np. <strong>2:1</strong>. Liczy się przede wszystkim trafienie rozstrzygnięcia.</p>
@@ -1817,7 +1817,7 @@ function openTeamDetail(name) {
 
         const stepContent = {
             1: { icon: "🏆", title: "Bet World Cup 2026", subtitle: "Typer Mistrzostw Świata", text: "Typujesz dokładne wyniki meczów mundialu. Trafiasz — zdobywasz punkty. Mylisz zwycięzcę — tracisz punkty. Wygrywa ten, kto uzbiera ich najwięcej." },
-            2: { icon: "📋", title: "Zasady", subtitle: "Krótka wersja", items: ["Typuj <strong>dokładny wynik</strong> (np. '2:1')", "Obstawiasz <strong>5 najbliższych meczów</strong> z terminarza", "Typ <strong>edytujesz</strong> aż do gwizdka", "Nikt nie odpada — gra się <strong>na punkty</strong>", "Wygrywa gracz z <strong style='color:var(--gold);'>najwyższym wynikiem</strong>"] },
+            2: { icon: "📋", title: "Zasady", subtitle: "Krótka wersja", items: ["Typuj <strong>dokładny wynik</strong> (np. '2:1')", "Obstawiasz <strong>8 najbliższych meczów</strong> z terminarza", "Typ <strong>edytujesz</strong> aż do gwizdka", "Nikt nie odpada — gra się <strong>na punkty</strong>", "Wygrywa gracz z <strong style='color:var(--gold);'>najwyższym wynikiem</strong>"] },
             3: { icon: "🎯", title: "Punktacja", subtitle: "Jak zdobywasz punkty", items: ["<strong style='color:var(--success);'>+3 pkt</strong> — dokładny wynik", "<strong>+1 pkt</strong> — dobry zwycięzca / remis", "<strong style='color:var(--danger);'>−1 pkt</strong> — błędnie wytypowany zwycięzca"] },
             4: { icon: "✨", title: "Bonusy", subtitle: "Zaryzykuj, zarób więcej", items: ["Underdog wygrywa → <strong style='color:var(--success);'>+2</strong>", "Underdog remisuje → <strong>+1</strong>", "Min. 4,5 bramki (5 goli) → <strong>+1</strong>", "Min. 5,5 bramki (6 goli) → <strong>+2</strong>", "Seria trafień → <strong style='color:var(--gold);'>+1 do +8</strong>", "Faza pucharowa ×1.5 / ×2 / ×3", "Ulubiona drużyna wygrywa → <strong style='color:var(--gold);'>+1</strong>"] },
             5: { icon: "📖", title: "Przykład", subtitle: "Arabia Saudyjska vs Argentyna", text: "Typujesz <strong style='color:var(--success);'>2:1</strong>. Wynik: <strong>2:1</strong>.<br><br>3 (dokładny) + 2 (underdog) = <span style='color:var(--success); font-size:1.5rem; font-weight:700; font-family: DM Sans;'>5 punktów</span>" }
