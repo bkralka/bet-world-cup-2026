@@ -182,7 +182,7 @@
         .tab-btn.active::after {
             content: '';
             position: absolute;
-            bottom: -9px;
+            bottom: 0px;
             left: 0;
             right: 0;
             height: 2px;
@@ -558,6 +558,12 @@
                 {% set future_matches = matches|sort(attribute='is_finished') %}
                 {% for match in future_matches %}
                 <div class="match-card p-4 sm:p-5">
+                    {% set stage_labels = {'round_32':'1/16 finału','round_16':'1/8 finału','quarter':'Ćwierćfinał','semi':'Półfinał','third_place':'Mecz o 3. miejsce','final':'Finał'} %}
+                    {% if match.stage and match.stage != 'group' %}
+                    <div class="text-center mb-3">
+                        <span class="text-[10px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full" style="{% if match.stage == 'final' %}background: rgba(251,191,36,0.12); color: var(--gold);{% else %}background: var(--accent-soft); color: var(--accent);{% endif %}">{% if match.stage == 'final' %}🏆 {% endif %}{{ stage_labels.get(match.stage, 'Faza pucharowa') }}{% if match.multiplier and match.multiplier > 1 %} · ×{{ match.multiplier }}{% endif %}</span>
+                    </div>
+                    {% endif %}
                     <div class="flex flex-wrap items-center gap-3 sm:gap-4">
                         <div class="flex-1 min-w-0 sm:min-w-[280px]">
                             <div class="flex items-center gap-2 sm:gap-3 justify-between">
