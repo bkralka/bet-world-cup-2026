@@ -1043,6 +1043,23 @@ def get_player_history(player_id: int, db: Session = Depends(get_db)):
 # ========================================================
 from fastapi.responses import HTMLResponse
 
+@app.post("/admin/verify", dependencies=[Depends(verify_admin)])
+def verify_admin_secret():
+    """Sprawdza, czy podany klucz jest poprawny — używane przez bramkę panelu admina."""
+    return {"ok": True}
+
+@app.delete("/admin/players/{player_id}", dependencies=[Depends(verify_admin)])
+def delete_player(player_id: int, db: Session = Depends(get_db)):
+    """Usuwa gracza wraz z jego typami. Wymaga klucza ADMIN_SECRET."""
+    player = db.query(models.Player).filter(models.Player.id == player_id).first()
+    if not player:
+        raise HTTPException(status_code=404, detail="Nie znaleziono gracza")
+    username = player.username
+    db.query(models.UserPick).filter(models.UserPick.player_id == player_id).delete()
+    db.delete(player)
+    db.commit()
+    return {"status": "ok", "deleted": player_id, "username": username}
+
 @app.get("/admin", response_class=HTMLResponse)
 def admin_panel(request: Request, db: Session = Depends(get_db)):
     players = db.query(models.Player).order_by(models.Player.total_points.desc()).all()
@@ -1052,6 +1069,7 @@ def admin_panel(request: Request, db: Session = Depends(get_db)):
     players_html = ""
     for p in players:
         status = '<span class="text-green-400 bg-green-500/10 px-2 py-0.5 rounded text-xs font-medium">W grze</span>' if p.is_alive else '<span class="text-red-400 bg-red-500/10 px-2 py-0.5 rounded text-xs font-medium">Odpadł</span>'
+        safe_username = (p.username or "").replace("\\", "\\\\").replace("'", "\\'")
         players_html += f"""
         <tr class="border-b border-white/5 hover:bg-white/[0.02] text-sm transition">
             <td class="p-3 font-semibold text-white">{p.username}</td>
@@ -1059,7 +1077,10 @@ def admin_panel(request: Request, db: Session = Depends(get_db)):
             <td class="p-3 font-medium text-xs text-gray-300 truncate max-w-[140px]">{p.full_name or '-'}</td>
             <td class="p-3 font-medium text-xs text-gray-400 truncate max-w-[120px]">{p.star_player or '-'}</td>
             <td class="p-3 font-medium text-xs text-gray-400 truncate max-w-[120px]">{p.favorite_team or '-'}</td>
-            <td class="p-3 text-right">{status}</td>
+            <td class="p-3 text-center">{status}</td>
+            <td class="p-3 text-right">
+                <button onclick="deleteUser({p.id}, '{safe_username}')" class="bg-rose-600/20 text-rose-400 border border-rose-600/30 hover:bg-rose-600 hover:text-white text-xs font-bold px-3 py-1.5 rounded-lg transition">🗑 Usuń</button>
+            </td>
         </tr>
         """
 
@@ -1138,6 +1159,17 @@ def admin_panel(request: Request, db: Session = Depends(get_db)):
         </style>
     </head>
     <body class="p-4 md:p-8">
+        <div id="admin-gate" class="min-h-screen flex items-center justify-center">
+            <div class="bg-[#14171d] border border-white/10 rounded-2xl p-8 w-full max-w-sm shadow-2xl">
+                <h1 class="text-xl font-bold text-white mb-1">🔐 Panel Admina</h1>
+                <p class="text-xs text-gray-500 mb-5">Podaj klucz dostępu, aby wejść do panelu.</p>
+                <input type="password" id="gate-secret" placeholder="ADMIN_SECRET" onkeydown="if(event.key==='Enter')unlockAdmin()" class="w-full bg-[#1a1e26] border border-white/10 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500 mb-3">
+                <button onclick="unlockAdmin()" class="w-full bg-amber-500 hover:bg-amber-600 text-gray-900 font-bold text-sm py-3 rounded-lg transition">Odblokuj panel</button>
+                <p id="gate-error" class="text-xs text-rose-400 mt-3 hidden">Nieprawidłowy klucz dostępu.</p>
+            </div>
+        </div>
+
+        <div id="admin-content" style="display:none;">
         <div class="max-w-7xl mx-auto">
             
             <div class="flex flex-col md:flex-row items-start md:items-center justify-between border-b border-white/10 pb-5 mb-6 gap-4">
@@ -1181,7 +1213,8 @@ def admin_panel(request: Request, db: Session = Depends(get_db)):
                                 <th class="p-4 font-semibold">Imię i nazwisko</th>
                                 <th class="p-4 font-semibold">Gwiazda</th>
                                 <th class="p-4 font-semibold">Zespół</th>
-                                <th class="p-4 font-semibold text-right">Status</th>
+                                <th class="p-4 font-semibold text-center">Status</th>
+                                <th class="p-4 font-semibold text-right">Akcje</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -1192,13 +1225,56 @@ def admin_panel(request: Request, db: Session = Depends(get_db)):
             </div>
 
         </div>
+        </div>
 
         <script>
             // Obsługa zapisywania klucza
             document.addEventListener('DOMContentLoaded', () => {{
                 const savedSecret = localStorage.getItem('app_admin_secret');
-                if (savedSecret) {{ document.getElementById('admin-secret-input').value = savedSecret; }}
+                if (savedSecret) {{
+                    document.getElementById('admin-secret-input').value = savedSecret;
+                    // automatyczne odblokowanie, jeśli zapisany klucz jest poprawny
+                    tryUnlock(savedSecret);
+                }}
             }});
+
+            async function tryUnlock(secret) {{
+                try {{
+                    const r = await fetch('/admin/verify', {{ method: 'POST', headers: {{ 'x-admin-secret': secret }} }});
+                    if (r.ok) {{
+                        document.getElementById('admin-gate').style.display = 'none';
+                        document.getElementById('admin-content').style.display = 'block';
+                        localStorage.setItem('app_admin_secret', secret);
+                        return true;
+                    }}
+                }} catch (e) {{}}
+                return false;
+            }}
+
+            async function unlockAdmin() {{
+                const val = document.getElementById('gate-secret').value.trim();
+                if (!val) return;
+                const ok = await tryUnlock(val);
+                if (!ok) {{
+                    document.getElementById('gate-error').classList.remove('hidden');
+                }}
+            }}
+
+            async function deleteUser(id, username) {{
+                const secret = localStorage.getItem('app_admin_secret');
+                if (!secret) return alert('Brak klucza — odśwież i zaloguj się ponownie.');
+                if (!confirm('Na pewno usunąć gracza „' + username + '"? Usunie to też wszystkie jego typy. Tej operacji nie można cofnąć.')) return;
+                try {{
+                    const r = await fetch('/admin/players/' + id, {{ method: 'DELETE', headers: {{ 'x-admin-secret': secret }} }});
+                    if (r.ok) {{
+                        alert('Usunięto gracza „' + username + '".');
+                        location.reload();
+                    }} else {{
+                        const e = await r.json();
+                        alert('Błąd: ' + (e.detail || 'nie udało się usunąć'));
+                    }}
+                }} catch (e) {{ alert('Błąd połączenia.'); }}
+            }}
 
             function saveSecret() {{
                 const val = document.getElementById('admin-secret-input').value.trim();
