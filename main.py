@@ -551,6 +551,7 @@ def read_dashboard(request: Request, db: Session = Depends(get_db)):
         vals = {p.id: getattr(p, attr) or 0 for p in all_players}
         _award_max_dict(vals, emoji, label, min_val)
 
+    _award_max_attr("total_points", "👑", "Lider — najwięcej punktów", 1)
     _award_max_dict(exact_counts, "🎯", "Snajper — najwięcej dokładnych typów", 1)
     _award_max_attr("longest_streak", "🔥", "Seryjny — najdłuższa seria", 3)
 
