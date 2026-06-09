@@ -174,6 +174,9 @@
             font-size: 0.85rem;
             letter-spacing: 0.01em;
         }
+        @media (max-width: 640px) {
+            .tab-btn { font-size: 0.8rem; padding-bottom: 0.5rem; }
+        }
         .tab-btn:hover { color: var(--text) !important; }
         .tab-btn.active { color: var(--text) !important; font-weight: 600 !important; }
         .tab-btn.active::after {
@@ -296,16 +299,16 @@
 
 <main class="max-w-7xl mx-auto px-6 py-10 relative z-10">
 
-    <div class="flex gap-6 border-b mb-8 overflow-x-auto whitespace-nowrap scrollbar-hide px-1" style="border-color: var(--border-subtle);">
-        <button class="tab-btn active pb-3 transition shrink-0" data-tab="home">Home</button>
-        <button class="tab-btn pb-3 transition shrink-0" data-tab="groups">Grupy</button>
-        <button class="tab-btn pb-3 transition shrink-0" data-tab="matches">Mecze</button>
-        <button class="tab-btn pb-3 transition shrink-0" data-tab="knockouts">Drabinka</button>
-        <button class="tab-btn pb-3 transition shrink-0" data-tab="teams">Drużyny</button>
-        <button class="tab-btn pb-3 transition shrink-0" data-tab="players">Gracze</button>
-        <button class="tab-btn pb-3 transition shrink-0" data-tab="history">Moje typy</button>
-        <button class="tab-btn pb-3 transition shrink-0" data-tab="ranking">Ranking</button>
-        <button class="tab-btn pb-3 transition shrink-0" data-tab="rules">Zasady</button>
+    <div class="flex flex-wrap gap-x-4 gap-y-1 sm:gap-6 border-b mb-8 px-1" style="border-color: var(--border-subtle);">
+        <button class="tab-btn active pb-3 transition" data-tab="home">Home</button>
+        <button class="tab-btn pb-3 transition" data-tab="groups">Grupy</button>
+        <button class="tab-btn pb-3 transition" data-tab="matches">Mecze</button>
+        <button class="tab-btn pb-3 transition" data-tab="knockouts">Drabinka</button>
+        <button class="tab-btn pb-3 transition" data-tab="teams">Drużyny</button>
+        <button class="tab-btn pb-3 transition" data-tab="players">Gracze</button>
+        <button class="tab-btn pb-3 transition" data-tab="history">Moje typy</button>
+        <button class="tab-btn pb-3 transition" data-tab="ranking">Ranking</button>
+        <button class="tab-btn pb-3 transition" data-tab="rules">Zasady</button>
     </div>
 
 <div id="tab-home" class="tab-content active">
