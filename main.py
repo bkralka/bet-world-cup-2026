@@ -528,12 +528,6 @@ def read_dashboard(request: Request, db: Session = Depends(get_db)):
     settled_picks = {pid: cnt for pid, cnt in settled_counts.items()}
 
     # Odznaki rankingowe — wyróżnienia w kategoriach (liderów danej kategorii)
-    exact_counts = dict(
-        db.query(models.UserPick.player_id, _func.count(models.UserPick.id))
-        .join(models.Match)
-        .filter(models.Match.is_finished == True, models.UserPick.predicted_result == models.Match.result)
-        .group_by(models.UserPick.player_id).all()
-    )
     player_badges = {}
     def _award(pid, emoji, label):
         if pid is not None:
@@ -552,8 +546,8 @@ def read_dashboard(request: Request, db: Session = Depends(get_db)):
         _award_max_dict(vals, emoji, label, min_val)
 
     _award_max_attr("total_points", "👑", "Lider — najwięcej punktów", 1)
-    _award_max_dict(exact_counts, "🎯", "Snajper — najwięcej dokładnych typów", 1)
-    _award_max_attr("longest_streak", "🔥", "Seryjny — najdłuższa seria", 3)
+    _award_max_attr("correct_predictions", "🎯", "Snajper — najwięcej trafionych typów", 1)
+    _award_max_attr("current_streak", "🔥", "Seryjny — najdłuższa aktualna seria", 3)
 
     player_id = request.cookies.get("player_id")
     current_player = None
