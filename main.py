@@ -204,16 +204,19 @@ def calculate_points_with_bonus(predicted: str, actual: str, match_stage: str, h
             base_points = -1
 
         # 2. Bonus za wysoką liczbę bramek
-        #    Liczy się, gdy trafisz KIERUNEK (zwycięzcę/remis) ORAZ zarówno Twój TYP,
-        #    jak i RZECZYWISTY wynik mają odpowiednio dużo bramek.
-        #    Oba ≥6 goli → +2 (próg "5,5"); oba ≥5 goli → +1 (próg "4,5").
+        #    Poziom bonusu wyznacza TWÓJ TYP (ile goli obstawiłeś), a WYNIK musi osiągnąć ten próg:
+        #    - typ ma ≥6 goli ("over 5,5") → +2, ale tylko gdy w meczu padło też ≥6 goli (inaczej 0),
+        #    - typ ma 5 goli ("over 4,5") → +1, gdy w meczu padło ≥5 goli.
+        #    Działa tylko przy trafionym kierunku (base_points >= 1).
         pred_goals = pred_h + pred_a
         high_score_bonus = 0
         if base_points >= 1:
-            if pred_goals >= 6 and total_goals >= 6:
-                high_score_bonus = 2
-            elif pred_goals >= 5 and total_goals >= 5:
-                high_score_bonus = 1
+            if pred_goals >= 6:
+                if total_goals >= 6:
+                    high_score_bonus = 2
+            elif pred_goals >= 5:
+                if total_goals >= 5:
+                    high_score_bonus = 1
 
         # 3. Bonus za underdoga (tylko przy trafionym typie – base_points > 0)
         underdog_bonus = 0
