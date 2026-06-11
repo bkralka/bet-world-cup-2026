@@ -1107,6 +1107,21 @@ def delete_player(player_id: int, db: Session = Depends(get_db)):
     db.commit()
     return {"status": "ok", "deleted": player_id, "username": username}
 
+class PasswordReset(BaseModel):
+    new_password: str
+
+@app.put("/admin/players/{player_id}/reset-password", dependencies=[Depends(verify_admin)])
+def admin_reset_password(player_id: int, data: PasswordReset, db: Session = Depends(get_db)):
+    """Ustawia nowe hasło graczowi (gdy zapomniał). Wymaga klucza ADMIN_SECRET."""
+    player = db.query(models.Player).filter(models.Player.id == player_id).first()
+    if not player:
+        raise HTTPException(status_code=404, detail="Nie znaleziono gracza")
+    if not data.new_password or len(data.new_password) < 4:
+        raise HTTPException(status_code=400, detail="Hasło musi mieć min. 4 znaki")
+    player.password = hash_password(data.new_password)
+    db.commit()
+    return {"status": "ok", "player_id": player_id, "username": player.username}
+
 @app.get("/admin", response_class=HTMLResponse)
 def admin_panel(request: Request, db: Session = Depends(get_db)):
     players = db.query(models.Player).order_by(models.Player.total_points.desc()).all()
@@ -1125,7 +1140,8 @@ def admin_panel(request: Request, db: Session = Depends(get_db)):
             <td class="p-3 font-medium text-xs text-gray-400 truncate max-w-[120px]">{p.star_player or '-'}</td>
             <td class="p-3 font-medium text-xs text-gray-400 truncate max-w-[120px]">{p.favorite_team or '-'}</td>
             <td class="p-3 text-center">{status}</td>
-            <td class="p-3 text-right">
+            <td class="p-3 text-right whitespace-nowrap">
+                <button onclick="resetPass({p.id}, '{safe_username}')" class="bg-amber-600/20 text-amber-400 border border-amber-600/30 hover:bg-amber-600 hover:text-white text-xs font-bold px-3 py-1.5 rounded-lg transition mr-1">🔑 Hasło</button>
                 <button onclick="deleteUser({p.id}, '{safe_username}')" class="bg-rose-600/20 text-rose-400 border border-rose-600/30 hover:bg-rose-600 hover:text-white text-xs font-bold px-3 py-1.5 rounded-lg transition">🗑 Usuń</button>
             </td>
         </tr>
@@ -1319,6 +1335,27 @@ def admin_panel(request: Request, db: Session = Depends(get_db)):
                     }} else {{
                         const e = await r.json();
                         alert('Błąd: ' + (e.detail || 'nie udało się usunąć'));
+                    }}
+                }} catch (e) {{ alert('Błąd połączenia.'); }}
+            }}
+
+            async function resetPass(id, username) {{
+                const secret = localStorage.getItem('app_admin_secret');
+                if (!secret) return alert('Brak klucza — odśwież i zaloguj się ponownie.');
+                const newPass = prompt('Nowe hasło dla gracza „' + username + '" (min. 4 znaki):');
+                if (newPass === null) return;
+                if (newPass.trim().length < 4) return alert('Hasło musi mieć min. 4 znaki.');
+                try {{
+                    const r = await fetch('/admin/players/' + id + '/reset-password', {{
+                        method: 'PUT',
+                        headers: {{ 'x-admin-secret': secret, 'Content-Type': 'application/json' }},
+                        body: JSON.stringify({{ new_password: newPass.trim() }})
+                    }});
+                    if (r.ok) {{
+                        alert('Hasło gracza „' + username + '" zostało zmienione. Przekaż mu nowe hasło: ' + newPass.trim());
+                    }} else {{
+                        const e = await r.json();
+                        alert('Błąd: ' + (e.detail || 'nie udało się zmienić hasła'));
                     }}
                 }} catch (e) {{ alert('Błąd połączenia.'); }}
             }}
