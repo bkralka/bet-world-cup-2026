@@ -203,13 +203,16 @@ def calculate_points_with_bonus(predicted: str, actual: str, match_stage: str, h
         else:
             base_points = -1
 
-        # 2. Bonus za wysoką liczbę bramek (tylko przy dokładnym wyniku)
-        #    próg 4.5 bramki → +1 (czyli 5 goli), próg 5.5 bramki → +2 (czyli 6+ goli)
+        # 2. Bonus za wysoką liczbę bramek
+        #    Liczy się, gdy trafisz KIERUNEK (zwycięzcę/remis) ORAZ zarówno Twój TYP,
+        #    jak i RZECZYWISTY wynik mają odpowiednio dużo bramek.
+        #    Oba ≥6 goli → +2 (próg "5,5"); oba ≥5 goli → +1 (próg "4,5").
+        pred_goals = pred_h + pred_a
         high_score_bonus = 0
-        if base_points == 3:
-            if total_goals >= 6:
+        if base_points >= 1:
+            if pred_goals >= 6 and total_goals >= 6:
                 high_score_bonus = 2
-            elif total_goals >= 5:
+            elif pred_goals >= 5 and total_goals >= 5:
                 high_score_bonus = 1
 
         # 3. Bonus za underdoga (tylko przy trafionym typie – base_points > 0)
@@ -393,7 +396,7 @@ def register_user(auth: PlayerAuth, response: Response, db: Session = Depends(ge
     db.commit()
     db.refresh(new_player)
 
-    response.set_cookie(key="player_id", value=str(new_player.id), max_age=2592000, httponly=True, samesite="lax")
+    response.set_cookie(key="player_id", value=str(new_player.id), max_age=2592000, httponly=True, samesite="lax", secure=True, path="/")
     return {"status": "ok"}
 
 @app.post("/auth/login/")
@@ -402,12 +405,12 @@ def login_user(auth: PlayerAuth, response: Response, db: Session = Depends(get_d
     if not player or not verify_password(auth.password, player.password):
         raise HTTPException(status_code=400, detail="Błędny login lub hasło!")
 
-    response.set_cookie(key="player_id", value=str(player.id), max_age=2592000, httponly=True, samesite="lax")
+    response.set_cookie(key="player_id", value=str(player.id), max_age=2592000, httponly=True, samesite="lax", secure=True, path="/")
     return {"status": "ok"}
 
 @app.post("/auth/logout/")
 def logout_user(response: Response):
-    response.delete_cookie("player_id")
+    response.delete_cookie("player_id", path="/")
     return {"status": "ok"}
 
 @app.post("/seed/", dependencies=[Depends(verify_admin)])
@@ -683,7 +686,16 @@ def set_favorite_team(
     return {"status": "ok", "favorite_team": player.favorite_team, "star_player": player.star_player}
 
 @app.post("/picks/")
-def create_pick(pick: UserPickCreate, db: Session = Depends(get_db)):
+def create_pick(
+    pick: UserPickCreate,
+    db: Session = Depends(get_db),
+    session_player_id: Optional[str] = Cookie(None, alias="player_id"),
+):
+    # WERYFIKACJA TOŻSAMOŚCI: typ zapisujemy tylko dla konta z ciasteczka tej przeglądarki.
+    # Chroni przed obstawianiem za kogoś innego oraz przed działaniem na zdezaktualizowanej (zacache'owanej) stronie.
+    if not session_player_id or not session_player_id.isdigit() or int(session_player_id) != pick.player_id:
+        raise HTTPException(status_code=403, detail="Sesja wygasła lub konto się nie zgadza. Odśwież stronę (wyczyść cache) i zaloguj się ponownie.")
+
     # Sprawdzenie czy gracz istnieje
     player = db.query(models.Player).filter(models.Player.id == pick.player_id).first()
     if not player:
