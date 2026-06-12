@@ -18,7 +18,14 @@ curl -X POST http://localhost:8000/seed/ \
   -H "X-Admin-Secret: Wojtek123"
 
 3. Dodaj wynik meczu
+curl -X PUT http://localhost:8000/matches/1/result -H "Content-Type: application/json" -H "x-admin-secret: Wojtek123" -d '{"result": "3:0"}'
+
+curl -X PUT "http://localhost:8000/matches/1/result" -H "Content-Type: application/json" -H "x-admin-secret: Wojtek123" -d '{"result": "2:1", "scorers": ["Cristiano Ronaldo"]}'
+
+curl -X PUT "http://localhost:8000/matches/2/result" -H "Content-Type: application/json" -H "x-admin-secret: Wojtek123" -d '{"result": "2:1", "scorers": ["Cristiano Ronaldo"]}'
+
 curl -X PUT http://localhost:8000/matches/3/result -H "Content4Type: application/json" -H "x-admin-secret: Wojtek123" -d '{"result": "1:0", "scorers": ["Erling Haaland"]}'
+
 
 4. Zablokuj mecz (nie można już typować)
 curl -X PUT http://localhost:8000/matches/1/lock \

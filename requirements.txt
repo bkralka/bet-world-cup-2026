@@ -5,3 +5,4 @@ redis
 sqlalchemy
 jinja2
 bcrypt==4.0.1
+requests 

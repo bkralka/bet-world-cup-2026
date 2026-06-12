@@ -130,6 +130,7 @@
         .underdog-badge {
             display: inline-flex;
             align-items: center;
+            flex-shrink: 0;
             background: var(--danger-soft);
             color: var(--danger);
             font-size: 0.6rem;
@@ -1331,11 +1332,23 @@
         function isUnderdog(teamName) { return UNDERDOG_TEAMS_SET.has(teamName); }
 
         function addUnderdogBadge(element, teamName) {
-            if (isUnderdog(teamName) && !element.querySelector('.underdog-badge')) {
+            if (isUnderdog(teamName) && !element.parentNode.querySelector('.underdog-badge')) {
                 const badge = document.createElement('span');
                 badge.className = 'underdog-badge';
-                badge.title = 'Underdog — win or draw earns bonus points!';
-                element.appendChild(badge);
+                badge.title = 'Słabszy zespół — wygrana lub remis daje bonus punktowy!';
+                const parent = element.parentNode;
+                // rodzic jako elastyczny rząd: nazwa może się skrócić, badge zostaje widoczny
+                parent.style.display = 'flex';
+                parent.style.alignItems = 'center';
+                parent.style.minWidth = '0';
+                // nazwa drużyny skraca się wielokropkiem, ustępując miejsca odznace
+                element.style.minWidth = '0';
+                element.style.overflow = 'hidden';
+                element.style.textOverflow = 'ellipsis';
+                element.style.whiteSpace = 'nowrap';
+                element.style.flex = '0 1 auto';
+                badge.style.flexShrink = '0';
+                element.insertAdjacentElement('afterend', badge);
             }
         }
 
