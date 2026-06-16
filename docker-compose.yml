@@ -18,7 +18,7 @@ services:
 
   # 2. Baza danych (PostgreSQL)
   db:
-    image: postgres:15
+    image: postgres:17
     env_file:
       - .env                        # POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB z .env
     ports:

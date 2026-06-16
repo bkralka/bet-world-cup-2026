@@ -197,11 +197,13 @@ def calculate_points_with_bonus(predicted: str, actual: str, match_stage: str, h
 
         # 1. Punkty bazowe (za typ)
         if pred_h == act_h and pred_a == act_a:
-            base_points = 3
+            base_points = 3  # dokładny wynik
         elif (pred_h > pred_a and act_h > act_a) or (pred_h < pred_a and act_h < act_a) or (pred_h == pred_a and act_h == act_a):
-            base_points = 1
+            base_points = 1  # dobry kierunek (trafiony zwycięzca lub trafiony remis)
+        elif pred_h == pred_a or act_h == act_a:
+            base_points = 0  # remis w typie LUB w wyniku — remis nigdy nie zabiera punktu (bez kary)
         else:
-            base_points = -1
+            base_points = -1  # obstawiłeś wygraną jednej drużyny, a wygrała druga
 
         # 2. Bonus za wysoką liczbę bramek
         #    Poziom bonusu wyznacza TWÓJ TYP (ile goli obstawiłeś), a WYNIK musi osiągnąć ten próg:
