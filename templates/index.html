@@ -193,6 +193,45 @@
 
         .tab-content { display: none; animation: fadeIn 0.25s ease; }
         .tab-content.active { display: block; }
+        .match-subtab-btn {
+            flex: 1 1 0;
+            min-width: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            padding: 9px 6px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            background: var(--bg-surface);
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            transition: all 0.18s ease;
+            cursor: pointer;
+        }
+        .match-subtab-btn:hover { color: var(--text); border-color: var(--border-soft); }
+        .match-subtab-btn.active {
+            background: var(--accent-soft);
+            color: var(--accent);
+            border-color: rgba(245,158,11,0.35);
+        }
+        .match-cnt {
+            font-size: 10px;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 999px;
+            background: var(--bg-elevated);
+            color: var(--text-faint);
+            flex-shrink: 0;
+        }
+        .match-subtab-btn.active .match-cnt { background: rgba(245,158,11,0.18); color: var(--accent); }
+        @media (min-width: 640px) {
+            .match-subtab-btn { font-size: 13px; padding: 10px 14px; gap: 7px; }
+        }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(4px); }
             to { opacity: 1; transform: translateY(0); }
@@ -555,10 +594,19 @@
         </div>
 
         <div id="tab-matches" class="tab-content">
+            <div class="flex gap-1.5 sm:gap-2 mb-4">
+                <button class="match-subtab-btn active" data-cat="pool" onclick="switchMatchTab('pool')">🎯 Do obstawienia <span class="match-cnt" data-cnt="pool">0</span></button>
+                <button class="match-subtab-btn" data-cat="soon" onclick="switchMatchTab('soon')">⏳ Wkrótce <span class="match-cnt" data-cnt="soon">0</span></button>
+                <button class="match-subtab-btn" data-cat="done" onclick="switchMatchTab('done')">✅ Zakończone <span class="match-cnt" data-cnt="done">0</span></button>
+            </div>
+            <div id="match-empty" class="hidden p-8 rounded-xl text-center" style="background: var(--bg-surface); border: 1px solid var(--border);">
+                <p class="text-sm" style="color: var(--text-muted);">Brak meczów w tej kategorii.</p>
+            </div>
             <div class="space-y-3">
                 {% set future_matches = matches|sort(attribute='is_finished') %}
                 {% for match in future_matches %}
-                <div class="match-card p-4 sm:p-5">
+                {% set cat = 'done' if match.is_finished else ('pool' if match.id in upcoming_match_ids else 'soon') %}
+                <div class="match-card p-4 sm:p-5 match-item" data-cat="{{ cat }}">
                     {% set stage_labels = {'round_32':'1/16 finału','round_16':'1/8 finału','quarter':'Ćwierćfinał','semi':'Półfinał','third_place':'Mecz o 3. miejsce','final':'Finał'} %}
                     {% if match.stage and match.stage != 'group' %}
                     <div class="text-center mb-3">
@@ -598,6 +646,28 @@
                                     <div style="width: {{ (stats.home / stats.total) * 100 }}%; background: var(--success);"></div>
                                     <div style="width: {{ (stats.draw / stats.total) * 100 }}%; background: var(--info);"></div>
                                     <div style="width: {{ (stats.away / stats.total) * 100 }}%; background: var(--accent);"></div>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            {% set summary = match_summary.get(match.id) %}
+                            {% if match.is_finished and summary %}
+                            <div class="mt-3 pt-3 px-2 sm:px-4" style="border-top: 1px solid var(--border-subtle);">
+                                <div class="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-4 text-[11px] sm:text-xs">
+                                    <div class="flex-1 min-w-0">
+                                        <span style="color: var(--text-faint);">🎯 Dokładny wynik:</span>
+                                        {% if summary.exact %}
+                                        <span style="color: var(--success); font-weight: 600;">{{ summary.exact|join(', ') }}</span>
+                                        {% else %}
+                                        <span style="color: var(--text-muted);">nikt nie trafił</span>
+                                        {% endif %}
+                                    </div>
+                                    {% if summary.mvp_nicks and summary.mvp_pts and summary.mvp_pts > 0 %}
+                                    <div class="flex-shrink-0">
+                                        <span style="color: var(--text-faint);">🏆 Najwięcej punktów:</span>
+                                        <span style="color: var(--gold); font-weight: 600;">{{ summary.mvp_nicks|join(', ') }} (+{{ summary.mvp_pts }})</span>
+                                    </div>
+                                    {% endif %}
                                 </div>
                             </div>
                             {% endif %}
@@ -1566,6 +1636,34 @@ async function loadHistory() {
             });
         });
 
+        // ===== Pod-zakładki w "Mecze": Do obstawienia / Wkrótce / Zakończone =====
+        function switchMatchTab(cat) {
+            document.querySelectorAll('.match-subtab-btn').forEach(b => b.classList.toggle('active', b.dataset.cat === cat));
+            let visible = 0;
+            document.querySelectorAll('.match-item').forEach(el => {
+                const show = el.dataset.cat === cat;
+                el.style.display = show ? '' : 'none';
+                if (show) visible++;
+            });
+            const empty = document.getElementById('match-empty');
+            if (empty) empty.classList.toggle('hidden', visible > 0);
+        }
+        window.switchMatchTab = switchMatchTab;
+
+        function initMatchSubtabs() {
+            const counts = { pool: 0, soon: 0, done: 0 };
+            document.querySelectorAll('.match-item').forEach(el => {
+                if (counts[el.dataset.cat] !== undefined) counts[el.dataset.cat]++;
+            });
+            document.querySelectorAll('.match-cnt').forEach(span => {
+                span.textContent = counts[span.dataset.cnt] || 0;
+            });
+            // domyślnie "Do obstawienia"; gdy pusta — pierwsza niepusta
+            let def = 'pool';
+            if (counts.pool === 0) def = counts.soon > 0 ? 'soon' : (counts.done > 0 ? 'done' : 'pool');
+            switchMatchTab(def);
+        }
+
         (function restoreTabFromHash() {
             const tab = window.location.hash.replace('#', '');
             if (tab && tab !== 'home') activateTab(tab);
@@ -2419,6 +2517,7 @@ const TEAM_DATA = {
             updateSidebarStar();
             checkFavoriteTeam();
             updateCountdown();
+            initMatchSubtabs();
             countdownInterval = setInterval(tickCountdown, 1000);
             setInterval(fetchNextMatch, 5 * 60 * 1000);
         });

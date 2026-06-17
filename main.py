@@ -583,6 +583,28 @@ def read_dashboard(request: Request, db: Session = Depends(get_db)):
                 else: pick_stats[p.match_id]["draw"] += 1
             except: pass
 
+    # Podsumowanie rozliczonych meczów: kto trafił dokładny wynik + kto zdobył najwięcej pkt
+    _id2nick = {p.id: p.username for p in all_players}
+    match_summary = {}
+    for m in matches:
+        if m.is_finished and m.result:
+            exact, pts_list, best_pts = [], [], None
+            for p in picks:
+                if p.match_id != m.id:
+                    continue
+                nick = _id2nick.get(p.player_id)
+                if not nick:
+                    continue
+                if p.predicted_result == m.result:
+                    exact.append(nick)
+                pts = p.points_earned if p.points_earned is not None else 0
+                pts_list.append((nick, pts))
+                if best_pts is None or pts > best_pts:
+                    best_pts = pts
+            # wszyscy, którzy zdobyli najwięcej punktów (może być kilku ex aequo)
+            mvp_nicks = [n for n, pt in pts_list if pt == best_pts] if best_pts is not None else []
+            match_summary[m.id] = {"exact": exact, "mvp_nicks": mvp_nicks, "mvp_pts": best_pts}
+
     group_standings = calculate_group_standings(db)
     knockout_bracket = build_knockout_bracket(db)
     upcoming_match_ids = get_upcoming_matches(db, 8)
@@ -615,7 +637,7 @@ def read_dashboard(request: Request, db: Session = Depends(get_db)):
             "active_picks": active_picks,
             "recent_picks": recent_picks,
             "group_standings": group_standings, "knockout_bracket": knockout_bracket,
-            "pick_stats": pick_stats, "now": now_utc, "timedelta": timedelta, "upcoming_match_ids": upcoming_match_ids,
+            "pick_stats": pick_stats, "match_summary": match_summary, "now": now_utc, "timedelta": timedelta, "upcoming_match_ids": upcoming_match_ids,
             "team_positions": team_positions
         }
     )
