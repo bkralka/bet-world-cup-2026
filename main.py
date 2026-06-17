@@ -1062,16 +1062,25 @@ def lock_match(match_id: int, db: Session = Depends(get_db)):
 @app.get("/next-match/")
 def get_next_match_info(db: Session = Depends(get_db)):
     now = now_utc()
+    # Mecz "trwa": zaczął się, nie jest jeszcze rozliczony i nie minęło więcej niż ~2,5h od startu
+    live_exists = db.query(models.Match).filter(
+        models.Match.is_finished == False,
+        models.Match.match_date <= now,
+        models.Match.match_date > now - timedelta(hours=2, minutes=30)
+    ).first() is not None
+
     next_match = db.query(models.Match).filter(
         models.Match.is_finished == False,
         models.Match.match_date > now
     ).order_by(models.Match.match_date).first()
 
-    if not next_match: return {"has_next": False}
+    if not next_match:
+        return {"has_next": False, "is_live": live_exists}
 
     time_left = next_match.match_date - now
     return {
         "has_next": True,
+        "is_live": live_exists,
         "match_id": next_match.id,
         "home_team": next_match.home_team,
         "away_team": next_match.away_team,

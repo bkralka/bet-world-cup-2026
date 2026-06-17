@@ -331,7 +331,7 @@
                         <button onclick="openAuth('register')" class="text-xs font-semibold px-4 py-1.5 rounded-lg transition" style="background: var(--accent); color: var(--bg-base);">Zarejestruj się</button>
                     {% endif %}
 
-                    <span id="liveBadge" class="px-3 py-1.5 rounded-lg text-xs font-semibold uppercase animate-pulse-slow" style="display:none; background: var(--danger-soft); color: var(--danger); border: 1px solid rgba(248,113,113,0.25); letter-spacing: 0.08em;">● Mecz wkrótce</span>
+                    <span id="liveBadge" class="px-3 py-1.5 rounded-lg text-xs font-semibold uppercase animate-pulse-slow" style="display:none; background: var(--danger-soft); color: var(--danger); border: 1px solid rgba(248,113,113,0.25); letter-spacing: 0.08em;">● Mecz trwa</span>
                 </div>
             </div>
         </div>
@@ -603,9 +603,7 @@
                 <p class="text-sm" style="color: var(--text-muted);">Brak meczów w tej kategorii.</p>
             </div>
             <div class="space-y-3">
-                {% set _unfinished = matches|rejectattr('is_finished')|list %}
-                {% set _finished = matches|selectattr('is_finished')|list|reverse|list %}
-                {% set future_matches = _unfinished + _finished %}
+                {% set future_matches = matches|sort(attribute='is_finished') %}
                 {% for match in future_matches %}
                 {% set cat = 'done' if match.is_finished else ('pool' if match.id in upcoming_match_ids else 'soon') %}
                 <div class="match-card p-4 sm:p-5 match-item" data-cat="{{ cat }}">
@@ -615,7 +613,7 @@
                         <span class="text-[10px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full" style="{% if match.stage == 'final' %}background: rgba(251,191,36,0.12); color: var(--gold);{% else %}background: var(--accent-soft); color: var(--accent);{% endif %}">{% if match.stage == 'final' %}🏆 {% endif %}{{ stage_labels.get(match.stage, 'Faza pucharowa') }}{% if match.multiplier and match.multiplier > 1 %} · ×{{ match.multiplier }}{% endif %}</span>
                     </div>
                     {% endif %}
-                    <div class="flex flex-wrap items-start sm:items-center gap-3 sm:gap-4">
+                    <div class="flex flex-wrap items-center gap-3 sm:gap-4">
                         <div class="flex-1 min-w-0 sm:min-w-[280px]">
                             <div class="flex items-center gap-2 sm:gap-3 justify-between">
                                 <div class="font-semibold text-xs sm:text-sm flex-1 min-w-0 overflow-hidden whitespace-nowrap text-ellipsis text-right"><span class="team-name" data-team="{{ match.home_team }}">{{ match.home_team }}</span></div>
@@ -648,6 +646,28 @@
                                     <div style="width: {{ (stats.home / stats.total) * 100 }}%; background: var(--success);"></div>
                                     <div style="width: {{ (stats.draw / stats.total) * 100 }}%; background: var(--info);"></div>
                                     <div style="width: {{ (stats.away / stats.total) * 100 }}%; background: var(--accent);"></div>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            {% set summary = match_summary.get(match.id) %}
+                            {% if match.is_finished and summary %}
+                            <div class="mt-3 pt-3 px-2 sm:px-4" style="border-top: 1px solid var(--border-subtle);">
+                                <div class="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-4 text-[11px] sm:text-xs">
+                                    <div class="flex-1 min-w-0">
+                                        <span style="color: var(--text-faint);">🎯 Dokładny wynik:</span>
+                                        {% if summary.exact %}
+                                        <span style="color: var(--success); font-weight: 600;">{{ summary.exact|join(', ') }}</span>
+                                        {% else %}
+                                        <span style="color: var(--text-muted);">nikt nie trafił</span>
+                                        {% endif %}
+                                    </div>
+                                    {% if summary.mvp_nicks and summary.mvp_pts and summary.mvp_pts > 0 %}
+                                    <div class="flex-shrink-0">
+                                        <span style="color: var(--text-faint);">🏆 Najwięcej punktów:</span>
+                                        <span style="color: var(--gold); font-weight: 600;">{{ summary.mvp_nicks|join(', ') }} (+{{ summary.mvp_pts }})</span>
+                                    </div>
+                                    {% endif %}
                                 </div>
                             </div>
                             {% endif %}
@@ -686,27 +706,6 @@
                             {% endif %}
                         </div>
                     </div>
-                    {% set summary = match_summary.get(match.id) %}
-                    {% if match.is_finished and summary %}
-                    <div class="mt-3 pt-3" style="border-top: 1px solid var(--border-subtle);">
-                        <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1.5 sm:gap-4 text-[11px] sm:text-xs">
-                            <div class="min-w-0">
-                                <span style="color: var(--text-faint);">🎯 Dokładny wynik:</span>
-                                {% if summary.exact %}
-                                <span style="color: var(--success); font-weight: 600;">{{ summary.exact|join(', ') }}</span>
-                                {% else %}
-                                <span style="color: var(--text-muted);">nikt nie trafił</span>
-                                {% endif %}
-                            </div>
-                            {% if summary.mvp_nicks and summary.mvp_pts and summary.mvp_pts > 0 %}
-                            <div class="flex-shrink-0 sm:text-right">
-                                <span style="color: var(--text-faint);">🏆 Najwięcej punktów:</span>
-                                <span style="color: var(--gold); font-weight: 600;">{{ summary.mvp_nicks|join(', ') }} (+{{ summary.mvp_pts }})</span>
-                            </div>
-                            {% endif %}
-                        </div>
-                    </div>
-                    {% endif %}
                 </div>
                 {% endfor %}
             </div>
@@ -1488,13 +1487,13 @@
                     const totalSecondsLeft = data.days * 86400 + data.hours * 3600 + data.minutes * 60 + (data.seconds || 0);
                     nextMatchTimestamp = Date.now() + totalSecondsLeft * 1000;
                     const liveBadge = document.getElementById('liveBadge');
-                    if (liveBadge) liveBadge.style.display = totalSecondsLeft < 7200 ? 'inline' : 'none';
+                    if (liveBadge) liveBadge.style.display = data.is_live ? 'inline' : 'none';
                 } else {
                     nextMatchTimestamp = null;
                     document.getElementById('next-match-teams').innerHTML = 'Turniej zakończony 🏆';
                     ['days','hours','minutes','seconds'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = '00'; });
                     const liveBadge = document.getElementById('liveBadge');
-                    if (liveBadge) liveBadge.style.display = 'none';
+                    if (liveBadge) liveBadge.style.display = data.is_live ? 'inline' : 'none';
                     if (countdownInterval) clearInterval(countdownInterval);
                 }
             } catch (e) { console.error(e); }
