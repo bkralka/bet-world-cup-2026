@@ -602,8 +602,8 @@
             <div id="match-empty" class="hidden p-8 rounded-xl text-center" style="background: var(--bg-surface); border: 1px solid var(--border);">
                 <p class="text-sm" style="color: var(--text-muted);">Brak meczów w tej kategorii.</p>
             </div>
-            <div class="space-y-3">
-                {% set future_matches = matches|sort(attribute='is_finished') %}
+            <div class="flex flex-col gap-3" id="matches-list-container">
+                {% set future_matches = matches|sort(attribute='match_date') %}
                 {% for match in future_matches %}
                 {% set cat = 'done' if match.is_finished else ('pool' if match.id in upcoming_match_ids else 'soon') %}
                 <div class="match-card p-4 sm:p-5 match-item" data-cat="{{ cat }}">
@@ -1645,6 +1645,15 @@ async function loadHistory() {
                 el.style.display = show ? '' : 'none';
                 if (show) visible++;
             });
+            
+            // --- Odwracanie kolejności dla zakończonych meczów ---
+            const container = document.getElementById('matches-list-container');
+            if (container) {
+                // Jeśli zakładka to "Zakończone" (done), odwracamy kontener od dołu do góry
+                container.style.flexDirection = cat === 'done' ? 'column-reverse' : 'column';
+            }
+            // -----------------------------------------------------
+
             const empty = document.getElementById('match-empty');
             if (empty) empty.classList.toggle('hidden', visible > 0);
         }
