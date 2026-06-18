@@ -605,6 +605,27 @@ def read_dashboard(request: Request, db: Session = Depends(get_db)):
             mvp_nicks = [n for n, pt in pts_list if pt == best_pts] if best_pts is not None else []
             match_summary[m.id] = {"exact": exact, "mvp_nicks": mvp_nicks, "mvp_pts": best_pts}
 
+    # ===== Statystyki gwiazd (tylko te wybrane przez graczy) =====
+    star_stats = {}
+    for p in all_players:
+        sp = (p.star_player or "").strip()
+        if not sp:
+            continue
+        if sp not in star_stats:
+            star_stats[sp] = {"name": sp, "goals": 0, "chosen_by": 0, "points": 0}
+        star_stats[sp]["chosen_by"] += 1
+        star_stats[sp]["points"] += (p.star_player_points or 0)
+    for m in matches:
+        if m.is_finished and m.scorers:
+            for s in m.scorers:
+                key = (s or "").strip()
+                if key in star_stats:
+                    star_stats[key]["goals"] += 1
+    # punkty na gracza (średnia) + ranking: gole → punkty → popularność
+    for st in star_stats.values():
+        st["per_player"] = round(st["points"] / st["chosen_by"], 1) if st["chosen_by"] else 0
+    star_ranking = sorted(star_stats.values(), key=lambda x: (-x["goals"], -x["points"], -x["chosen_by"]))
+
     group_standings = calculate_group_standings(db)
     knockout_bracket = build_knockout_bracket(db)
     upcoming_match_ids = get_upcoming_matches(db, 8)
@@ -637,7 +658,7 @@ def read_dashboard(request: Request, db: Session = Depends(get_db)):
             "active_picks": active_picks,
             "recent_picks": recent_picks,
             "group_standings": group_standings, "knockout_bracket": knockout_bracket,
-            "pick_stats": pick_stats, "match_summary": match_summary, "now": now_utc, "timedelta": timedelta, "upcoming_match_ids": upcoming_match_ids,
+            "pick_stats": pick_stats, "match_summary": match_summary, "star_ranking": star_ranking, "now": now_utc, "timedelta": timedelta, "upcoming_match_ids": upcoming_match_ids,
             "team_positions": team_positions
         }
     )

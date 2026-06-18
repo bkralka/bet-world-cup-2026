@@ -193,6 +193,36 @@
 
         .tab-content { display: none; animation: fadeIn 0.25s ease; }
         .tab-content.active { display: block; }
+        .star-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: transform 0.18s ease, border-color 0.18s ease;
+        }
+        .star-card:hover { transform: translateY(-3px); border-color: var(--border-soft); }
+        .star-card.top { border-color: rgba(251,191,36,0.4); }
+        .star-photo-wrap { position: relative; width: 100%; aspect-ratio: 16 / 10; overflow: hidden; background: var(--bg-elevated); }
+        .star-photo { width: 100%; height: 100%; object-fit: cover; object-position: top center; }
+        .star-photo-overlay {
+            position: absolute; left: 0; right: 0; bottom: 0; padding: 14px 14px 10px;
+            background: linear-gradient(to top, rgba(11,13,17,0.95) 10%, rgba(11,13,17,0.55) 55%, transparent 100%);
+        }
+        .star-rank-badge {
+            position: absolute; top: 10px; left: 10px;
+            min-width: 26px; height: 26px; padding: 0 7px;
+            display: inline-flex; align-items: center; justify-content: center;
+            border-radius: 999px; font-size: 12px; font-weight: 800; font-family: var(--font-display, inherit);
+            background: rgba(11,13,17,0.7); color: #fff; backdrop-filter: blur(4px);
+            border: 1px solid rgba(255,255,255,0.12);
+        }
+        .star-card.top .star-rank-badge { background: var(--gold); color: var(--bg-base); border: none; }
+        .star-name-lg { font-weight: 800; font-size: 16px; line-height: 1.1; color: #fff; }
+        .star-country-lg { font-size: 11px; color: rgba(255,255,255,0.7); display: flex; align-items: center; gap: 5px; margin-top: 3px; }
+        .star-stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; background: var(--border-subtle); }
+        .star-stat { background: var(--bg-surface); padding: 11px 8px; display: flex; flex-direction: column; gap: 1px; align-items: center; text-align: center; }
+        .star-stat .v { font-family: var(--font-display, inherit); font-weight: 800; font-size: 17px; line-height: 1; }
+        .star-stat .l { font-size: 9.5px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.02em; }
         .match-subtab-btn {
             flex: 1 1 0;
             min-width: 0;
@@ -345,6 +375,7 @@
         <button class="tab-btn pb-3 transition" data-tab="matches">Mecze</button>
         <button class="tab-btn pb-3 transition" data-tab="knockouts">Drabinka</button>
         <button class="tab-btn pb-3 transition" data-tab="teams">Drużyny</button>
+        <button class="tab-btn pb-3 transition" data-tab="stars">Gwiazdy</button>
         <button class="tab-btn pb-3 transition" data-tab="players">Gracze</button>
         <button class="tab-btn pb-3 transition" data-tab="history">Moje typy</button>
         <button class="tab-btn pb-3 transition" data-tab="ranking">Ranking</button>
@@ -856,6 +887,15 @@
                     <p class="text-xs" style="color: var(--text-faint);">Kliknij drużynę, by zobaczyć szczegóły</p>
                 </div>
                 <div id="teams-grid" class="space-y-7"></div>
+            </div>
+        </div>
+
+        <div id="tab-stars" class="tab-content">
+            <div id="stars-top" class="mb-5"></div>
+            <div id="stars-grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+            <div id="stars-empty" class="hidden p-8 rounded-xl text-center" style="background: var(--bg-surface); border: 1px solid var(--border);">
+                <div class="text-4xl mb-2">⭐</div>
+                <p class="text-sm" style="color: var(--text-muted);">Nikt jeszcze nie wybrał gwiazdy. Klasyfikacja pojawi się, gdy gracze wybiorą swoich zawodników.</p>
             </div>
         </div>
 
@@ -2283,6 +2323,8 @@ const TEAM_DATA = {
             document.getElementById('favoriteTeamModal').style.display = 'none';
         }
 
+    const STAR_RANKING = {{ star_ranking|tojson }};
+
     const STAR_PLAYERS = [
         { name: "Cristiano Ronaldo", country: "Portugalia", matches: 205, goals: 128, assists: 46, age: 41, height: "187 cm", weight: "83 kg", foot: "Prawa", img: "/static/players/ronaldo.jpg" },
         { name: "Lionel Messi", country: "Argentyna", matches: 180, goals: 106, assists: 56, age: 38, height: "170 cm", weight: "72 kg", foot: "Lewa", img: "/static/players/messi.jpg" },
@@ -2519,6 +2561,48 @@ const TEAM_DATA = {
             }
         }
 
+        function renderStars() {
+            const grid = document.getElementById('stars-grid');
+            const topBox = document.getElementById('stars-top');
+            const empty = document.getElementById('stars-empty');
+            if (!grid) return;
+            if (!STAR_RANKING || STAR_RANKING.length === 0) {
+                if (empty) empty.classList.remove('hidden');
+                return;
+            }
+            const declGole = (n) => n === 1 ? 'gol' : (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? 'gole' : 'goli');
+            const initials = (name) => name.split(' ').map(w => w[0]).slice(0,2).join('');
+            const card = (st, rank) => {
+                const meta = STAR_PLAYERS.find(p => p.name === st.name) || {};
+                const img = meta.img || '';
+                const country = meta.country || '';
+                const code = FLAG_CODES[country];
+                const flag = code ? `<img src="${FLAG_BASE_URL}${code}.svg" style="width:15px;height:11px;border-radius:2px;" onerror="this.style.display='none'">` : '';
+                const isTop = rank === 1 && st.goals > 0;
+                const photo = img
+                    ? `<img src="${img}" class="star-photo" onerror="this.style.display='none';this.parentElement.querySelector('.star-fallback').style.display='flex';">`
+                    : '';
+                return `
+                <div class="star-card ${isTop ? 'top' : ''}">
+                    <div class="star-photo-wrap">
+                        ${photo}
+                        <div class="star-fallback w-full h-full items-center justify-center font-display font-bold text-4xl" style="display:${img ? 'none' : 'flex'}; color: var(--gold);">${initials(st.name)}</div>
+                        <div class="star-rank-badge">${isTop ? '🥇' : '#' + rank}</div>
+                        <div class="star-photo-overlay">
+                            <p class="star-name-lg">${st.name}</p>
+                            <p class="star-country-lg">${flag} ${country}</p>
+                        </div>
+                    </div>
+                    <div class="star-stats-grid">
+                        <div class="star-stat"><span class="v" style="color: var(--gold);">${st.points}</span><span class="l">🏆 pkt ogółem</span></div>
+                        <div class="star-stat"><span class="v" style="color: var(--success);">${st.goals}</span><span class="l">⚽ gole strzelone<br><span style="opacity:0.7;">(pkt na gracza)</span></span></div>
+                        <div class="star-stat"><span class="v">${st.chosen_by}</span><span class="l">👥 wybrało</span></div>
+                    </div>
+                </div>`;
+            };
+            grid.innerHTML = STAR_RANKING.map((st, i) => card(st, i + 1)).join('');
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             addAllFlags();
             addFavoriteBadges();
@@ -2527,6 +2611,7 @@ const TEAM_DATA = {
             checkFavoriteTeam();
             updateCountdown();
             initMatchSubtabs();
+            renderStars();
             countdownInterval = setInterval(tickCountdown, 1000);
             setInterval(fetchNextMatch, 5 * 60 * 1000);
         });
