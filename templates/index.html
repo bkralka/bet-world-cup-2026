@@ -635,7 +635,7 @@
             </div>
             <div class="flex flex-col gap-3" id="matches-list-container">
                 {% set _unfinished = matches|rejectattr('is_finished')|sort(attribute='match_date')|list %}
-                {% set _finished = matches|selectattr('is_finished')|sort(attribute='match_date')|list|reverse|list %}
+                {% set _finished = matches|selectattr('is_finished')|sort(attribute='match_date', reverse=True)|list %}
                 {% set future_matches = _unfinished + _finished %}
                 {% for match in future_matches %}
                 {% set cat = 'done' if match.is_finished else ('pool' if match.id in upcoming_match_ids else 'soon') %}
@@ -1686,15 +1686,6 @@ async function loadHistory() {
                 el.style.display = show ? '' : 'none';
                 if (show) visible++;
             });
-            
-            // --- Odwracanie kolejności dla zakończonych meczów ---
-            const container = document.getElementById('matches-list-container');
-            if (container) {
-                // Jeśli zakładka to "Zakończone" (done), odwracamy kontener od dołu do góry
-                container.style.flexDirection = cat === 'done' ? 'column-reverse' : 'column';
-            }
-            // -----------------------------------------------------
-
             const empty = document.getElementById('match-empty');
             if (empty) empty.classList.toggle('hidden', visible > 0);
         }
