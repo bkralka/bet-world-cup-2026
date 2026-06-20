@@ -1,0 +1,1577 @@
+--
+-- PostgreSQL database dump
+--
+
+\restrict 00aoIyEmYmyAIB4kDMUJ6GkSMESdKzx4wdtj1S6LBFfjh8mefgP8DEILjw7xvm2
+
+-- Dumped from database version 18.4 (Debian 18.4-1.pgdg12+1)
+-- Dumped by pg_dump version 18.4 (Ubuntu 18.4-1.pgdg24.04+1)
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET transaction_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+--
+-- Name: public; Type: SCHEMA; Schema: -; Owner: -
+--
+
+-- *not* creating schema, since initdb creates it
+
+
+SET default_tablespace = '';
+
+SET default_table_access_method = heap;
+
+--
+-- Name: matches; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.matches (
+    id integer NOT NULL,
+    home_team character varying,
+    away_team character varying,
+    match_date timestamp without time zone,
+    result character varying,
+    penalties character varying,
+    is_locked boolean,
+    is_finished boolean,
+    stage character varying,
+    multiplier integer,
+    scorers json
+);
+
+
+--
+-- Name: matches_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.matches_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: matches_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.matches_id_seq OWNED BY public.matches.id;
+
+
+--
+-- Name: players; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.players (
+    id integer NOT NULL,
+    username character varying,
+    full_name character varying,
+    email character varying,
+    password character varying NOT NULL,
+    is_active boolean,
+    is_alive boolean,
+    shields integer,
+    total_points integer,
+    correct_predictions integer,
+    favorite_team character varying,
+    star_player character varying,
+    created_at timestamp without time zone,
+    current_streak integer,
+    longest_streak integer,
+    comeback_points integer,
+    revival_used boolean,
+    favorite_locked boolean,
+    favorite_team_points integer,
+    star_player_points integer
+);
+
+
+--
+-- Name: players_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.players_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: players_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.players_id_seq OWNED BY public.players.id;
+
+
+--
+-- Name: user_picks; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.user_picks (
+    id integer NOT NULL,
+    player_id integer,
+    match_id integer,
+    predicted_result character varying,
+    points_earned integer,
+    bonus_points integer,
+    points_breakdown json,
+    created_at timestamp without time zone
+);
+
+
+--
+-- Name: user_picks_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.user_picks_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: user_picks_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.user_picks_id_seq OWNED BY public.user_picks.id;
+
+
+--
+-- Name: matches id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.matches ALTER COLUMN id SET DEFAULT nextval('public.matches_id_seq'::regclass);
+
+
+--
+-- Name: players id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.players ALTER COLUMN id SET DEFAULT nextval('public.players_id_seq'::regclass);
+
+
+--
+-- Name: user_picks id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.user_picks ALTER COLUMN id SET DEFAULT nextval('public.user_picks_id_seq'::regclass);
+
+
+--
+-- Data for Name: matches; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.matches (id, home_team, away_team, match_date, result, penalties, is_locked, is_finished, stage, multiplier, scorers) FROM stdin;
+34	Niemcy	WKS	2026-06-20 22:00:00	\N	\N	f	f	group	1	[]
+35	Ekwador	Curacao	2026-06-21 02:00:00	\N	\N	f	f	group	1	[]
+36	Tunezja	Japonia	2026-06-21 06:00:00	\N	\N	f	f	group	1	[]
+37	Hiszpania	Arabia Saudyjska	2026-06-21 18:00:00	\N	\N	f	f	group	1	[]
+38	Belgia	Iran	2026-06-21 21:00:00	\N	\N	f	f	group	1	[]
+39	Urugwaj	RZP	2026-06-22 00:00:00	\N	\N	f	f	group	1	[]
+40	Nowa Zelandia	Egipt	2026-06-22 03:00:00	\N	\N	f	f	group	1	[]
+41	Argentyna	Austria	2026-06-22 19:00:00	\N	\N	f	f	group	1	[]
+42	Francja	Irak	2026-06-22 23:00:00	\N	\N	f	f	group	1	[]
+43	Norwegia	Senegal	2026-06-23 02:00:00	\N	\N	f	f	group	1	[]
+44	Jordania	Algieria	2026-06-23 05:00:00	\N	\N	f	f	group	1	[]
+45	Portugalia	Uzbekistan	2026-06-23 19:00:00	\N	\N	f	f	group	1	[]
+46	Anglia	Ghana	2026-06-23 22:00:00	\N	\N	f	f	group	1	[]
+47	Panama	Chorwacja	2026-06-24 01:00:00	\N	\N	f	f	group	1	[]
+48	Kolumbia	DR Konga	2026-06-24 04:00:00	\N	\N	f	f	group	1	[]
+49	Szwajcaria	Kanada	2026-06-24 21:00:00	\N	\N	f	f	group	1	[]
+50	Bośnia i Hercegowina	Katar	2026-06-24 21:00:00	\N	\N	f	f	group	1	[]
+51	Maroko	Haiti	2026-06-25 00:00:00	\N	\N	f	f	group	1	[]
+52	Szkocja	Brazylia	2026-06-25 00:00:00	\N	\N	f	f	group	1	[]
+53	RPA	Korea Południowa	2026-06-25 03:00:00	\N	\N	f	f	group	1	[]
+54	Czechy	Meksyk	2026-06-25 03:00:00	\N	\N	f	f	group	1	[]
+55	Curacao	WKS	2026-06-25 22:00:00	\N	\N	f	f	group	1	[]
+56	Ekwador	Niemcy	2026-06-25 22:00:00	\N	\N	f	f	group	1	[]
+57	Japonia	Szwecja	2026-06-26 01:00:00	\N	\N	f	f	group	1	[]
+58	Tunezja	Holandia	2026-06-26 01:00:00	\N	\N	f	f	group	1	[]
+59	Paragwaj	Australia	2026-06-26 04:00:00	\N	\N	f	f	group	1	[]
+60	Turcja	USA	2026-06-26 04:00:00	\N	\N	f	f	group	1	[]
+61	Norwegia	Francja	2026-06-26 21:00:00	\N	\N	f	f	group	1	[]
+62	Senegal	Irak	2026-06-26 21:00:00	\N	\N	f	f	group	1	[]
+63	RZP	Arabia Saudyjska	2026-06-27 02:00:00	\N	\N	f	f	group	1	[]
+64	Urugwaj	Hiszpania	2026-06-27 02:00:00	\N	\N	f	f	group	1	[]
+65	Egipt	Iran	2026-06-27 05:00:00	\N	\N	f	f	group	1	[]
+66	Nowa Zelandia	Belgia	2026-06-27 05:00:00	\N	\N	f	f	group	1	[]
+67	Chorwacja	Ghana	2026-06-27 23:00:00	\N	\N	f	f	group	1	[]
+68	Panama	Anglia	2026-06-27 23:00:00	\N	\N	f	f	group	1	[]
+69	DR Konga	Uzbekistan	2026-06-28 01:30:00	\N	\N	f	f	group	1	[]
+70	Kolumbia	Portugalia	2026-06-28 01:30:00	\N	\N	f	f	group	1	[]
+71	Algieria	Austria	2026-06-28 04:00:00	\N	\N	f	f	group	1	[]
+72	Jordania	Argentyna	2026-06-28 04:00:00	\N	\N	f	f	group	1	[]
+4	USA	Paragwaj	2026-06-13 03:00:00	4:1	\N	t	t	group	1	["Samob\\u00f3j", "Folarin Balogun", "Folarin Balogun", "Mauricio", "Giovanni Reyna"]
+5	Katar	Szwajcaria	2026-06-13 21:00:00	1:1	\N	t	t	group	1	["Breel Embolo", "Samob\\u00f3j"]
+1	Meksyk	RPA	2026-06-11 21:00:00	2:0	\N	t	t	group	1	["Julian Quinones", "Raul Jimenez"]
+2	Korea Południowa	Czechy	2026-06-12 04:00:00	2:1	\N	t	t	group	1	["Ladislav Krejci", "Hwang In-Beom", "Oh Hyeon-Gyu"]
+6	Brazylia	Maroko	2026-06-14 00:00:00	1:1	\N	t	t	group	1	["Ismael Saibari", "Vinicius Junior"]
+7	Haiti	Szkocja	2026-06-14 03:00:00	0:1	\N	t	t	group	1	["John Mcginn"]
+14	Belgia	Egipt	2026-06-15 21:00:00	1:1	\N	t	t	group	1	["Emam Ashour", "Samob\\u00f3j"]
+13	Hiszpania	RZP	2026-06-15 18:00:00	0:0	\N	t	t	group	1	[]
+18	Irak	Norwegia	2026-06-17 00:00:00	1:4	\N	t	t	group	1	["Erling Haaland", "Aymen Hussein", "Erling Haaland", "Leo Ostigard", "Samob\\u00f3j"]
+19	Argentyna	Algieria	2026-06-17 03:00:00	3:0	\N	t	t	group	1	["Lionel Messi", "Lionel Messi", "Lionel Messi"]
+10	Holandia	Japonia	2026-06-14 22:00:00	2:2	\N	t	t	group	1	["Virgil Van Dijk", "Keito Nakamura", "Crysencio Summerville", "Daichi Kamada"]
+3	Kanada	Bośnia i Hercegowina	2026-06-12 21:00:00	1:1	\N	t	t	group	1	["Jovo Lukic", "Cyle Larin"]
+11	WKS	Ekwador	2026-06-15 01:00:00	1:0	\N	t	t	group	1	["Amad Diallo"]
+8	Australia	Turcja	2026-06-14 06:00:00	2:0	\N	t	t	group	1	["Nestory Irankunda", "Connor Metcalfe"]
+9	Niemcy	Curacao	2026-06-14 19:00:00	7:1	\N	t	t	group	1	["Felix Nmecha", "Livano Comenencia", "Nico Schlotterbeck", "Kai Havertz", "Jamal Musiala", "Nathaniel Brown", "Deniz Undav", "Kai Havertz"]
+15	Arabia Saudyjska	Urugwaj	2026-06-16 00:00:00	1:1	\N	t	t	group	1	["Abdulelah Al Amri", "Maximiliano Araujo"]
+16	Iran	Nowa Zelandia	2026-06-16 03:00:00	2:2	\N	t	t	group	1	[]
+12	Szwecja	Tunezja	2026-06-15 04:00:00	5:1	\N	t	t	group	1	["Yasin Ayari", "Alexander Isak", "Omar Rekik", "Viktor Gyokeres", "Mattias Svanberg", "Yasin Ayari"]
+17	Francja	Senegal	2026-06-16 21:00:00	3:1	\N	t	t	group	1	["Kylian Mbappe", "Bradley Barcola", "Kylian Mbappe"]
+20	Austria	Jordania	2026-06-17 06:00:00	3:1	\N	t	t	group	1	[]
+21	Portugalia	DR Konga	2026-06-17 19:00:00	1:1	\N	t	t	group	1	[]
+22	Anglia	Chorwacja	2026-06-17 22:00:00	4:2	\N	t	t	group	1	["Harry Kane", "Martin Baturina", "Harry Kane", "Petar Musa", "Jude Bellingham", "Marcus Rashford"]
+23	Ghana	Panama	2026-06-18 01:00:00	1:0	\N	t	t	group	1	[]
+24	Uzbekistan	Kolumbia	2026-06-18 04:00:00	1:3	\N	t	t	group	1	[]
+25	Czechy	RPA	2026-06-18 18:00:00	1:1	\N	t	t	group	1	[]
+26	Szwajcaria	Bośnia i Hercegowina	2026-06-18 21:00:00	4:1	\N	t	t	group	1	[]
+27	Kanada	Katar	2026-06-19 00:00:00	6:0	\N	t	t	group	1	[]
+28	Meksyk	Korea Południowa	2026-06-19 03:00:00	1:0	\N	t	t	group	1	[]
+29	USA	Australia	2026-06-19 21:00:00	2:0	\N	t	t	group	1	[]
+30	Szkocja	Maroko	2026-06-20 00:00:00	0:1	\N	t	t	group	1	[]
+31	Brazylia	Haiti	2026-06-20 03:00:00	3:0	\N	t	t	group	1	[]
+32	Turcja	Paragwaj	2026-06-20 06:00:00	0:1	\N	t	t	group	1	[]
+33	Holandia	Szwecja	2026-06-20 19:00:00	5:1	\N	t	t	group	1	[]
+\.
+
+
+--
+-- Data for Name: players; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.players (id, username, full_name, email, password, is_active, is_alive, shields, total_points, correct_predictions, favorite_team, star_player, created_at, current_streak, longest_streak, comeback_points, revival_used, favorite_locked, favorite_team_points, star_player_points) FROM stdin;
+4	tomoszef997	Tomek	tomoszef997@onepick.pl	$2b$12$HKPLv2OEzeGgUFsiUfz.2OGP79R25ga2UFV/Ph4SSz0c4iryoxovu	t	t	2	29	19	Hiszpania	Lamine Yamal	2026-06-10 16:59:48.159605	1	6	0	f	t	0	0
+8	Szumi	Aleksander	Szumi@onepick.pl	$2b$12$w9EgnaXI/M84DMVT1J.suO41dMZ2nkOyQi/NlZjp42lSpg8GAMqyO	t	t	2	32	19	Francja	Kylian Mbappe	2026-06-10 17:01:10.446501	1	4	0	f	t	1	2
+9	piotrek8412	Piotrek	piotrek8412@onepick.pl	$2b$12$KfW.8T8Lhtgely.ZBZuC7enMHe4AXR9V4dViQBQ4jQP70WlMYAdP.	t	t	2	17	14	Hiszpania	Lautaro Martinez	2026-06-10 17:03:18.251893	1	4	0	f	t	0	0
+2	Makuwka	Kacper	Makuwka@onepick.pl	$2b$12$GAvzNtIKBI0fx6aNQrr6S.7qKKJtCk/kBZMvscV2y8j7I8akC48Pq	t	t	2	31	16	Francja	Kylian Mbappe	2026-06-10 16:47:37.449635	0	4	0	f	t	1	2
+10	matt	Mateusz	matt@onepick.pl	$2b$12$C2pbvxqE0PHBhqfaBLT8iO2vErrvAaII7OhWgfwMgvtfxZLunQzoW	t	t	2	26	17	Francja	Kylian Mbappe	2026-06-10 17:08:42.150127	0	4	0	f	t	1	2
+1	krala	Bartosz	krala@onepick.pl	$2b$12$.a4DNbwMdITwn1K.Aij3vOVO.lCEJsAi1tyIxYkbFNS5hngNRMr5u	t	t	2	26	18	Portugalia	Cristiano Ronaldo	2026-06-10 16:41:26.852824	1	4	0	f	t	0	0
+3	rogal99	Daniel	rogal99@onepick.pl	$2b$12$24P3OBFy8WA5sbp0Xc8Xdu.jABvk.O1Ma72eYmOzVmD5z7YeSa6se	t	t	2	33	21	Portugalia	Cristiano Ronaldo	2026-06-10 16:56:59.247783	1	4	0	f	t	0	0
+18	Mirek	Milosz	Mirek@onepick.pl	$2b$12$JoUZEsQMGHOznpimRq7RneXMtPsMUz7onnLuT8JjIoljizyPFs3Ie	t	t	2	54	23	Hiszpania	Kylian Mbappe	2026-06-10 17:31:42.949509	1	10	0	f	t	0	2
+19	Tomcio	Jakub	Tomcio@onepick.pl	$2b$12$KU88s7WN428I7akY0F7cxun2CKUPD/eoP4lVTi1q0Wza2H9sk0136	t	t	2	40	20	Francja	Kylian Mbappe	2026-06-10 17:33:51.04786	1	7	0	f	t	1	2
+21	Kryś	Krystian	Kryś@onepick.pl	$2b$12$DapO5Av.xQmv0RlIrH9dJODiagzZ6eZnIq86HiRZ2AGCRa53vom0S	t	t	2	29	17	Hiszpania	Kylian Mbappe	2026-06-10 17:44:26.45018	1	4	0	f	t	0	2
+22	Igorek2016	Igor	Igorek2016@onepick.pl	$2b$12$H3Wrvoy9kFf8t5AHORK3yOxNqNCe/x5H9Iy1onaPI7iunlxcauOlW	t	t	2	12	13	Hiszpania	Michael Olise	2026-06-10 17:44:33.355847	0	4	0	f	t	0	0
+23	Zalena	Kacper	Zalena@onepick.pl	$2b$12$nG8LDEMcGUCWxWRKNlvz5urSHynpHs0rCle2zSdyZhvFW/z19xxpa	t	t	2	31	19	Hiszpania	Kylian Mbappe	2026-06-10 17:46:12.346892	1	6	0	f	t	0	2
+24	pola	pola	pola@onepick.pl	$2b$12$G4cUu9rCaRUrK9HpMLV6Ueh3VsTdA608fqIM6k2os7U4c4GzxwoO.	t	t	2	45	20	Hiszpania	Harry Kane	2026-06-10 18:09:55.25301	1	10	0	f	t	0	2
+25	kuba4617	Kuba	kuba4617@onepick.pl	$2b$12$qWfDLHkwacCfxGPCy5pUwOL6r3JiGsTaJS4Z/S6VHP5KQq4g7//.G	t	t	2	37	21	Francja	Kylian Mbappe	2026-06-10 18:24:54.447192	1	6	0	f	t	1	2
+26	Cis	Jakub	Cis@onepick.pl	$2b$12$ZABltTWGyA3f1D4tn7GVsOabImD5x5pvAv9sX7S.XzZ6/GLeXUvgC	t	t	2	26	15	Hiszpania	Erling Haaland	2026-06-10 18:30:24.348072	5	5	0	f	t	0	2
+27	Bossman	Michał	Bossman@onepick.pl	$2b$12$ECSc/n6bMBADQwrfMuzHxOyq7MMZ/y/JPjv0USV3gDLy0atLiBsye	t	t	2	23	18	Argentyna	Ousmane Dembele	2026-06-10 20:00:13.354962	1	4	0	f	t	1	0
+28	deps	Patryk	deps@onepick.pl	$2b$12$3jHCrvNE0.bz7ctoq8t9EOTybHJlazhKSNR7PfWyGFVQcgEtargLO	t	t	2	27	17	Portugalia	Erling Haaland	2026-06-10 20:09:07.447212	1	5	0	f	t	0	2
+29	Zagkub	Jakub	Zagkub@onepick.pl	$2b$12$aaMpR8gugZNRCQ9B7bDXEuYXvJn9TZhtKeW6x6LLtxIECHbZpmyDG	t	t	2	25	18	Hiszpania	Kylian Mbappe	2026-06-10 20:11:21.146091	1	4	0	f	t	0	2
+11	Wosiu	Igor	Wosiu@onepick.pl	$2b$12$yUV1aoM1/RxlsDb0y6Znse8LGnbrV7Y9E.RCwSd0Ez5wxQimnbCcC	t	t	2	38	19	Meksyk	Harry Kane	2026-06-10 17:09:22.260296	1	6	0	f	t	2	2
+12	Arturo	Artur	Arturo@onepick.pl	$2b$12$lHBKNMd5ANfzlczHpbxvzOw/Fqlm0D8YVw6HFMUTebyPjQn.yBl32	t	t	2	31	19	Hiszpania	Kylian Mbappe	2026-06-10 17:14:21.349394	1	6	0	f	t	0	2
+14	tommy	tomasz	tommy@onepick.pl	$2b$12$S2NSwyjukqHZ6ojJcYKozOSL0aFHqobf7RTei96DYPCpjgTDFXmf6	t	t	2	30	19	Francja	Kylian Mbappe	2026-06-10 17:16:01.849347	1	4	0	f	t	1	2
+16	młody szumi	Szymon	młody szumi@onepick.pl	$2b$12$UAOiXu2N840dkpEm6kdcAOo.5Ng6Z7RCNxaFeYwAeAKUuVC2/UVsG	t	t	2	32	19	Hiszpania	Kylian Mbappe	2026-06-10 17:24:19.150629	1	4	0	f	t	0	2
+17	Mundeek	Klaudiusz	Mundeek@onepick.pl	$2b$12$cUB8MFwccLLaUdda3Vf.AeqwmsOEccOVl6sfs1jwF5Vea5zRC3b3.	t	t	2	11	11	Brazylia	Neymar	2026-06-10 17:31:07.254973	1	3	0	f	t	1	0
+33	mati_ufc	Mateusz	mati_ufc@onepick.pl	$2b$12$RISHLlo6.qhJuAzm60xZuOU2P7et3VNF1foiUnEwFbeqaZeDt.xGu	t	t	2	30	19	Francja	Kylian Mbappe	2026-06-10 21:19:04.651863	0	4	0	f	t	1	2
+39	arekfire	Arek	arekfire@onepick.pl	$2b$12$N7fq6K3I6OQlTTfCrzAC0.JdOxYtxJXrjdYi0LQu3stsVgpXWQtiW	t	t	2	31	18	Francja	Kylian Mbappe	2026-06-11 18:05:54.843428	0	6	0	f	t	1	2
+30	majkel	Michał	majkel@onepick.pl	$2b$12$kAOiD37deXNU2IAv7/.qPOBdObSpr60V9LpENQ0cM2USmMnug5j0O	t	t	2	29	18	Francja	Erling Haaland	2026-06-10 20:39:08.351214	1	5	0	f	t	1	2
+31	kralcia	Paulina	kralcia@onepick.pl	$2b$12$zh1A08U6yULLDHJx7dm7MOOrJ/6RjQ3IAK03o3hdimG4GV1AoYjfS	t	t	2	20	17	Hiszpania	Harry Kane	2026-06-10 20:46:09.452872	1	4	0	f	t	0	2
+32	Butrym6	Kuba	Butrym6@onepick.pl	$2b$12$QQxgsdt4CAUWpu3jS1WpF.XAVgOe1hZ9k2oYSKC6nECPUdLXCS1Sq	t	t	2	25	18	Brazylia	Erling Haaland	2026-06-10 20:55:45.347976	1	5	0	f	t	0	2
+35	wojciu	Wojtek	wojciu@onepick.pl	$2b$12$yVluB6WkLDpF.sDK3UZqlejaBf6YX.gSBfu4sdWJUuclOETwDO1EC	t	t	2	36	19	Argentyna	Desire Doue	2026-06-11 06:19:20.525527	1	6	0	f	t	1	0
+36	tobiking	Tobiasz	tobiking@onepick.pl	$2b$12$7KhJ61QtWwPR.6Oub2f5yetk2r1vdQySol3OiRjk7lOHFWK5ORfnu	t	t	2	29	19	Francja	Kylian Mbappe	2026-06-11 09:16:36.578686	1	6	0	f	t	1	2
+37	fificzi	Filip	fificzi@onepick.pl	$2b$12$alkoNijznbr8nK01G3FWlepXcefhIqEmPc50Jbdo518kDFkaQCJM2	t	t	2	34	19	Francja	Harry Kane	2026-06-11 11:01:39.379274	1	6	0	f	t	1	2
+38	k0meta	Mateusz	k0meta@onepick.pl	$2b$12$V3oIhztm6xrWHfW0ffNMcelWgI5lDL1jabhgCJDYJ.CChcILHt8aS	t	t	2	38	21	Francja	Kylian Mbappe	2026-06-11 17:46:49.549558	1	6	0	f	t	1	2
+\.
+
+
+--
+-- Data for Name: user_picks; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.user_picks (id, player_id, match_id, predicted_result, points_earned, bonus_points, points_breakdown, created_at) FROM stdin;
+11	2	8	0:1	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-10 16:49:01.644947
+6	2	4	1:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-10 16:48:37.16513
+289	11	9	6:0	3	0	{"base": 1, "high_score": 2, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 3, "grand_total": 3}	2026-06-12 21:15:24.729707
+12	1	4	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-10 16:49:28.153859
+32	9	4	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-10 17:04:03.34124
+43	10	4	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-10 17:09:36.206799
+5	2	3	3:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 16:48:30.709849
+7	2	5	1:4	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 16:48:43.994686
+13	1	5	0:3	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 16:49:58.611706
+8	2	6	4:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 16:48:49.17243
+14	1	6	3:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 16:50:04.659095
+34	9	6	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 17:04:14.321965
+468	23	11	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 19:16:39.026955
+464	27	17	3:1	3	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 3, "grand_total": 3}	2026-06-14 19:09:22.761292
+465	2	15	1:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 19:15:30.127633
+16	1	8	0:2	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-10 16:52:33.274102
+677	28	17	3:1	3	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 3, "grand_total": 3}	2026-06-16 15:27:33.84079
+682	32	17	3:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-16 15:31:07.429577
+523	36	19	2:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-15 06:34:51.131068
+36	9	8	0:2	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-10 17:04:23.437253
+508	21	18	1:4	4	0	{"base": 3, "high_score": 1, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 4, "grand_total": 4}	2026-06-15 06:28:28.118248
+10	2	7	0:4	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-10 16:48:54.836961
+15	1	7	0:3	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-10 16:51:13.046962
+35	9	7	0:5	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-10 17:04:19.282083
+51	8	8	1:3	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-10 17:16:19.373203
+18	3	2	0:2	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-10 16:58:45.826622
+1	1	1	2:0	3	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 3, "grand_total": 3}	2026-06-10 16:48:07.179225
+3	2	2	2:1	3	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 3, "grand_total": 3}	2026-06-10 16:48:24.222939
+30	9	2	1:2	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-10 17:03:53.230272
+38	8	2	1:2	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-10 17:05:57.774121
+9	1	3	1:1	4	0	{"base": 3, "high_score": 0, "underdog": 1, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 4, "grand_total": 4}	2026-06-10 16:48:53.632814
+39	8	3	1:1	4	0	{"base": 3, "high_score": 0, "underdog": 1, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 4, "grand_total": 4}	2026-06-10 17:08:13.195883
+1074	1	34	4:1	0	0	\N	2026-06-19 21:10:33.864451
+154	29	1	2:0	3	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 3, "grand_total": 3}	2026-06-10 20:27:20.012441
+162	31	1	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-10 20:55:18.313854
+169	32	1	3:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-10 20:56:03.90727
+172	30	1	2:0	3	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 3, "grand_total": 3}	2026-06-10 22:10:06.202416
+381	11	14	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 08:02:42.348001
+150	27	5	0:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 20:02:55.472361
+180	32	2	2:1	3	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 3, "grand_total": 3}	2026-06-10 22:49:28.081025
+148	27	3	1:1	4	0	{"base": 3, "high_score": 0, "underdog": 1, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 4, "grand_total": 4}	2026-06-10 20:02:41.387657
+376	21	16	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 07:26:48.069609
+149	27	4	3:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-10 20:02:46.920188
+175	30	4	3:2	2	0	{"base": 1, "high_score": 1, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 2, "grand_total": 2}	2026-06-10 22:11:17.015153
+151	27	6	3:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 20:03:04.459824
+773	27	28	1:2	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-17 11:38:57.616641
+177	30	6	3:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 22:11:37.958077
+313	12	6	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-13 11:00:28.940601
+145	11	8	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 19:19:12.717365
+379	11	13	6:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 08:02:24.701045
+683	32	18	0:6	4	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 2, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 3, "grand_total": 4}	2026-06-16 15:31:16.092621
+679	28	19	2:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-16 15:27:53.874994
+684	32	19	3:0	4	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 4, "match_total": 3, "grand_total": 4}	2026-06-16 15:31:28.391124
+153	27	8	1:2	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-10 20:04:20.939444
+152	27	7	0:3	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-10 20:04:13.980686
+314	12	7	0:3	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-13 11:03:42.80542
+53	10	8	0:3	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-10 17:19:59.497321
+75	18	8	1:3	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-10 17:35:01.184785
+76	17	8	0:2	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-10 17:35:01.568012
+88	14	8	1:2	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-10 17:41:24.709173
+96	4	8	0:2	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-10 17:43:07.84382
+107	22	8	1:3	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-10 17:46:13.249092
+115	21	8	0:1	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-10 17:54:34.811587
+123	23	8	0:3	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-10 18:01:43.522092
+137	25	8	0:1	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-10 18:42:55.522666
+170	31	8	0:3	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-10 20:56:04.2606
+196	16	8	1:2	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-11 09:03:13.065516
+199	26	8	0:4	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-11 09:10:05.54536
+1079	9	34	3:0	0	0	\N	2026-06-19 21:11:27.69096
+171	28	1	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-10 20:56:16.301545
+156	29	3	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 20:32:20.024635
+389	35	16	1:1	2	0	{"base": 1, "high_score": 0, "underdog": 1, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 2, "grand_total": 2}	2026-06-14 08:41:17.810244
+131	26	4	0:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 18:35:21.374853
+45	8	4	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-10 17:09:46.510312
+65	17	4	0:1	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-10 17:33:51.932068
+69	18	4	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-10 17:34:19.227333
+84	14	4	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-10 17:39:51.496106
+92	4	4	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-10 17:42:14.349327
+103	22	4	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-10 17:45:09.59936
+109	21	4	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-10 17:49:10.247139
+119	23	4	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-10 17:59:09.037957
+133	25	4	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-10 18:38:27.055571
+141	11	4	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-10 19:17:17.388319
+157	29	4	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-10 20:33:52.576043
+192	16	4	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-11 09:02:36.832638
+203	36	4	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-11 09:42:43.89688
+210	37	4	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-11 11:08:11.716763
+216	19	4	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-11 14:35:42.580085
+222	33	4	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-11 17:08:21.417211
+238	12	4	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-11 21:25:16.246871
+260	32	4	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-12 15:40:23.47523
+264	39	4	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-12 16:09:57.60954
+288	28	4	3:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-12 21:04:23.014685
+166	31	5	0:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 20:55:47.792724
+167	31	6	3:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 20:55:53.557844
+473	28	13	5:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 20:18:59.188909
+362	10	15	2:4	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 01:12:44.221163
+179	30	8	1:2	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-10 22:12:03.797348
+168	31	7	1:4	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-10 20:55:59.197185
+686	2	24	0:2	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-16 15:41:50.553253
+178	30	7	0:4	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-10 22:11:52.761026
+327	39	7	0:3	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-13 14:18:49.116667
+331	32	7	0:3	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-13 15:56:04.829251
+319	21	12	1:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-13 11:11:45.097063
+159	29	6	2:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 20:34:52.505065
+161	29	8	0:2	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-10 20:37:38.516449
+337	24	11	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-13 16:26:41.513336
+343	37	11	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-13 20:55:13.4928
+368	16	15	0:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 01:32:30.288872
+1080	9	35	3:0	0	0	\N	2026-06-19 21:11:33.531618
+165	31	4	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-10 20:55:41.823103
+184	35	4	1:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-11 06:22:02.438276
+188	35	8	0:2	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-11 06:22:37.405287
+325	30	12	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-13 12:38:18.745014
+510	21	19	5:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-15 06:28:40.521629
+781	8	23	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-17 12:54:21.955814
+764	26	28	3:4	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-17 10:44:33.473166
+160	29	7	0:3	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-10 20:36:18.240558
+2	2	1	4:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-10 16:48:19.497962
+17	3	1	1:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-10 16:58:40.621705
+20	4	1	2:0	3	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 3, "grand_total": 3}	2026-06-10 17:00:21.205672
+29	9	1	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-10 17:03:48.092751
+37	8	1	2:0	3	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 3, "grand_total": 3}	2026-06-10 17:05:52.921996
+40	10	1	2:0	3	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 3, "grand_total": 3}	2026-06-10 17:09:11.611641
+52	12	1	2:0	3	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 3, "grand_total": 3}	2026-06-10 17:18:46.794286
+58	17	1	3:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-10 17:32:30.957803
+61	18	1	1:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-10 17:33:39.73032
+62	14	1	3:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-10 17:33:42.46208
+81	19	1	2:0	3	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 3, "grand_total": 3}	2026-06-10 17:38:57.410878
+100	22	1	1:2	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-10 17:44:55.526533
+108	21	1	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-10 17:46:38.448775
+116	23	1	2:0	3	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 3, "grand_total": 3}	2026-06-10 17:57:20.372734
+124	24	1	3:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-10 18:18:19.0842
+125	25	1	2:0	3	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 3, "grand_total": 3}	2026-06-10 18:29:47.529708
+126	26	1	0:1	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-10 18:33:51.126807
+138	11	1	2:0	4	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 1, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 4, "grand_total": 4}	2026-06-10 19:15:43.995836
+181	35	1	1:2	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-11 06:21:37.513372
+189	16	1	2:0	3	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 3, "grand_total": 3}	2026-06-11 08:45:01.713764
+173	30	2	1:3	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-10 22:10:15.837636
+146	27	1	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-10 20:02:24.971907
+200	36	1	3:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-11 09:35:08.200619
+208	37	1	2:0	3	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 3, "grand_total": 3}	2026-06-11 11:07:47.348088
+213	33	1	3:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-11 14:00:54.673281
+224	38	1	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-11 17:51:04.125172
+227	39	1	3:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-11 18:09:33.102051
+255	33	7	0:2	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-12 14:49:45.497529
+245	9	10	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-12 08:18:49.321473
+243	14	10	1:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-12 06:59:45.998073
+1081	9	36	0:2	0	0	\N	2026-06-19 21:11:40.054934
+1082	9	37	3:0	0	0	\N	2026-06-19 21:11:46.388046
+318	21	11	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-13 11:11:26.497895
+295	17	12	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-13 05:44:02.571954
+400	29	16	1:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 09:21:52.353822
+1107	3	34	2:0	0	0	\N	2026-06-20 07:16:57.407358
+41	10	2	1:3	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-10 17:09:21.446444
+54	12	2	2:1	3	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 3, "grand_total": 3}	2026-06-10 17:20:05.746139
+79	14	2	0:1	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-10 17:37:09.90885
+101	22	2	0:3	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-10 17:44:59.330779
+467	2	17	5:1	4	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 1, "star": 2, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 4, "grand_total": 4}	2026-06-14 19:15:53.860207
+480	25	17	3:1	6	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 1, "star": 2, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 6, "grand_total": 6}	2026-06-14 20:48:59.625158
+505	21	17	4:2	3	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 2, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 3, "grand_total": 3}	2026-06-15 06:27:53.486256
+511	35	17	4:2	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-15 06:29:19.914213
+668	9	17	3:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-16 13:52:32.6769
+147	27	2	0:1	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-10 20:02:34.392345
+676	31	17	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-16 14:31:12.597283
+687	23	17	2:1	3	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 2, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 3, "grand_total": 3}	2026-06-16 15:46:15.087637
+700	33	17	3:1	6	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 1, "star": 2, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 6, "grand_total": 6}	2026-06-16 18:13:30.874801
+209	37	2	0:1	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-11 11:07:55.284965
+702	3	17	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-16 18:38:40.68961
+221	33	2	1:2	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-11 17:06:30.042109
+1108	3	36	0:3	0	0	\N	2026-06-20 07:17:05.335388
+228	39	2	0:1	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-11 18:11:34.651984
+1111	17	37	3:0	0	0	\N	2026-06-20 09:16:50.167212
+233	24	2	2:1	3	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 3, "grand_total": 3}	2026-06-11 21:15:33.22715
+725	12	20	2:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 4, "match_total": 1, "grand_total": 2}	2026-06-16 22:41:19.30464
+688	23	18	1:3	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-16 15:46:55.097388
+707	31	18	0:4	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-16 21:02:37.793602
+706	18	25	1:1	5	0	{"base": 3, "high_score": 0, "underdog": 1, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 4, "match_total": 4, "grand_total": 5}	2026-06-16 20:05:06.105369
+326	39	6	3:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-13 14:18:29.38583
+487	29	17	2:1	3	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 2, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 3, "grand_total": 3}	2026-06-14 22:00:39.796199
+496	37	18	0:3	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-14 22:18:54.087482
+63	17	3	2:2	2	0	{"base": 1, "high_score": 0, "underdog": 1, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 2, "grand_total": 2}	2026-06-10 17:33:44.278884
+68	18	3	1:1	4	0	{"base": 3, "high_score": 0, "underdog": 1, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 4, "grand_total": 4}	2026-06-10 17:34:10.307173
+499	18	18	0:4	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-14 22:44:09.579737
+94	4	3	0:0	2	0	{"base": 1, "high_score": 0, "underdog": 1, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 2, "grand_total": 2}	2026-06-10 17:42:23.980112
+704	3	19	1:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-16 18:38:56.564808
+708	31	19	3:0	4	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 3, "grand_total": 4}	2026-06-16 21:03:09.044811
+129	26	3	1:1	4	0	{"base": 3, "high_score": 0, "underdog": 1, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 4, "grand_total": 4}	2026-06-10 18:34:49.465166
+1083	29	37	3:0	0	0	\N	2026-06-19 21:12:47.192881
+776	14	22	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-17 12:17:34.841293
+361	10	14	3:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 01:12:36.815705
+799	33	22	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-17 15:54:29.697276
+800	28	22	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-17 16:30:32.074644
+211	37	3	1:1	4	0	{"base": 3, "high_score": 0, "underdog": 1, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 4, "grand_total": 4}	2026-06-11 11:12:35.364365
+803	3	22	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-17 16:52:11.121342
+821	12	22	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-17 18:18:16.878987
+822	17	22	2:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-17 18:54:15.15871
+621	2	23	2:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 21:57:06.268914
+254	33	3	1:1	4	0	{"base": 3, "high_score": 0, "underdog": 1, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 4, "grand_total": 4}	2026-06-12 14:49:21.963609
+626	37	23	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 22:32:43.096755
+631	1	23	0:1	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-15 22:43:39.268641
+387	35	14	2:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 08:40:29.203199
+638	27	23	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-15 23:42:09.556479
+640	30	23	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-15 23:46:04.343927
+642	29	23	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-16 00:07:43.630909
+643	22	23	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-16 08:30:14.576968
+784	16	23	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-17 13:11:21.8265
+1140	8	37	3:0	0	0	\N	2026-06-20 15:24:51.3636
+1141	8	38	2:1	0	0	\N	2026-06-20 15:26:08.290627
+286	3	7	0:4	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-12 20:46:17.454069
+334	24	7	1:2	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-13 16:25:43.737809
+207	36	8	1:3	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-11 09:47:29.589317
+220	19	8	0:2	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-11 16:31:01.809388
+223	33	8	1:3	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-11 17:09:02.679289
+270	37	8	1:3	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-12 18:41:25.768191
+1142	8	39	2:0	0	0	\N	2026-06-20 15:26:15.281123
+1146	14	36	0:3	0	0	\N	2026-06-20 15:39:30.320298
+493	8	17	3:1	6	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 1, "star": 2, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 6, "grand_total": 6}	2026-06-14 22:13:47.284448
+490	37	14	2:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 22:10:30.062593
+393	19	16	1:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 09:02:21.862328
+498	18	17	3:1	5	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 2, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 5, "grand_total": 5}	2026-06-14 22:44:00.881975
+516	26	17	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 06:30:11.58773
+779	14	23	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-17 12:25:09.285339
+1156	22	40	3:2	0	0	\N	2026-06-20 15:58:35.532687
+494	8	18	0:3	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-14 22:15:16.783044
+517	26	18	1:3	3	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 2, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 3, "grand_total": 3}	2026-06-15 06:30:27.974494
+513	35	19	5:1	3	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 1, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 4, "match_total": 2, "grand_total": 3}	2026-06-15 06:29:41.995224
+710	4	19	2:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 4, "match_total": 1, "grand_total": 2}	2026-06-16 21:05:25.195317
+720	33	19	2:1	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-16 21:09:23.023968
+854	23	24	0:2	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-17 22:09:09.39122
+851	30	30	1:3	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-17 21:50:14.835653
+712	4	21	2:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-16 21:05:44.427255
+726	12	21	3:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-16 22:41:29.253089
+287	3	8	0:2	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-12 20:46:29.080972
+308	28	8	0:2	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-13 09:49:44.294816
+315	12	8	1:2	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-13 11:05:39.967119
+328	39	8	0:2	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-13 14:19:16.225383
+335	24	8	1:2	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-13 16:26:18.81866
+345	32	8	0:3	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-13 21:36:57.684218
+301	19	12	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-13 08:25:56.59213
+645	18	23	1:0	3	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 3, "grand_total": 3}	2026-06-16 08:30:42.838097
+655	19	23	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-16 09:41:27.957085
+659	35	23	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-16 09:49:16.902093
+666	25	23	1:0	3	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 3, "grand_total": 3}	2026-06-16 13:23:33.482842
+674	9	23	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-16 13:53:15.012874
+692	36	23	1:0	3	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 3, "grand_total": 3}	2026-06-16 15:50:48.417023
+716	4	23	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-16 21:06:17.739926
+731	10	23	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-17 00:05:27.696099
+834	31	23	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-17 20:23:15.70315
+857	32	23	3:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-17 22:15:57.368204
+861	2	28	1:2	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-17 22:30:27.874688
+895	14	26	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-18 07:48:29.865855
+273	38	4	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-12 19:49:22.922197
+372	26	16	0:0	2	0	{"base": 1, "high_score": 0, "underdog": 1, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 2, "grand_total": 2}	2026-06-14 06:22:47.682509
+462	24	17	3:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-14 18:29:12.790365
+49	8	6	3:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 17:13:46.620525
+271	37	9	4:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-12 18:41:44.706701
+495	37	17	3:1	4	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 1, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 4, "grand_total": 4}	2026-06-14 22:18:33.242788
+525	1	17	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-15 06:55:51.812087
+105	22	6	2:2	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-10 17:45:28.171268
+1169	38	34	4:0	0	0	\N	2026-06-20 16:56:55.524287
+791	23	21	4:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-17 15:18:34.248347
+500	22	18	0:4	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-14 23:08:45.026789
+518	26	19	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-15 06:30:36.233467
+527	1	19	2:1	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-15 06:56:13.641326
+528	1	20	2:1	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 4, "match_total": 1, "grand_total": 2}	2026-06-15 06:56:41.001212
+711	4	20	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-16 21:05:35.629726
+246	19	10	3:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-12 10:08:36.476077
+1185	10	35	2:0	0	0	\N	2026-06-20 18:01:59.982191
+66	17	6	3:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 17:34:01.136035
+353	2	12	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 00:17:09.928144
+350	1	14	3:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 00:10:03.066285
+375	21	15	0:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 07:25:36.311593
+1186	10	37	3:1	0	0	\N	2026-06-20 18:02:10.039853
+714	4	25	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-16 21:05:58.871133
+811	24	27	2:1	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 6, "match_total": 1, "grand_total": 2}	2026-06-17 17:18:11.370362
+718	38	21	4:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-16 21:08:49.603897
+403	4	12	1:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-14 09:35:09.165877
+595	24	22	2:1	3	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 2, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 3, "grand_total": 3}	2026-06-15 20:06:06.945949
+604	22	22	0:3	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-15 21:20:23.005085
+606	29	22	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-15 21:41:18.520381
+620	2	22	4:2	5	0	{"base": 3, "high_score": 2, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 5, "grand_total": 5}	2026-06-15 21:56:58.906458
+801	28	23	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-17 16:30:40.279266
+850	30	29	3:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-17 21:49:50.216019
+232	22	9	5:1	3	0	{"base": 1, "high_score": 2, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 3, "grand_total": 3}	2026-06-11 21:13:22.162863
+235	4	9	3:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-11 21:19:03.069293
+237	29	9	5:0	2	0	{"base": 1, "high_score": 1, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 2, "grand_total": 2}	2026-06-11 21:23:38.27853
+239	2	9	6:0	3	0	{"base": 1, "high_score": 2, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 3, "grand_total": 3}	2026-06-11 21:28:59.845116
+377	22	15	2:2	2	0	{"base": 1, "high_score": 0, "underdog": 1, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 2, "grand_total": 2}	2026-06-14 07:32:32.465418
+463	4	17	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-14 18:43:29.885132
+291	11	11	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-12 21:20:35.682732
+833	22	30	0:3	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-17 20:05:56.188925
+277	24	4	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-12 19:50:28.513442
+283	3	4	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-12 20:45:37.155191
+198	26	7	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-11 09:09:45.632302
+417	14	12	1:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-14 10:59:12.566934
+278	38	8	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-12 19:50:35.482946
+248	1	10	1:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-12 10:28:22.936797
+346	22	14	0:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 00:07:57.13058
+275	38	6	1:1	3	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 3, "grand_total": 3}	2026-06-12 19:50:10.001742
+285	3	6	1:1	3	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 3, "grand_total": 3}	2026-06-12 20:46:07.073808
+438	11	15	0:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 16:10:22.612111
+378	22	16	0:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 07:33:34.787619
+47	10	7	0:2	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-10 17:10:10.180215
+50	8	7	0:3	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-10 17:13:55.360036
+73	17	7	0:2	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-10 17:34:50.595928
+74	18	7	0:3	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-10 17:34:53.488683
+87	14	7	0:2	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-10 17:40:54.758362
+98	4	7	0:1	3	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 3, "grand_total": 3}	2026-06-10 17:43:19.595045
+106	22	7	0:3	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-10 17:46:06.797764
+114	21	7	1:4	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-10 17:52:18.400172
+122	23	7	0:2	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-10 18:00:51.235968
+136	25	7	0:4	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-10 18:42:00.467709
+144	11	7	0:4	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-10 19:18:46.902215
+187	35	7	0:2	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-11 06:22:30.624573
+195	16	7	1:3	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-11 09:02:59.167011
+206	36	7	0:4	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-11 09:46:13.838063
+212	37	7	0:3	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-11 11:12:45.764994
+219	19	7	0:3	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-11 16:30:48.903485
+276	38	7	0:3	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-12 19:50:22.485084
+307	28	7	1:2	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-13 09:49:35.186245
+450	38	12	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-14 17:26:12.297803
+724	2	25	3:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-16 21:41:45.966389
+231	19	9	4:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-11 19:06:46.616543
+241	18	9	6:0	3	0	{"base": 1, "high_score": 2, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 3, "grand_total": 3}	2026-06-11 22:14:08.306247
+242	9	9	5:0	2	0	{"base": 1, "high_score": 1, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 2, "grand_total": 2}	2026-06-11 22:28:35.943354
+244	14	9	4:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-12 07:00:52.27256
+247	1	9	5:0	2	0	{"base": 1, "high_score": 1, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 2, "grand_total": 2}	2026-06-12 10:28:03.870395
+249	25	9	4:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-12 13:16:03.935325
+251	8	9	4:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-12 14:13:37.248286
+258	33	9	5:0	2	0	{"base": 1, "high_score": 1, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 2, "grand_total": 2}	2026-06-12 14:52:49.066961
+266	16	9	4:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-12 18:36:09.702918
+279	38	9	5:0	2	0	{"base": 1, "high_score": 1, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 2, "grand_total": 2}	2026-06-12 19:50:51.147995
+292	17	9	3:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-13 05:43:31.863397
+309	26	9	4:1	2	0	{"base": 1, "high_score": 1, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 2, "grand_total": 2}	2026-06-13 10:17:54.24919
+316	21	9	5:0	2	0	{"base": 1, "high_score": 1, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 2, "grand_total": 2}	2026-06-13 11:10:44.392384
+320	23	9	5:0	2	0	{"base": 1, "high_score": 1, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 2, "grand_total": 2}	2026-06-13 11:55:32.394997
+322	30	9	4:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-13 12:36:21.878389
+336	24	9	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-13 16:26:30.363923
+340	36	9	4:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-13 17:59:20.326765
+356	12	9	4:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-14 00:40:25.728738
+358	10	9	5:0	2	0	{"base": 1, "high_score": 1, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 2, "grand_total": 2}	2026-06-14 01:12:11.71081
+382	35	9	4:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-14 08:32:36.436759
+420	32	9	5:0	2	0	{"base": 1, "high_score": 1, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 2, "grand_total": 2}	2026-06-14 11:23:35.53923
+426	27	9	4:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-14 12:49:07.436747
+437	31	9	4:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-14 15:30:39.91263
+439	39	9	4:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-14 16:44:34.895936
+443	3	9	4:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-14 16:45:14.322832
+502	22	17	3:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-15 02:11:42.249039
+521	36	17	3:0	4	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 1, "star": 2, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 4, "grand_total": 4}	2026-06-15 06:34:27.472832
+256	33	10	1:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-12 14:50:22.884026
+267	16	10	2:2	3	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 3, "grand_total": 3}	2026-06-12 18:36:17.719878
+1170	38	35	3:0	0	0	\N	2026-06-20 16:57:06.689864
+280	38	10	1:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-12 19:51:06.956109
+501	22	19	2:1	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-14 23:08:55.900889
+817	29	29	3:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-17 18:05:39.610337
+729	10	21	5:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-17 00:03:30.123313
+808	24	24	0:1	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-17 17:17:29.009501
+794	36	25	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-17 15:27:45.82531
+810	24	26	2:1	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 5, "match_total": 1, "grand_total": 2}	2026-06-17 17:17:54.261997
+1171	38	36	0:1	0	0	\N	2026-06-20 16:57:27.717298
+488	29	18	0:3	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-14 22:00:46.802758
+806	3	21	3:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	\N
+1172	28	34	3:1	0	0	\N	2026-06-20 16:57:39.545024
+1178	1	35	2:0	0	0	\N	2026-06-20 16:59:18.082631
+1179	1	36	1:3	0	0	\N	2026-06-20 16:59:25.024217
+1180	1	37	2:0	0	0	\N	2026-06-20 16:59:33.377217
+444	3	10	1:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-14 16:45:21.811231
+380	11	12	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 08:02:35.280824
+407	4	16	1:1	2	0	{"base": 1, "high_score": 0, "underdog": 1, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 2, "grand_total": 2}	2026-06-14 09:35:46.171547
+298	18	12	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-13 07:29:32.791874
+304	29	12	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-13 09:37:15.006949
+312	26	12	3:2	2	0	{"base": 1, "high_score": 1, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 2, "grand_total": 2}	2026-06-13 10:18:34.920916
+329	22	12	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-13 15:03:58.04961
+339	24	12	3:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-13 16:27:24.489322
+342	37	12	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-13 20:55:07.78688
+348	1	12	3:2	2	0	{"base": 1, "high_score": 1, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 2, "grand_total": 2}	2026-06-14 00:09:49.998615
+363	10	12	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-14 01:13:01.614845
+365	16	12	2:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 4, "match_total": 1, "grand_total": 2}	2026-06-14 01:31:54.714779
+386	35	12	1:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-14 08:35:38.739746
+395	8	12	1:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-14 09:13:31.878738
+414	36	12	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-14 10:09:29.680461
+424	9	12	3:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-14 12:48:59.66725
+432	27	12	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-14 14:00:51.080206
+442	39	12	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-14 16:45:10.566709
+446	3	12	2:1	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 4, "match_total": 1, "grand_total": 2}	2026-06-14 16:45:40.63838
+738	39	23	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-17 06:34:52.959955
+747	21	23	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-17 07:43:09.389387
+759	26	23	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-17 10:42:04.094742
+793	23	23	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-17 15:18:47.314158
+804	3	23	3:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-17 16:52:16.902362
+807	24	23	1:0	3	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 3, "grand_total": 3}	2026-06-17 17:17:17.780976
+823	17	23	0:2	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-17 18:54:24.487605
+836	38	23	1:0	3	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 3, "grand_total": 3}	2026-06-17 20:50:22.974939
+855	12	23	1:2	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-17 22:09:36.763574
+864	33	23	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-17 22:38:28.056285
+646	18	24	0:2	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-16 08:30:55.905475
+860	2	27	0:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-17 22:30:20.762968
+849	30	28	2:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-17 21:49:22.999714
+504	19	17	4:2	4	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 1, "star": 2, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 4, "grand_total": 4}	2026-06-15 04:42:39.191267
+294	17	11	0:2	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-13 05:43:53.107307
+297	18	11	1:0	3	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 3, "grand_total": 3}	2026-06-13 07:29:22.708847
+661	25	18	0:3	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-16 13:22:09.548588
+669	9	18	0:5	2	0	{"base": 1, "high_score": 1, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 2, "grand_total": 2}	2026-06-16 13:52:37.817749
+678	28	18	0:6	3	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 2, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 3, "grand_total": 3}	2026-06-16 15:27:44.147788
+696	14	18	1:4	4	0	{"base": 3, "high_score": 1, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 4, "grand_total": 4}	2026-06-16 17:56:00.87145
+347	1	11	2:3	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-14 00:09:39.250121
+352	2	11	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-14 00:16:58.598989
+359	10	11	3:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-14 01:12:19.588452
+364	16	11	1:0	4	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 3, "grand_total": 4}	2026-06-14 01:31:41.929501
+703	3	18	1:2	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-16 18:38:50.616586
+709	4	18	1:3	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-16 21:05:16.919517
+719	33	18	0:3	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-16 21:09:00.633889
+650	12	19	2:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-16 08:44:20.58049
+662	25	19	2:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 4, "match_total": 1, "grand_total": 2}	2026-06-16 13:22:21.109929
+422	32	11	1:2	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-14 11:24:47.184871
+670	9	19	2:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-16 13:52:48.690971
+433	27	11	1:2	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-14 14:01:07.041239
+689	23	19	3:0	4	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 3, "grand_total": 4}	2026-06-16 15:47:12.723471
+445	3	11	1:0	4	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 3, "grand_total": 4}	2026-06-14 16:45:28.706408
+449	38	11	0:1	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-14 17:25:35.337219
+453	31	11	0:1	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-14 18:02:27.749876
+697	14	19	2:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-16 17:56:54.676085
+471	28	11	0:1	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-14 20:18:38.269298
+474	25	11	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-14 20:46:05.665355
+481	33	11	2:1	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-14 20:49:23.413966
+1173	38	37	3:1	0	0	\N	2026-06-20 16:57:45.248994
+411	18	16	1:1	2	0	{"base": 1, "high_score": 0, "underdog": 1, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 2, "grand_total": 2}	2026-06-14 10:02:12.206378
+478	25	16	1:1	2	0	{"base": 1, "high_score": 0, "underdog": 1, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 2, "grand_total": 2}	2026-06-14 20:48:43.347513
+430	9	16	1:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 12:49:46.633099
+436	27	16	1:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 14:02:57.950577
+461	24	16	1:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 18:28:51.893075
+466	2	16	1:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 19:15:39.264916
+470	1	16	2:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 19:32:02.118087
+492	8	16	2:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 22:13:34.673833
+1174	28	35	3:0	0	0	\N	2026-06-20 16:57:50.522046
+454	31	12	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-14 18:03:39.421223
+456	12	12	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-14 18:25:06.793078
+469	23	12	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-14 19:18:04.496089
+472	28	12	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-14 20:18:49.794409
+475	25	12	1:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-14 20:47:07.618801
+485	33	12	3:1	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 4, "match_total": 1, "grand_total": 2}	2026-06-14 20:53:23.61544
+491	32	12	3:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-14 22:13:23.133128
+843	38	30	0:2	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 5, "match_total": 1, "grand_total": 2}	2026-06-17 20:51:56.584774
+536	38	16	1:1	2	0	{"base": 1, "high_score": 0, "underdog": 1, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 2, "grand_total": 2}	2026-06-15 08:17:24.479705
+1175	28	36	0:2	0	0	\N	2026-06-20 16:58:01.961283
+565	30	16	2:2	4	0	{"base": 3, "high_score": 0, "underdog": 1, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 4, "grand_total": 4}	2026-06-15 16:24:58.031274
+600	32	16	1:1	2	0	{"base": 1, "high_score": 0, "underdog": 1, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 2, "grand_total": 2}	2026-06-15 20:58:07.500106
+4	1	2	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 16:48:30.374355
+60	17	2	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 17:33:35.589982
+64	18	2	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 17:33:47.692711
+99	4	2	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 17:44:09.123705
+112	21	2	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 17:49:53.718262
+117	23	2	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 17:57:34.093442
+127	26	2	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 18:34:00.548484
+128	25	2	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 18:34:06.681715
+139	11	2	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 19:16:15.366419
+155	29	2	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 20:29:52.447445
+163	31	2	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 20:55:24.540738
+182	35	2	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-11 06:21:44.896829
+190	16	2	2:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-11 08:50:00.720192
+201	36	2	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-11 09:38:28.02251
+214	19	2	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-11 14:35:21.294431
+570	30	21	5:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 16:25:58.549937
+580	2	21	5:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 18:58:04.557476
+588	26	21	4:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 19:29:36.597079
+594	24	21	2:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 20:05:57.702467
+605	29	21	3:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 21:41:08.734462
+613	11	21	3:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 21:52:33.168609
+734	18	27	2:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 6, "match_total": 1, "grand_total": 2}	2026-06-17 06:20:53.626486
+749	1	28	2:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-17 08:05:43.851193
+756	11	26	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-17 08:17:23.82434
+1176	38	38	2:1	0	0	\N	2026-06-20 16:58:03.337064
+529	1	18	0:3	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-15 06:57:30.388135
+1183	10	34	4:1	0	0	\N	2026-06-20 18:01:40.260936
+1184	10	36	0:3	0	0	\N	2026-06-20 18:01:46.915229
+225	38	2	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-11 17:51:16.339648
+229	28	2	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-11 18:49:23.92901
+46	10	6	4:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 17:10:03.965516
+71	18	6	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 17:34:47.012333
+86	14	6	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 17:40:35.706603
+111	21	6	1:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 17:49:32.464669
+121	23	6	3:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 18:00:04.433257
+135	25	6	3:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 18:40:52.634685
+143	11	6	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 19:18:19.729212
+186	35	6	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-11 06:22:22.727808
+194	16	6	3:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-11 09:02:52.435517
+197	26	6	1:3	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-11 09:09:30.010684
+205	36	6	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-11 09:45:35.746041
+218	19	6	4:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-11 16:29:44.441685
+236	4	6	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-11 21:19:12.52016
+257	33	6	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-12 14:52:12.021337
+269	37	6	3:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-12 18:41:10.755028
+306	28	6	3:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-13 09:49:21.706226
+330	32	6	3:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-13 15:55:58.701613
+333	24	6	1:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-13 16:24:25.512768
+250	25	10	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-12 13:16:10.466972
+252	8	10	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-12 14:20:43.108189
+262	4	10	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-12 16:06:00.42562
+272	37	10	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-12 18:41:51.404427
+281	22	10	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-12 20:36:05.884268
+290	11	10	1:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-12 21:17:38.986612
+293	17	10	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-13 05:43:40.876649
+296	18	10	1:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-13 07:29:13.043174
+299	10	10	3:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-13 08:22:10.888807
+302	29	10	1:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-13 09:36:23.492354
+310	26	10	2:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-13 10:18:05.82947
+317	21	10	3:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-13 11:10:54.058941
+321	23	10	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-13 11:55:47.974132
+323	30	10	3:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-13 12:37:45.970724
+19	3	3	1:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 16:59:04.095797
+31	9	3	1:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 17:03:57.351478
+42	10	3	1:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 17:09:29.097327
+55	12	3	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 17:24:36.627619
+82	14	3	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 17:39:02.712967
+102	22	3	0:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 17:45:04.871119
+113	21	3	1:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 17:52:01.525997
+118	23	3	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 17:58:09.196508
+132	25	3	0:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 18:37:09.420878
+140	11	3	0:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 19:16:43.782916
+164	31	3	0:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 20:55:35.94253
+174	30	3	0:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 22:10:53.921044
+183	35	3	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-11 06:21:54.495069
+191	16	3	3:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-11 09:02:23.022632
+202	36	3	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-11 09:40:45.904056
+215	19	3	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-11 14:35:33.399518
+226	38	3	1:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-11 17:51:30.849016
+230	28	3	0:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-11 18:49:41.933777
+234	24	3	2:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-11 21:16:15.269121
+259	32	3	1:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-12 15:40:09.990309
+263	39	3	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-12 16:09:03.05723
+33	9	5	0:4	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 17:04:09.187825
+44	10	5	0:3	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 17:09:42.661333
+48	8	5	0:3	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 17:12:20.899791
+67	17	5	0:3	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 17:34:07.862413
+70	18	5	0:3	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 17:34:31.930965
+85	14	5	0:3	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 17:40:28.107924
+90	4	5	0:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 17:42:06.842857
+104	22	5	0:3	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 17:45:17.101804
+110	21	5	0:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 17:49:23.826547
+120	23	5	0:3	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 17:59:30.629567
+130	26	5	0:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 18:35:11.352642
+134	25	5	0:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 18:39:40.066558
+142	11	5	0:3	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 19:17:33.146094
+750	1	27	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-17 08:05:52.0691
+852	27	30	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-17 21:50:30.680012
+573	18	19	2:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 4, "match_total": 1, "grand_total": 2}	2026-06-15 17:01:53.804094
+614	11	22	2:1	3	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 2, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 3, "grand_total": 3}	2026-06-15 21:52:41.856556
+537	38	17	3:1	6	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 1, "star": 2, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 6, "grand_total": 6}	2026-06-15 08:17:35.198395
+546	16	17	3:1	5	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 2, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 5, "grand_total": 5}	2026-06-15 10:19:40.953299
+615	11	23	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-15 21:52:53.38494
+158	29	5	0:4	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 20:34:43.796814
+556	10	17	3:0	4	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 1, "star": 2, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 4, "grand_total": 4}	2026-06-15 12:25:24.397577
+532	28	14	1:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 07:59:37.749786
+533	28	16	2:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 08:00:56.177106
+566	30	17	2:1	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 1, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 2, "grand_total": 2}	2026-06-15 16:25:12.382945
+649	12	17	2:1	3	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 2, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 3, "grand_total": 3}	2026-06-16 08:44:05.740802
+618	2	19	2:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-15 21:56:24.24494
+512	35	18	1:4	5	0	{"base": 3, "high_score": 1, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 4, "grand_total": 5}	2026-06-15 06:29:30.665128
+522	36	18	0:3	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-15 06:34:42.573617
+538	38	18	0:2	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-15 08:17:47.756018
+547	16	18	0:3	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-15 10:19:49.650276
+553	19	18	0:2	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-15 12:00:01.80608
+557	10	18	0:2	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-15 12:25:39.450343
+567	30	18	0:3	4	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 2, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 3, "grand_total": 4}	2026-06-15 16:25:26.192697
+617	2	18	0:2	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-15 21:56:13.105048
+539	38	19	2:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 4, "match_total": 1, "grand_total": 2}	2026-06-15 08:18:01.396117
+543	29	19	2:1	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-15 10:00:49.237141
+548	16	19	2:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-15 10:20:01.909076
+554	19	19	3:1	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-15 12:00:50.827967
+558	10	19	3:0	4	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 3, "grand_total": 4}	2026-06-15 12:25:47.092314
+568	30	19	3:1	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 4, "match_total": 1, "grand_total": 2}	2026-06-15 16:25:37.217683
+503	22	20	2:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 4, "match_total": 1, "grand_total": 2}	2026-06-15 02:11:54.775584
+514	21	20	4:1	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 4, "match_total": 1, "grand_total": 2}	2026-06-15 06:29:49.157007
+515	35	20	3:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 5, "match_total": 1, "grand_total": 2}	2026-06-15 06:29:52.422386
+519	26	20	1:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-15 06:31:02.134352
+524	36	20	2:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 4, "match_total": 1, "grand_total": 2}	2026-06-15 06:35:05.393038
+544	29	20	2:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 4, "match_total": 1, "grand_total": 2}	2026-06-15 10:01:48.133168
+549	16	20	3:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 4, "match_total": 1, "grand_total": 2}	2026-06-15 10:20:12.196461
+562	36	21	3:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 16:15:20.97568
+652	19	20	1:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 4, "match_total": 1, "grand_total": 2}	2026-06-16 09:41:00.021381
+584	39	17	3:0	4	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 1, "star": 2, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 4, "grand_total": 4}	2026-06-15 19:26:09.421107
+603	14	17	3:1	6	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 1, "star": 2, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 6, "grand_total": 6}	2026-06-15 21:09:26.863883
+609	11	17	3:1	3	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 3, "grand_total": 3}	2026-06-15 21:48:37.852549
+663	25	20	2:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 5, "match_total": 1, "grand_total": 2}	2026-06-16 13:22:28.707008
+1181	1	38	2:1	0	0	\N	2026-06-20 16:59:40.053043
+589	26	22	2:3	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-15 19:30:14.869404
+585	39	18	0:2	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-15 19:26:20.116624
+591	24	18	0:3	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-15 20:04:49.619918
+1189	39	39	2:0	0	0	\N	2026-06-20 19:00:09.207703
+875	10	31	4:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-18 01:06:38.840575
+1191	39	35	3:0	0	0	\N	2026-06-20 19:01:19.61273
+1192	39	36	0:2	0	0	\N	2026-06-20 19:02:08.272591
+671	9	20	3:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 4, "match_total": 1, "grand_total": 2}	2026-06-16 13:52:54.482525
+608	11	18	0:3	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-15 21:48:26.838322
+370	26	14	2:2	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-14 06:22:03.806221
+648	12	18	0:5	2	0	{"base": 1, "high_score": 1, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 2, "grand_total": 2}	2026-06-16 08:43:48.289443
+586	39	19	3:0	4	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 3, "grand_total": 4}	2026-06-15 19:26:34.951924
+592	24	19	1:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-15 20:05:20.236584
+611	11	19	2:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-15 21:50:59.861783
+559	10	20	3:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 4, "match_total": 1, "grand_total": 2}	2026-06-15 12:25:55.683712
+569	30	20	4:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 5, "match_total": 1, "grand_total": 2}	2026-06-15 16:25:47.772596
+587	39	20	2:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 4, "match_total": 1, "grand_total": 2}	2026-06-15 19:26:45.650692
+590	18	20	2:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 5, "match_total": 1, "grand_total": 2}	2026-06-15 19:51:22.545343
+593	24	20	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 20:05:40.790356
+612	11	20	2:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 4, "match_total": 1, "grand_total": 2}	2026-06-15 21:52:24.372449
+619	2	20	3:1	4	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 4, "match_total": 3, "grand_total": 4}	2026-06-15 21:56:35.489954
+628	37	20	2:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 4, "match_total": 1, "grand_total": 2}	2026-06-15 22:33:03.037064
+680	28	20	2:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 4, "match_total": 1, "grand_total": 2}	2026-06-16 15:28:06.742793
+685	32	20	3:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 5, "match_total": 1, "grand_total": 2}	2026-06-16 15:31:37.302036
+583	39	16	1:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 19:25:59.530247
+596	12	16	1:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 20:39:40.180404
+576	22	21	4:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 18:00:59.117554
+355	2	14	2:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 00:17:31.519917
+367	16	14	2:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 01:32:17.76844
+374	21	14	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 07:25:10.612101
+391	19	14	3:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 09:01:55.619723
+886	26	29	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-18 05:39:26.777304
+889	26	32	1:2	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 4, "match_total": 1, "grand_total": 2}	2026-06-18 06:02:25.907488
+1182	32	34	4:1	0	0	\N	2026-06-20 17:22:35.952256
+176	30	5	0:3	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 22:11:28.907002
+185	35	5	1:3	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-11 06:22:16.140626
+193	16	5	0:3	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-11 09:02:44.844255
+204	36	5	0:3	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-11 09:43:58.370639
+217	19	5	1:3	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-11 14:35:53.862498
+240	12	5	0:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-11 21:51:40.88233
+253	33	5	0:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-12 14:49:05.473434
+261	32	5	0:3	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-12 15:40:34.920458
+265	39	5	0:3	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-12 16:10:13.501395
+268	37	5	0:3	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-12 18:41:03.107336
+274	38	5	0:3	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-12 19:49:55.132811
+284	3	5	1:3	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-12 20:45:49.337267
+305	28	5	0:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-13 09:49:10.939846
+332	24	5	0:3	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-13 16:24:06.684759
+282	22	11	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-12 20:36:59.589692
+300	19	11	2:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-13 08:25:44.073581
+303	29	11	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-13 09:36:39.908128
+311	26	11	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-13 10:18:15.695587
+324	30	11	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-13 12:38:01.372136
+384	35	11	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 08:33:28.809149
+394	8	11	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 09:13:11.710349
+402	4	11	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 09:35:02.901661
+413	36	11	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 10:09:23.251175
+416	14	11	0:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 10:47:07.930238
+423	9	11	0:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 12:48:44.123946
+441	39	11	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 16:44:56.768546
+455	12	11	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 18:23:25.736713
+341	17	13	5:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-13 20:31:14.828183
+344	37	13	6:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-13 20:55:24.175377
+349	1	13	6:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 00:09:57.184648
+354	2	13	6:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 00:17:15.814311
+360	10	13	4:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 01:12:26.503073
+647	22	24	1:3	3	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 3, "grand_total": 3}	2026-06-16 08:30:56.304025
+653	19	21	3:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-16 09:41:06.910246
+1187	39	37	3:0	0	0	\N	2026-06-20 18:59:32.805026
+1188	39	38	3:1	0	0	\N	2026-06-20 18:59:46.134434
+627	37	21	4:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 22:32:52.444164
+625	37	22	2:0	3	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 2, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 3, "grand_total": 3}	2026-06-15 22:32:36.160269
+622	8	19	2:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-15 22:30:01.369176
+338	24	10	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-13 16:27:05.683717
+351	2	10	3:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 00:15:36.661163
+357	12	10	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 00:41:03.738779
+383	35	10	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 08:32:49.573428
+412	36	10	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 10:09:05.145765
+421	32	10	3:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 11:24:35.05556
+427	27	10	3:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 12:49:15.982071
+440	39	10	3:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 16:44:43.921762
+447	28	10	1:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 17:04:00.607151
+448	31	10	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 17:25:34.925815
+396	8	13	6:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 09:15:01.434055
+397	29	13	4:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 09:18:50.190056
+404	4	13	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 09:35:17.726615
+408	18	13	4:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 10:01:36.396662
+415	22	13	4:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 10:43:45.77839
+418	14	13	3:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 10:59:19.829977
+425	9	13	6:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 12:49:06.710491
+431	27	13	5:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 14:00:44.910276
+451	38	13	4:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 17:26:31.937254
+457	12	13	5:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 18:26:22.314268
+458	24	13	3:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 18:28:10.132845
+476	25	13	6:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 20:47:13.124421
+482	33	13	5:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 20:51:46.167052
+506	36	13	6:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 06:28:13.215807
+530	3	13	6:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 07:31:32.141504
+540	31	13	5:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 09:15:09.288983
+550	23	13	6:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 11:06:04.213602
+560	32	13	5:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 14:53:52.557906
+398	29	14	3:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 09:19:37.418051
+401	8	14	2:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 09:27:33.259151
+405	4	14	2:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 09:35:30.38558
+388	35	15	1:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 08:40:51.587846
+630	1	22	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-15 22:42:28.302996
+632	8	22	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-15 22:52:41.353114
+637	27	22	1:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-15 23:41:24.940265
+1190	39	34	2:1	0	0	\N	2026-06-20 19:00:55.046391
+639	30	22	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 23:45:25.500071
+366	16	13	5:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 01:32:05.129352
+392	19	15	1:1	4	0	{"base": 3, "high_score": 0, "underdog": 1, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 4, "grand_total": 4}	2026-06-14 09:02:03.168396
+748	21	24	1:4	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-17 07:43:22.900403
+633	27	18	1:5	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-15 23:39:55.136634
+629	37	19	2:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-15 22:33:09.450208
+634	27	19	3:1	3	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 1, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 2, "grand_total": 3}	2026-06-15 23:40:08.692154
+623	8	20	2:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 4, "match_total": 1, "grand_total": 2}	2026-06-15 22:30:49.203596
+635	27	20	4:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 4, "match_total": 1, "grand_total": 2}	2026-06-15 23:40:34.774649
+690	23	20	2:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 4, "match_total": 1, "grand_total": 2}	2026-06-16 15:47:45.031201
+698	14	20	3:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 4, "match_total": 1, "grand_total": 2}	2026-06-16 17:57:18.079305
+526	1	15	1:1	4	0	{"base": 3, "high_score": 0, "underdog": 1, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 4, "grand_total": 4}	2026-06-15 06:56:03.919899
+705	3	20	4:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 4, "match_total": 1, "grand_total": 2}	2026-06-16 18:39:02.090479
+717	38	20	2:1	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 5, "match_total": 1, "grand_total": 2}	2026-06-16 21:08:35.823571
+721	33	20	2:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 4, "match_total": 1, "grand_total": 2}	2026-06-16 21:09:45.684489
+722	31	20	2:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 4, "match_total": 1, "grand_total": 2}	2026-06-16 21:10:01.711314
+575	1	21	4:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 17:58:41.710873
+616	18	21	3:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 21:55:14.539727
+369	26	13	4:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 06:21:51.270716
+373	21	13	6:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 07:23:24.365196
+385	35	13	6:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 08:33:51.472015
+390	19	13	3:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 09:01:46.884936
+371	26	15	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 06:22:14.57015
+624	8	21	4:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 22:30:56.349219
+636	27	21	5:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 23:40:50.530858
+657	35	21	4:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-16 09:47:42.809039
+664	25	21	3:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-16 13:22:35.598106
+672	9	21	2:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-16 13:53:02.528918
+681	28	21	3:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-16 15:28:19.385214
+694	16	21	3:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-16 16:47:33.678324
+882	21	29	5:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-18 02:04:39.760046
+409	18	14	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 10:01:54.433232
+419	14	14	2:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 11:01:37.132426
+428	9	14	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 12:49:32.682337
+434	27	14	4:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 14:01:34.116039
+452	38	14	3:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 17:26:46.596959
+459	24	14	2:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 18:28:29.957924
+477	25	14	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 20:47:29.491114
+507	36	14	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 06:28:23.591466
+531	3	14	3:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 07:31:38.439978
+541	31	14	3:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 09:15:26.767095
+551	23	14	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 11:06:36.621494
+561	32	14	3:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 14:54:05.875568
+563	30	14	3:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 16:24:17.244478
+574	12	14	2:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 17:57:39.460362
+577	33	14	3:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 18:02:31.22194
+497	37	16	2:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 22:19:01.288121
+520	36	16	1:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 06:31:26.101882
+542	31	16	2:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 09:16:18.665071
+545	16	16	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 10:19:29.04839
+555	10	16	0:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 12:25:18.7198
+598	3	16	2:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 20:51:29.771861
+602	14	16	3:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 21:08:45.794233
+607	23	16	2:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 21:45:40.076806
+610	11	16	2:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 21:48:50.854989
+641	33	16	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-16 00:06:05.95028
+1193	11	34	4:0	0	0	\N	2026-06-20 19:06:02.543927
+1194	11	35	4:0	0	0	\N	2026-06-20 19:06:12.746536
+699	14	21	3:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-16 17:58:32.764283
+736	39	21	5:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-17 06:34:06.249664
+740	17	21	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-17 06:39:06.632192
+745	21	21	5:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-17 07:42:15.148818
+765	32	21	4:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-17 10:59:45.201327
+777	31	21	3:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-17 12:20:58.378884
+798	33	21	3:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-17 15:54:20.537299
+644	18	22	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-16 08:30:27.457304
+654	19	22	4:3	3	0	{"base": 1, "high_score": 2, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 3, "grand_total": 3}	2026-06-16 09:41:18.49562
+757	29	28	2:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-17 08:17:29.644836
+399	29	15	0:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 09:21:04.501568
+406	4	15	0:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 09:35:39.186679
+410	18	15	1:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 10:02:04.813935
+429	9	15	0:3	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 12:49:38.448571
+435	27	15	1:3	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 14:02:49.360646
+460	24	15	0:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 18:28:41.707748
+479	25	15	1:3	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 20:48:50.434896
+486	8	15	1:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 21:01:02.308794
+489	37	15	1:3	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 22:10:22.513293
+509	36	15	1:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 06:28:30.850052
+534	28	15	0:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 08:03:12.033153
+535	38	15	1:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 08:17:10.68106
+552	23	15	0:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 11:08:18.550668
+564	30	15	0:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 16:24:27.297203
+578	33	15	1:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 18:02:56.057697
+579	12	15	0:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 18:10:43.246277
+581	31	15	0:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 19:09:51.710957
+582	39	15	0:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 19:25:45.667481
+597	3	15	0:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 20:51:22.262554
+599	32	15	0:3	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 20:57:46.701763
+601	14	15	0:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 21:08:13.354423
+1195	11	36	1:3	0	0	\N	2026-06-20 19:06:29.48642
+761	26	25	1:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-17 10:43:55.34697
+772	27	27	3:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-17 11:38:47.976467
+658	35	22	3:2	2	0	{"base": 1, "high_score": 1, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 2, "grand_total": 2}	2026-06-16 09:49:03.075418
+665	25	22	1:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-16 13:22:47.72081
+673	9	22	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-16 13:53:07.291209
+691	36	22	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-16 15:50:33.262293
+695	16	22	2:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-16 16:47:39.673722
+713	4	22	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-16 21:05:50.31946
+730	10	22	3:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-17 00:03:38.878728
+737	39	22	1:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-17 06:34:21.706193
+746	21	22	2:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-17 07:42:52.581595
+766	32	22	3:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-17 10:59:54.771595
+778	31	22	2:1	3	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 2, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 3, "grand_total": 3}	2026-06-17 12:21:50.069152
+792	23	22	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-17 15:18:40.989336
+651	29	24	0:4	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-16 08:55:47.200352
+656	19	24	2:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-16 09:41:37.960851
+660	35	24	1:4	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-16 09:49:26.917292
+667	25	24	0:2	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-16 13:23:39.918474
+675	9	24	0:2	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-16 13:53:25.361339
+693	36	24	0:2	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-16 15:50:57.18685
+701	11	24	1:3	4	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 3, "grand_total": 4}	2026-06-16 18:18:44.965029
+715	4	24	0:2	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-16 21:06:06.694885
+723	1	24	0:3	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-16 21:19:58.241023
+732	10	24	0:2	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-17 00:05:39.954019
+739	39	24	0:2	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-17 06:35:04.18511
+760	26	24	1:3	3	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 3, "grand_total": 3}	2026-06-17 10:42:35.689427
+771	27	24	0:2	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-17 11:38:22.409815
+780	14	24	1:3	4	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 3, "grand_total": 4}	2026-06-17 12:25:18.326746
+782	8	24	1:3	4	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 3, "grand_total": 4}	2026-06-17 12:54:28.614948
+785	16	24	0:2	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-17 13:11:30.335919
+802	28	24	0:3	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-17 16:30:52.340078
+805	3	24	0:2	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-17 16:52:23.13294
+814	37	24	0:2	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-17 18:03:13.669081
+824	17	24	0:3	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-17 18:54:32.29307
+835	31	24	0:2	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-17 20:23:45.310946
+837	38	24	1:2	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-17 20:50:40.487894
+844	30	24	0:3	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-17 21:46:07.61314
+853	12	24	0:2	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-17 22:07:39.252631
+858	32	24	0:3	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-17 22:16:23.315497
+865	33	24	0:3	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-17 22:39:07.188871
+863	2	30	2:4	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-17 22:30:45.060984
+868	18	30	0:2	3	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 2, "streak_len": 9, "match_total": 1, "grand_total": 3}	2026-06-18 00:17:26.934394
+874	10	30	1:3	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-18 01:06:29.343772
+883	21	30	1:2	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-18 02:04:55.959754
+887	26	30	1:3	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-18 05:39:37.861995
+891	19	30	1:3	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 6, "match_total": 1, "grand_total": 2}	2026-06-18 06:46:24.797114
+904	35	30	1:4	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 5, "match_total": 1, "grand_total": 2}	2026-06-18 08:22:59.813978
+919	8	30	1:3	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-18 11:55:24.355281
+932	25	30	0:2	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 5, "match_total": 1, "grand_total": 2}	2026-06-18 14:57:38.62365
+946	27	33	3:2	2	0	{"base": 1, "high_score": 1, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 2, "grand_total": 2}	2026-06-18 16:35:50.572296
+911	2	31	3:0	4	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 3, "grand_total": 4}	2026-06-18 09:34:27.829765
+876	29	30	0:3	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-18 01:07:09.406739
+921	8	32	3:1	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-18 11:58:22.590471
+923	22	32	2:0	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-18 12:22:27.067063
+727	29	25	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-16 22:56:37.317186
+741	19	25	1:1	4	0	{"base": 3, "high_score": 0, "underdog": 1, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 4, "grand_total": 4}	2026-06-17 07:22:57.824127
+752	1	25	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-17 08:06:09.359901
+758	11	25	2:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-17 08:17:43.043202
+767	22	25	2:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-17 11:13:03.516827
+774	27	25	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-17 11:39:08.525468
+783	8	25	1:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-17 12:57:02.482651
+786	16	25	2:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-17 13:11:40.817404
+809	24	25	1:1	5	0	{"base": 3, "high_score": 0, "underdog": 1, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 4, "match_total": 4, "grand_total": 5}	2026-06-17 17:17:37.025921
+815	37	25	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-17 18:03:24.866162
+825	17	25	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-17 18:54:45.355324
+830	25	25	1:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-17 19:04:52.760589
+838	38	25	3:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-17 20:50:56.216389
+845	30	25	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-17 21:46:59.71412
+856	12	25	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-17 22:13:53.845175
+869	10	25	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-18 01:05:34.283268
+878	21	25	1:1	4	0	{"base": 3, "high_score": 0, "underdog": 1, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 4, "grand_total": 4}	2026-06-18 02:01:41.719575
+894	14	25	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-18 07:46:24.942004
+898	39	25	2:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-18 08:06:33.164633
+899	35	25	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-18 08:21:12.619153
+913	32	25	2:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-18 11:46:54.049183
+925	33	25	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-18 13:29:20.728838
+926	3	25	2:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-18 14:54:07.583882
+935	28	25	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-18 14:59:36.891872
+908	39	27	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-18 08:31:09.72861
+910	39	29	2:0	4	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 4, "match_total": 3, "grand_total": 4}	2026-06-18 08:32:19.744777
+915	32	27	3:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-18 11:47:16.708069
+897	14	28	2:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-18 07:51:58.608446
+938	23	25	2:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-18 15:49:50.207616
+943	31	25	2:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	\N
+957	4	30	0:3	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 5, "match_total": 1, "grand_total": 2}	2026-06-18 18:24:22.94191
+953	4	26	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-18 18:23:45.806942
+954	4	27	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-18 18:23:54.036556
+967	31	27	3:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-18 20:36:51.878241
+970	12	27	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-18 20:51:09.402447
+971	12	28	1:0	4	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 3, "grand_total": 4}	2026-06-18 20:51:14.789087
+956	4	29	3:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 4, "match_total": 1, "grand_total": 2}	2026-06-18 18:24:14.399039
+963	11	29	3:1	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 4, "match_total": 1, "grand_total": 2}	2026-06-18 18:55:55.92616
+964	11	30	1:2	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 5, "match_total": 1, "grand_total": 2}	2026-06-18 18:56:32.534466
+992	16	30	1:2	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-19 06:26:41.705395
+1000	36	30	0:2	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 5, "match_total": 1, "grand_total": 2}	2026-06-19 06:31:08.269853
+1003	17	30	1:3	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-19 07:01:07.393893
+1048	14	30	0:2	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-19 17:24:29.855523
+1050	28	30	0:3	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 4, "match_total": 1, "grand_total": 2}	2026-06-19 17:25:38.476288
+1056	32	30	0:2	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-19 18:15:02.638325
+1058	31	30	0:2	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-19 18:17:51.574072
+1059	12	30	1:2	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 5, "match_total": 1, "grand_total": 2}	2026-06-19 19:27:52.540942
+1062	23	30	1:2	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 5, "match_total": 1, "grand_total": 2}	2026-06-19 20:29:51.712015
+1065	39	30	0:1	4	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 5, "match_total": 3, "grand_total": 4}	2026-06-19 20:32:29.844258
+1075	9	30	1:2	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-19 21:10:56.8887
+951	38	31	5:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 6, "match_total": 1, "grand_total": 2}	2026-06-18 18:15:03.793139
+1076	9	31	3:0	3	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 3, "grand_total": 3}	2026-06-19 21:11:02.546737
+1084	31	31	4:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-19 23:28:12.473996
+1114	17	40	1:3	0	0	\N	2026-06-20 09:17:36.230028
+1117	12	35	1:0	0	0	\N	2026-06-20 09:21:07.200068
+1130	23	34	3:1	0	0	\N	2026-06-20 13:40:32.881392
+1166	36	36	0:2	0	0	\N	2026-06-20 16:26:39.358639
+949	29	33	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-18 18:12:03.21711
+952	38	33	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-18 18:15:18.009455
+959	4	33	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-18 18:24:58.719862
+976	22	33	2:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-18 22:25:05.265755
+983	2	33	2:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-18 23:01:03.317538
+987	19	33	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-19 05:37:13.573944
+995	16	33	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-19 06:27:22.343654
+1129	23	33	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-20 13:40:27.559849
+968	28	27	3:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-18 20:50:38.987902
+1087	29	38	2:0	0	0	\N	2026-06-20 00:05:46.08845
+885	21	32	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-18 02:05:29.026793
+893	19	32	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-18 06:46:50.772266
+906	35	32	3:1	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-18 08:23:24.809346
+934	25	32	1:0	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-18 14:59:08.276622
+937	29	32	2:1	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-18 15:04:51.562684
+945	27	32	2:1	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-18 16:35:37.811151
+950	38	32	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-18 18:14:52.87277
+960	4	32	2:1	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-18 18:25:15.28527
+966	11	32	1:0	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-18 18:58:39.065652
+980	2	32	1:0	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-18 22:59:40.891745
+982	24	32	2:1	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-18 23:01:00.605916
+994	16	32	3:0	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-19 06:27:11.183546
+1002	36	32	2:1	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-19 06:41:09.247484
+1005	17	32	2:1	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-19 07:01:30.283031
+1020	37	32	3:1	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-19 07:14:59.025877
+1038	30	32	2:1	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-19 13:39:57.907885
+1054	14	32	3:1	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-19 17:28:06.890348
+1061	12	32	2:0	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-19 19:29:11.601725
+1064	23	32	2:1	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-19 20:31:25.752294
+1069	39	32	2:0	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-19 20:34:45.881882
+1077	9	32	2:0	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-19 21:11:08.558892
+1085	31	32	2:1	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-19 23:28:47.509348
+1086	28	32	2:1	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-19 23:32:13.489246
+1097	33	32	1:0	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-20 01:47:53.775781
+1109	18	39	2:0	0	0	\N	2026-06-20 08:11:15.556191
+1110	18	40	0:2	0	0	\N	2026-06-20 08:11:31.484862
+1112	17	38	2:1	0	0	\N	2026-06-20 09:17:06.073998
+1113	17	39	1:1	0	0	\N	2026-06-20 09:17:25.486733
+1125	4	34	4:0	0	0	\N	2026-06-20 12:19:15.056243
+1126	4	35	3:0	0	0	\N	2026-06-20 12:19:23.308886
+1127	4	36	0:2	0	0	\N	2026-06-20 12:19:30.412746
+1144	14	34	3:1	0	0	\N	2026-06-20 15:37:58.54185
+1147	25	37	3:0	0	0	\N	2026-06-20 15:48:15.027853
+1148	25	38	1:0	0	0	\N	2026-06-20 15:48:28.759786
+1149	25	39	3:0	0	0	\N	2026-06-20 15:48:42.122966
+1150	25	40	1:2	0	0	\N	2026-06-20 15:48:48.744235
+1155	22	39	3:1	0	0	\N	2026-06-20 15:58:00.534233
+1162	30	40	1:3	0	0	\N	2026-06-20 16:03:07.955574
+1165	36	35	3:0	0	0	\N	2026-06-20 16:23:02.432477
+1168	36	37	1:0	0	0	\N	2026-06-20 16:47:35.220509
+1006	17	33	3:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-19 07:01:36.783161
+1021	37	33	3:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-19 07:15:09.788224
+1025	18	33	3:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-19 07:23:13.918447
+1032	25	33	3:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-19 12:00:17.200216
+1039	30	33	3:2	2	0	{"base": 1, "high_score": 1, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 2, "grand_total": 2}	2026-06-19 13:41:23.397728
+979	24	30	0:1	5	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 2, "streak_len": 9, "match_total": 3, "grand_total": 5}	2026-06-18 22:59:17.569455
+1088	18	37	3:0	0	0	\N	2026-06-20 00:08:50.986252
+1089	18	38	2:1	0	0	\N	2026-06-20 00:09:36.565935
+973	18	32	3:1	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-18 21:07:40.658539
+977	22	34	4:1	0	0	\N	2026-06-18 22:25:14.208027
+978	22	35	1:1	0	0	\N	2026-06-18 22:26:24.246887
+1132	24	34	2:0	0	0	\N	2026-06-20 14:29:53.792106
+988	19	34	4:1	0	0	\N	2026-06-19 05:37:22.175196
+989	19	35	2:1	0	0	\N	2026-06-19 05:37:33.203592
+990	19	36	0:2	0	0	\N	2026-06-19 05:37:58.487241
+1133	24	35	1:0	0	0	\N	2026-06-20 14:30:11.199232
+997	16	35	4:0	0	0	\N	2026-06-19 06:27:49.009432
+1134	24	36	0:1	0	0	\N	2026-06-20 14:30:20.736108
+999	16	36	0:4	0	0	\N	2026-06-19 06:28:05.83649
+728	29	26	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-16 22:57:18.536086
+733	18	26	2:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 5, "match_total": 1, "grand_total": 2}	2026-06-17 06:20:35.313113
+742	19	26	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-17 07:25:14.101729
+751	1	26	1:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-17 08:05:59.769145
+762	26	26	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-17 10:44:05.936512
+768	22	26	1:2	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-17 11:13:15.473698
+775	27	26	3:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-17 11:40:23.707665
+787	16	26	1:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-17 13:11:49.343365
+789	8	26	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-17 13:19:42.574948
+795	36	26	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-17 15:28:46.555644
+816	37	26	1:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-17 18:03:38.978854
+826	17	26	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-17 18:54:54.09181
+831	25	26	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-17 19:05:01.085111
+839	38	26	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-17 20:51:10.819249
+846	30	26	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-17 21:48:02.083709
+859	2	26	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-17 22:30:10.559914
+870	10	26	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-18 01:05:46.797095
+879	21	26	3:1	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-18 02:03:44.2005
+900	35	26	3:2	2	0	{"base": 1, "high_score": 1, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 2, "grand_total": 2}	2026-06-18 08:21:37.33927
+907	39	26	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-18 08:30:25.395626
+914	32	26	0:2	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-18 11:47:05.726565
+927	3	26	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-18 14:54:16.597139
+936	28	26	2:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-18 14:59:56.900065
+939	23	26	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-18 15:55:59.281454
+947	31	26	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-18 17:46:00.191343
+948	12	26	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-18 17:57:36.266015
+941	23	28	2:1	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-18 16:00:30.691637
+1007	17	34	2:2	0	0	\N	2026-06-19 07:01:45.184025
+1009	17	36	1:3	0	0	\N	2026-06-19 07:02:02.62288
+1135	24	37	3:1	0	0	\N	2026-06-20 14:30:30.107225
+985	2	35	6:7	0	0	\N	2026-06-18 23:01:57.095748
+1137	33	34	2:1	0	0	\N	2026-06-20 15:20:55.666097
+996	16	34	2:2	0	0	\N	2026-06-19 06:27:27.640005
+961	33	26	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-18 18:28:35.250385
+1008	17	35	4:1	0	0	\N	2026-06-19 07:01:53.971695
+1014	3	29	3:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-19 07:09:14.41227
+1011	1	30	0:3	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-19 07:03:34.635266
+1015	3	30	0:1	3	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 3, "grand_total": 3}	2026-06-19 07:09:19.726285
+1012	1	31	4:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-19 07:03:43.686757
+1090	32	32	3:0	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-20 00:55:45.07771
+1118	29	39	2:0	0	0	\N	2026-06-20 09:46:22.228953
+1119	29	40	1:1	0	0	\N	2026-06-20 09:46:29.128043
+1121	35	34	5:1	0	0	\N	2026-06-20 10:44:39.401629
+1152	22	36	0:3	0	0	\N	2026-06-20 15:56:28.606703
+1153	22	37	4:1	0	0	\N	2026-06-20 15:56:40.104898
+1154	22	38	1:1	0	0	\N	2026-06-20 15:56:50.029144
+1160	30	38	3:1	0	0	\N	2026-06-20 16:02:09.446896
+1161	30	39	4:0	0	0	\N	2026-06-20 16:02:25.618852
+1164	36	34	2:0	0	0	\N	2026-06-20 16:21:08.795198
+1045	8	33	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-19 16:46:46.159611
+1067	21	33	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-19 20:34:23.907441
+1073	1	33	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-19 21:10:25.814777
+1078	9	33	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-19 21:11:19.528106
+1098	26	33	3:2	3	0	{"base": 1, "high_score": 1, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 5, "match_total": 2, "grand_total": 3}	2026-06-20 06:53:06.296145
+1106	3	33	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-20 07:16:48.735264
+1115	12	33	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-20 09:18:01.706391
+1120	35	33	4:2	3	0	{"base": 1, "high_score": 2, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 3, "grand_total": 3}	2026-06-20 10:44:33.634552
+1128	32	33	3:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-20 13:22:26.210891
+1131	24	33	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-20 14:29:29.009596
+1136	33	33	2:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-20 15:20:26.350984
+1143	14	33	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-20 15:35:29.715393
+1151	11	33	3:2	2	0	{"base": 1, "high_score": 1, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 2, "grand_total": 2}	2026-06-20 15:56:23.618986
+1163	36	33	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-20 16:17:58.610756
+1167	31	33	3:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-20 16:28:43.248229
+1177	28	33	3:2	2	0	{"base": 1, "high_score": 1, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 2, "grand_total": 2}	\N
+1196	12	36	0:2	0	0	\N	2026-06-20 19:19:37.609135
+1116	12	34	3:1	0	0	\N	2026-06-20 09:18:11.812951
+1197	32	35	2:0	0	0	\N	2026-06-20 19:30:07.96358
+1198	32	36	0:3	0	0	\N	2026-06-20 19:30:18.185704
+743	19	27	3:1	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-17 07:25:23.059196
+754	29	27	3:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-17 08:16:53.795322
+755	11	27	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-17 08:17:09.49159
+763	26	27	0:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-17 10:44:19.142345
+769	22	27	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-17 11:13:58.145918
+788	16	27	1:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-17 13:12:03.43785
+790	8	27	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-17 13:19:51.527305
+796	36	27	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-17 15:29:22.571516
+820	37	27	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-17 18:07:46.171521
+827	17	27	4:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-17 18:55:00.950988
+832	25	27	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-17 19:05:06.941631
+840	38	27	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-17 20:51:25.507584
+847	30	27	3:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-17 21:48:35.060922
+871	10	27	3:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-18 01:05:56.739325
+880	21	27	2:1	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 4, "match_total": 1, "grand_total": 2}	2026-06-18 02:04:07.888435
+896	14	27	1:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-18 07:51:08.450533
+901	35	27	4:1	2	0	{"base": 1, "high_score": 1, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 2, "grand_total": 2}	2026-06-18 08:22:12.861196
+928	3	27	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-18 14:54:25.274561
+940	23	27	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-18 15:56:36.227181
+975	33	27	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-18 21:26:06.869077
+735	18	28	2:1	3	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 2, "streak_len": 7, "match_total": 1, "grand_total": 3}	2026-06-17 06:21:22.37863
+744	19	28	3:2	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 4, "match_total": 1, "grand_total": 2}	2026-06-17 07:25:35.670873
+753	11	28	2:1	3	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 1, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 2, "grand_total": 3}	2026-06-17 08:16:51.09012
+770	22	28	2:3	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-17 11:14:11.815018
+797	36	28	2:1	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-17 15:29:55.09165
+812	24	28	2:1	3	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 2, "streak_len": 7, "match_total": 1, "grand_total": 3}	2026-06-17 17:18:28.510062
+819	37	28	1:0	4	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 3, "grand_total": 4}	2026-06-17 18:07:40.18241
+828	17	28	2:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-17 18:55:09.926988
+841	38	28	2:1	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-17 20:51:35.208005
+872	10	28	1:3	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-18 01:06:04.609004
+881	21	28	1:3	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-18 02:04:26.168469
+902	35	28	2:1	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-18 08:22:28.909221
+909	39	28	2:1	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-18 08:31:43.759948
+916	32	28	2:3	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-18 11:47:27.881065
+917	8	28	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-18 11:54:12.965437
+1091	27	34	3:0	0	0	\N	2026-06-20 01:00:22.915654
+1092	27	35	3:1	0	0	\N	2026-06-20 01:00:32.220011
+1093	27	36	0:2	0	0	\N	2026-06-20 01:00:41.920564
+929	3	28	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-18 14:54:38.126193
+930	25	28	2:1	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-18 14:55:44.87055
+955	4	28	2:1	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-18 18:24:02.334504
+969	28	28	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-18 20:50:46.114958
+974	33	28	2:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-18 21:09:38.021449
+986	31	28	2:3	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-18 23:15:56.085785
+1023	37	35	3:0	0	0	\N	2026-06-19 07:15:39.497436
+1024	37	36	0:2	0	0	\N	2026-06-19 07:15:57.481993
+1199	31	34	2:1	0	0	\N	\N
+1026	18	34	2:0	0	0	\N	2026-06-19 07:24:13.350653
+1027	18	35	3:0	0	0	\N	2026-06-19 07:24:33.164496
+1028	18	36	0:3	0	0	\N	2026-06-19 07:25:13.324615
+1122	35	35	3:0	0	0	\N	2026-06-20 10:44:50.463079
+1029	29	34	3:2	0	0	\N	2026-06-19 07:55:02.715678
+1030	29	35	3:0	0	0	\N	2026-06-19 07:55:21.964252
+1031	29	36	1:3	0	0	\N	2026-06-19 07:55:41.606802
+1034	25	35	2:0	0	0	\N	2026-06-19 12:01:28.972866
+1035	25	36	0:2	0	0	\N	2026-06-19 12:01:36.722067
+1033	25	34	2:0	0	0	\N	2026-06-19 12:01:20.018899
+1040	30	34	3:1	0	0	\N	2026-06-19 13:41:37.809893
+1013	1	32	2:0	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-19 07:04:06.757777
+1041	2	36	6:7	0	0	\N	2026-06-19 14:45:01.207728
+1043	8	35	2:0	0	0	\N	2026-06-19 16:39:44.279122
+1044	8	36	0:3	0	0	\N	2026-06-19 16:39:56.648788
+1018	37	30	0:2	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 5, "match_total": 1, "grand_total": 2}	2026-06-19 07:14:43.258068
+1047	33	30	1:3	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-19 17:10:09.511667
+1094	27	37	4:1	0	0	\N	2026-06-20 01:00:50.086382
+1095	27	38	4:0	0	0	\N	2026-06-20 01:00:57.524922
+1096	27	39	2:0	0	0	\N	2026-06-20 01:01:17.815666
+1004	17	31	4:0	3	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 1, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 2, "grand_total": 3}	2026-06-19 07:01:16.391214
+1017	3	32	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-19 07:09:32.893364
+1068	21	34	5:1	0	0	\N	2026-06-19 20:34:44.951734
+1070	21	35	1:2	0	0	\N	2026-06-19 20:35:14.662129
+1071	21	36	1:3	0	0	\N	2026-06-19 20:35:33.477486
+1072	21	37	1:1	0	0	\N	2026-06-19 20:35:51.014474
+813	22	29	1:2	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-17 17:57:08.63461
+818	37	29	2:1	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 4, "match_total": 1, "grand_total": 2}	2026-06-17 18:07:30.296004
+829	17	29	2:0	3	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 3, "grand_total": 3}	2026-06-17 18:55:16.176102
+842	38	29	3:2	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 4, "match_total": 1, "grand_total": 2}	2026-06-17 20:51:43.703923
+848	27	29	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-17 21:49:00.877011
+862	2	29	4:2	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-17 22:30:36.759138
+866	18	29	2:1	3	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 2, "streak_len": 8, "match_total": 1, "grand_total": 3}	2026-06-18 00:17:07.661195
+873	10	29	3:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-18 01:06:15.330021
+890	19	29	3:1	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 5, "match_total": 1, "grand_total": 2}	2026-06-18 06:46:18.011926
+903	35	29	2:0	4	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 4, "match_total": 3, "grand_total": 4}	2026-06-18 08:22:46.714594
+918	8	29	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-18 11:55:10.161586
+1010	1	29	0:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-19 07:03:27.26685
+1036	23	29	2:1	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 4, "match_total": 1, "grand_total": 2}	2026-06-19 13:19:45.567017
+1123	35	36	0:2	0	0	\N	2026-06-20 10:44:59.528458
+1124	35	37	4:1	0	0	\N	2026-06-20 10:45:08.077306
+984	2	34	3:0	0	0	\N	2026-06-18 23:01:49.771245
+1042	8	34	2:0	0	0	\N	2026-06-19 16:39:29.120283
+1145	14	35	3:0	0	0	\N	2026-06-20 15:38:54.443814
+1157	30	35	4:1	0	0	\N	2026-06-20 16:00:35.469173
+1158	30	36	0:2	0	0	\N	2026-06-20 16:00:56.928028
+1159	30	37	4:0	0	0	\N	2026-06-20 16:01:45.939095
+1022	37	34	3:0	0	0	\N	2026-06-19 07:15:28.209846
+924	24	29	3:1	3	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 2, "streak_len": 8, "match_total": 1, "grand_total": 3}	2026-06-18 13:01:27.790679
+931	25	29	2:1	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 4, "match_total": 1, "grand_total": 2}	2026-06-18 14:57:19.82935
+972	12	29	3:1	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 4, "match_total": 1, "grand_total": 2}	2026-06-18 20:55:53.542716
+991	16	29	3:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-19 06:26:23.948708
+998	36	29	2:1	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 4, "match_total": 1, "grand_total": 2}	2026-06-19 06:27:56.927163
+1046	33	29	3:2	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-19 17:09:50.162162
+1049	28	29	3:1	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-19 17:25:26.358036
+1052	14	29	1:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-19 17:26:22.822742
+1055	32	29	3:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-19 18:14:38.430673
+1057	31	29	3:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-19 18:17:09.819176
+1099	26	34	4:1	0	0	\N	2026-06-20 06:53:24.59494
+1100	26	35	1:2	0	0	\N	2026-06-20 06:53:41.524954
+1101	26	36	1:1	0	0	\N	2026-06-20 06:54:02.069924
+1102	26	37	4:1	0	0	\N	2026-06-20 06:54:16.664471
+1103	26	38	0:0	0	0	\N	2026-06-20 06:54:29.185224
+1104	26	39	3:1	0	0	\N	2026-06-20 06:54:45.500626
+1105	26	40	2:3	0	0	\N	2026-06-20 06:55:05.09569
+877	29	31	5:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-18 01:07:24.121244
+884	21	31	4:1	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-18 02:05:19.846548
+888	26	31	5:2	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-18 06:02:13.560294
+892	19	31	4:1	3	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 2, "streak_len": 7, "match_total": 1, "grand_total": 3}	2026-06-18 06:46:36.760388
+905	35	31	5:1	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 6, "match_total": 1, "grand_total": 2}	2026-06-18 08:23:14.530229
+912	18	31	5:0	4	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 3, "streak_len": 10, "match_total": 1, "grand_total": 4}	2026-06-18 09:52:53.858099
+920	8	31	5:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-18 11:58:03.44798
+922	22	31	4:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-18 12:22:03.467072
+933	25	31	6:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 6, "match_total": 1, "grand_total": 2}	2026-06-18 14:57:52.220225
+944	27	31	5:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-18 16:35:30.540671
+958	4	31	3:1	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 6, "match_total": 1, "grand_total": 2}	2026-06-18 18:24:29.199411
+965	11	31	4:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 6, "match_total": 1, "grand_total": 2}	2026-06-18 18:57:59.331806
+981	24	31	3:0	6	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 3, "streak_len": 10, "match_total": 3, "grand_total": 6}	2026-06-18 23:00:03.528302
+993	16	31	4:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-19 06:26:49.250322
+1001	36	31	5:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 6, "match_total": 1, "grand_total": 2}	2026-06-19 06:38:54.167694
+1016	3	31	3:0	4	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 3, "grand_total": 4}	2026-06-19 07:09:26.797023
+1019	37	31	6:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 6, "match_total": 1, "grand_total": 2}	2026-06-19 07:14:49.819726
+1037	30	31	4:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-19 13:38:48.977205
+1051	28	31	3:0	4	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 5, "match_total": 3, "grand_total": 4}	2026-06-19 17:25:46.910675
+1053	14	31	4:1	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-19 17:27:28.513262
+1060	12	31	5:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 6, "match_total": 1, "grand_total": 2}	2026-06-19 19:29:02.358361
+1063	23	31	5:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 6, "match_total": 1, "grand_total": 2}	2026-06-19 20:30:03.57628
+1066	39	31	4:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 6, "match_total": 1, "grand_total": 2}	2026-06-19 20:33:42.085141
+1138	33	35	3:2	0	0	\N	2026-06-20 15:21:42.669691
+1139	33	36	0:4	0	0	\N	2026-06-20 15:21:56.632496
+\.
+
+
+--
+-- Name: matches_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.matches_id_seq', 72, true);
+
+
+--
+-- Name: players_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.players_id_seq', 39, true);
+
+
+--
+-- Name: user_picks_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.user_picks_id_seq', 1199, true);
+
+
+--
+-- Name: matches matches_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.matches
+    ADD CONSTRAINT matches_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: players players_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.players
+    ADD CONSTRAINT players_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: user_picks user_picks_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.user_picks
+    ADD CONSTRAINT user_picks_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: ix_matches_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX ix_matches_id ON public.matches USING btree (id);
+
+
+--
+-- Name: ix_players_email; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX ix_players_email ON public.players USING btree (email);
+
+
+--
+-- Name: ix_players_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX ix_players_id ON public.players USING btree (id);
+
+
+--
+-- Name: ix_players_username; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX ix_players_username ON public.players USING btree (username);
+
+
+--
+-- Name: ix_user_picks_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX ix_user_picks_id ON public.user_picks USING btree (id);
+
+
+--
+-- Name: user_picks user_picks_match_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.user_picks
+    ADD CONSTRAINT user_picks_match_id_fkey FOREIGN KEY (match_id) REFERENCES public.matches(id);
+
+
+--
+-- Name: user_picks user_picks_player_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.user_picks
+    ADD CONSTRAINT user_picks_player_id_fkey FOREIGN KEY (player_id) REFERENCES public.players(id);
+
+
+--
+-- PostgreSQL database dump complete
+--
+
+\unrestrict 00aoIyEmYmyAIB4kDMUJ6GkSMESdKzx4wdtj1S6LBFfjh8mefgP8DEILjw7xvm2
+

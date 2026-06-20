@@ -223,6 +223,47 @@
         .star-stat { background: var(--bg-surface); padding: 11px 8px; display: flex; flex-direction: column; gap: 1px; align-items: center; text-align: center; }
         .star-stat .v { font-family: var(--font-display, inherit); font-weight: 800; font-size: 17px; line-height: 1; }
         .star-stat .l { font-size: 9.5px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.02em; }
+
+        /* ===== Karty drużyn (spójne ze stylem gwiazd) ===== */
+        .team-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: 14px;
+            overflow: hidden;
+            cursor: pointer;
+            text-align: left;
+            transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+        }
+        .team-card:hover { transform: translateY(-3px); border-color: var(--border-soft); box-shadow: 0 6px 18px rgba(0,0,0,0.25); }
+        .team-flag-wrap { position: relative; width: 100%; aspect-ratio: 3 / 2; overflow: hidden; background: var(--bg-elevated); }
+        .team-flag-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.18; filter: blur(3px); transform: scale(1.12); }
+        .team-flag-main { position: relative; z-index: 1; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+        .team-flag-main img { width: 52px; height: 37px; object-fit: cover; border-radius: 5px; box-shadow: 0 2px 8px rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.15); }
+        .team-flag-overlay { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; padding: 9px 11px 8px; background: linear-gradient(to top, rgba(11,13,17,0.95) 10%, rgba(11,13,17,0.4) 60%, transparent); }
+        .team-name-c { font-weight: 700; font-size: 13px; color: #fff; line-height: 1.1; }
+        .team-group-c { font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); margin-top: 2px; font-weight: 600; }
+        .team-stats-c { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; background: var(--border-subtle); }
+        .team-stat-c { background: var(--bg-surface); padding: 8px 4px; text-align: center; }
+        .team-stat-c .v { font-family: var(--font-display, inherit); font-weight: 800; font-size: 14px; line-height: 1; }
+        .team-stat-c .l { font-size: 8px; text-transform: uppercase; color: var(--text-faint); letter-spacing: 0.02em; margin-top: 2px; }
+        .team-ud-badge { position: absolute; top: 8px; right: 8px; z-index: 3; font-size: 8px; font-weight: 700; padding: 2px 6px; border-radius: 999px; background: var(--danger-soft); color: var(--danger); border: 1px solid rgba(248,113,113,0.3); text-transform: uppercase; letter-spacing: 0.03em; }
+        .group-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-faint); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+        .group-label::after { content: ''; flex: 1; height: 1px; background: var(--border-subtle); }
+
+        /* ===== Podgląd drużyny (karta szczegółów) ===== */
+        .td-section-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-faint); margin-bottom: 7px; display: flex; align-items: center; gap: 5px; }
+        .td-stat-box { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 9px 2px; border-radius: 9px; background: var(--bg-elevated); }
+        .td-stat-box .v { font-family: var(--font-display, inherit); font-weight: 800; font-size: 15px; line-height: 1; }
+        .td-stat-box .l { font-size: 7.5px; text-transform: uppercase; color: var(--text-faint); letter-spacing: 0.02em; }
+        .td-info-box { padding: 11px 12px; border-radius: 11px; background: var(--bg-elevated); }
+        .td-squad-section { padding: 11px; border-radius: 12px; background: var(--bg-surface); border: 1px solid var(--border-subtle); }
+        .td-squad-head { display: flex; align-items: center; gap: 7px; margin-bottom: 9px; padding-bottom: 7px; border-bottom: 1px solid var(--border-subtle); }
+        .td-squad-head .pos { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; }
+        .td-squad-head .cnt { margin-left: auto; font-size: 9px; font-family: ui-monospace, monospace; font-weight: 700; padding: 1px 7px; border-radius: 999px; background: var(--bg-elevated); color: var(--text-faint); }
+        .td-player { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 5px 8px; border-radius: 7px; transition: background 0.15s ease; }
+        .td-player:hover { background: var(--bg-elevated); }
+        .td-player .pname { font-size: 11.5px; font-weight: 500; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .td-player .pclub { font-size: 9px; color: var(--text-faint); flex-shrink: 0; max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .match-subtab-btn {
             flex: 1 1 0;
             min-width: 0;
@@ -1232,52 +1273,61 @@
             <div id="teamDetailCard" class="rounded-xl overflow-hidden flex flex-col md:flex-row shadow-2xl" style="background: var(--bg-surface); border: 1px solid var(--border-soft);">
                 
                 <div class="w-full md:w-[32%] flex flex-col border-b md:border-b-0 md:border-r" style="border-color: var(--border-subtle);">
-                    <div class="relative h-24 flex items-center justify-center overflow-hidden flex-shrink-0" style="background: var(--bg-elevated);">
-                        <img id="td-flag-bg" src="" alt="" class="absolute inset-0 w-full h-full object-cover opacity-10 scale-110" style="filter:blur(4px);">
-                        <div class="relative z-10 flex items-center gap-3 mt-2">
-                            <img id="td-flag" src="" alt="" class="w-12 h-9 object-cover rounded shadow" style="border: 1px solid var(--border-soft);">
+                    <div class="relative h-32 flex items-end overflow-hidden flex-shrink-0" style="background: var(--bg-elevated);">
+                        <img id="td-flag-bg" src="" alt="" class="absolute inset-0 w-full h-full object-cover opacity-20 scale-110" style="filter:blur(5px);">
+                        <div class="absolute inset-0" style="background: linear-gradient(to top, rgba(11,13,17,0.96) 8%, rgba(11,13,17,0.45) 55%, transparent 100%);"></div>
+                        <div class="relative z-10 flex items-center gap-3 p-4 w-full">
+                            <img id="td-flag" src="" alt="" class="w-14 h-10 object-cover rounded-md shadow-lg" style="border: 1px solid rgba(255,255,255,0.18);">
                             <div>
-                                <p id="td-name" class="font-display font-bold text-xl tracking-tight leading-none text-white"></p>
-                                <p id="td-group" class="text-[10px] font-bold uppercase tracking-widest mt-1" style="color: var(--accent);"></p>
+                                <p id="td-name" class="font-display font-bold text-2xl tracking-tight leading-none text-white"></p>
+                                <p id="td-group" class="text-[10px] font-bold uppercase tracking-widest mt-1.5" style="color: var(--accent);"></p>
                             </div>
                         </div>
                     </div>
 
-                    <div class="p-4 flex-1 space-y-3 text-xs">
-                        <div class="flex items-center justify-between p-2.5 rounded-lg" style="background: linear-gradient(135deg, rgba(251,191,36,0.1), rgba(251,191,36,0.02)); border: 1px solid rgba(251,191,36,0.15);">
-                            <span class="text-[11px] font-bold uppercase tracking-wider shadow-sm" style="color: var(--gold);">Ranking FIFA:</span>
-                            <span class="text-xl font-display font-bold text-gold" id="td-fifa-rank">-</span>
+                    <div class="p-4 flex-1 space-y-4 text-xs">
+                        <div class="flex items-center gap-3 p-3 rounded-xl" style="background: linear-gradient(135deg, rgba(251,191,36,0.12), rgba(251,191,36,0.02)); border: 1px solid rgba(251,191,36,0.2);">
+                            <div class="flex items-center justify-center w-10 h-10 rounded-lg flex-shrink-0" style="background: rgba(251,191,36,0.15);">
+                                <span class="text-lg">🏆</span>
+                            </div>
+                            <div>
+                                <p class="text-[9px] font-bold uppercase tracking-wider" style="color: var(--text-faint);">Ranking FIFA</p>
+                                <p class="font-display font-bold text-2xl leading-none mt-0.5" style="color: var(--gold);" id="td-fifa-rank">-</p>
+                            </div>
                         </div>
-                        <div class="grid grid-cols-5 gap-1 text-center bg-white/[0.01] p-1.5 rounded-lg border border-white/5">
-                            <div><p class="font-bold" id="td-p">0</p><p class="text-[8px] uppercase text-white/40">Mecze</p></div>
-                            <div><p class="font-bold text-success" id="td-w">0</p><p class="text-[8px] uppercase text-white/40">Wyg</p></div>
-                            <div><p class="font-bold text-info" id="td-d">0</p><p class="text-[8px] uppercase text-white/40">Rem</p></div>
-                            <div><p class="font-bold text-danger" id="td-l">0</p><p class="text-[8px] uppercase text-white/40">Por</p></div>
-                            <div><p class="font-bold text-gold" id="td-g">0</p><p class="text-[8px] uppercase text-white/40">Gole</p></div>
+
+                        <div>
+                            <p class="td-section-label">📊 Bilans historyczny</p>
+                            <div class="grid grid-cols-5 gap-1.5">
+                                <div class="td-stat-box"><span class="v" id="td-p">0</span><span class="l">Mecze</span></div>
+                                <div class="td-stat-box"><span class="v" style="color: var(--success);" id="td-w">0</span><span class="l">Wyg</span></div>
+                                <div class="td-stat-box"><span class="v" style="color: var(--info);" id="td-d">0</span><span class="l">Rem</span></div>
+                                <div class="td-stat-box"><span class="v" style="color: var(--danger);" id="td-l">0</span><span class="l">Por</span></div>
+                                <div class="td-stat-box"><span class="v" style="color: var(--gold);" id="td-g">0</span><span class="l">Gole</span></div>
+                            </div>
                         </div>
-                        <div class="p-2.5 rounded-lg" style="background: var(--bg-elevated);">
-                            <p class="text-[9px] font-medium uppercase tracking-wider mb-0.5 text-white/40">Styl gry</p>
-                            <p class="text-[11px] leading-relaxed text-white/70" id="td-style"></p>
+
+                        <div class="td-info-box">
+                            <p class="td-section-label">⚙️ Styl gry</p>
+                            <p class="text-[11px] leading-relaxed" style="color: var(--text-muted);" id="td-style"></p>
                         </div>
-                        <div class="p-2.5 rounded-lg" style="background: var(--bg-elevated);">
-                            <p class="text-[9px] font-medium uppercase tracking-wider mb-0.5 text-white/40">Sparingi przed MŚ</p>
-                            <div id="td-friendlies" class="text-[11px] text-white/70"></div>
+
+                        <div class="td-info-box">
+                            <p class="td-section-label">⚽ Sparingi przed MŚ</p>
+                            <div id="td-friendlies" class="text-[11px]" style="color: var(--text-muted);"></div>
                         </div>
-                        <div class="flex items-center justify-between bg-white/[0.02] p-2 rounded-lg border border-white/5">
-                            <span class="text-[10px] uppercase tracking-wider text-white/40">Szansa na tytuł:</span>
-                            <span class="font-display font-bold text-gold text-sm" id="td-odds-text">0%</span>
-                            <div class="hidden"><div id="td-odds-bar"></div></div>
-                        </div>
-                        <div class="p-2.5 rounded-lg text-[11px]" style="background: var(--accent-soft); border: 1px solid rgba(232,138,91,0.15);">
-                            <p id="td-funfact" style="color: var(--text-muted);"></p>
+
+                        <div class="p-3 rounded-xl" style="background: var(--accent-soft); border: 1px solid rgba(232,138,91,0.2);">
+                            <p class="td-section-label" style="color: var(--accent);">💡 Ciekawostka</p>
+                            <p class="text-[11px] leading-relaxed" style="color: var(--text-muted);" id="td-funfact"></p>
                         </div>
                     </div>
                 </div>
 
                 <div class="w-full md:w-[68%] relative p-4 md:p-5" style="background: var(--bg-base);">
-                    <div class="flex items-center justify-between border-b pb-2 mb-4" style="border-color: var(--border-subtle);">
-                        <h4 class="font-display font-bold text-lg text-white leading-none">Oficjalny Skład na MŚ 2026</h4>
-                        <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-white/5 text-white/50">26 ZAWODNIKÓW</span>
+                    <div class="flex items-center justify-between mb-4">
+                        <h4 class="font-display font-bold text-lg text-white leading-none">Kadra na MŚ 2026</h4>
+                        <span class="text-[10px] font-mono font-bold px-2.5 py-1 rounded-md" style="background: var(--bg-surface); color: var(--text-muted); border: 1px solid var(--border-subtle);">26 zawodników</span>
                     </div>
                     <div id="td-squad-container"></div>
                 </div>
@@ -1340,10 +1390,6 @@
                                     <div class="mt-3 text-left">
                                         <p class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-faint);">Styl gry</p>
                                         <p id="fav-style" class="text-xs mt-1" style="color: var(--text-muted);"></p>
-                                    </div>
-                                    <div class="mt-3">
-                                        <div class="flex justify-between text-[10px] mb-1"><span>Szansa na tytuł</span><span id="fav-odds-text" class="font-bold" style="color: var(--gold);">0%</span></div>
-                                        <div class="h-1.5 rounded-full overflow-hidden" style="background: var(--bg-elevated);"><div id="fav-odds-bar" class="h-full rounded-full transition-all duration-500" style="width:0%; background: linear-gradient(90deg, var(--success), var(--gold));"></div></div>
                                     </div>
                                 </div>
                             </div>
@@ -1802,28 +1848,32 @@ async function loadHistory() {
                 if (!teams.length) return;
                 html += `
                 <div>
-                    <p class="text-[10px] font-medium uppercase tracking-[0.15em] mb-3" style="color: var(--text-faint);">
-                        Grupa ${group}
-                    </p>
-                    <div class="grid grid-cols-4 gap-2.5">
+                    <p class="group-label">Grupa ${group}</p>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                         ${teams.map(name => {
+                            const d = TEAM_DATA[name] || {};
                             const code = FLAG_CODES[name];
                             const flagUrl = code ? `${FLAG_BASE_URL}${code}.svg` : '';
                             const isUD = UNDERDOG_TEAMS_SET.has(name);
                             return `
-                            <button onclick="openTeamDetail('${name.replace(/'/g, "\\'")}')"
-                                class="group relative rounded-xl overflow-hidden transition-all duration-200 hover:scale-[1.03]"
-                                style="aspect-ratio: 4/3; background: var(--bg-elevated); border: 1px solid var(--border-subtle);"
-                                onmouseover="this.style.borderColor='var(--border-soft)'"
-                                onmouseout="this.style.borderColor='var(--border-subtle)'">
-                                ${flagUrl ? `<img src="${flagUrl}" alt="${name}" class="absolute inset-0 w-full h-full object-cover opacity-15 group-hover:opacity-25 transition scale-110" style="filter:blur(2px);">` : ''}
-                                <div class="absolute inset-0 bg-gradient-to-t from-[var(--bg-elevated)] via-transparent to-transparent"></div>
-                                <div class="relative z-10 h-full flex flex-col items-center justify-center gap-1 p-2">
-                                    ${flagUrl ? `<img src="${flagUrl}" alt="${name}" class="w-9 h-6 object-cover rounded">` : '<div class="w-9 h-6 rounded" style="background: var(--bg-surface);"></div>'}
-                                    <p class="font-medium text-[10px] text-center leading-tight mt-1">${name}</p>
-                                    ${isUD ? `<span class="text-[9px] font-semibold" style="color: var(--danger);">underdog</span>` : ''}
+                            <div class="team-card" onclick="openTeamDetail('${name.replace(/'/g, "\\'")}')">
+                                <div class="team-flag-wrap">
+                                    ${flagUrl ? `<img src="${flagUrl}" alt="" class="team-flag-bg">` : ''}
+                                    ${isUD ? `<span class="team-ud-badge">underdog</span>` : ''}
+                                    <div class="team-flag-main">
+                                        ${flagUrl ? `<img src="${flagUrl}" alt="${name}">` : '<div style="width:52px;height:37px;border-radius:5px;background:var(--bg-surface);"></div>'}
+                                    </div>
+                                    <div class="team-flag-overlay">
+                                        <p class="team-name-c">${name}</p>
+                                        <p class="team-group-c">Grupa ${group}</p>
+                                    </div>
                                 </div>
-                            </button>`;
+                                <div class="team-stats-c">
+                                    <div class="team-stat-c"><div class="v" style="color: var(--gold);">${d.fifa_rank ?? '-'}</div><div class="l">🏆 FIFA</div></div>
+                                    <div class="team-stat-c"><div class="v">${d.p ?? '-'}</div><div class="l">⚽ mecze</div></div>
+                                    <div class="team-stat-c"><div class="v" style="color: var(--success);">${d.g ?? '-'}</div><div class="l">🥅 gole</div></div>
+                                </div>
+                            </div>`;
                         }).join('')}
                     </div>
                 </div>`;
@@ -1850,7 +1900,6 @@ function openTeamDetail(name) {
     document.getElementById('td-g').textContent = d.g;
     document.getElementById('td-style').textContent = d.style;
     document.getElementById('td-funfact').textContent = d.fun_fact;
-    document.getElementById('td-odds-text').textContent = d.odds + '%';
     document.getElementById('td-fifa-rank').textContent = d.fifa_rank;
 
     const friendliesDiv = document.getElementById('td-friendlies');
@@ -1866,9 +1915,6 @@ function openTeamDetail(name) {
         friendliesDiv.innerHTML = '<span style="color: var(--text-faint); font-style:italic;">Brak danych</span>';
     }
 
-   document.getElementById('td-odds-bar').style.width = '0%';
-    setTimeout(() => { document.getElementById('td-odds-bar').style.width = d.odds + '%'; }, 80);
-
     const squadContainer = document.getElementById('td-squad-container');
     const squad = SQUADS[name];
 
@@ -1878,7 +1924,7 @@ function openTeamDetail(name) {
         
         const formatSection = (title, players, icon, colorHex) => {
             if (!players || players.length === 0) return '';
-            
+
             const playerRows = players.map(p => {
                 const match = p.match(/(.+?)\s*\((.+?)\)/);
                 let playerName = p;
@@ -1887,34 +1933,31 @@ function openTeamDetail(name) {
                     playerName = match[1];
                     club = match[2];
                 }
-                
+
                 return `
-                    <div class="flex items-center justify-between py-0.5 px-1.5 rounded bg-white/[0.01] gap-2 overflow-hidden" 
-                         style="border: 1px solid rgba(255,255,255,0.03); border-left: 2px solid ${colorHex};">
-                        <span class="font-medium text-[11px] text-white/80 truncate min-w-0 flex-1">${playerName}</span>
-                        ${club ? `<span class="text-[9px] text-white/30 truncate flex-shrink-0 text-right max-w-[75px]">${club.split(' ')[0]}</span>` : ''}
+                    <div class="td-player">
+                        <span class="pname">${playerName}</span>
+                        ${club ? `<span class="pclub">${club.split(' ')[0]}</span>` : ''}
                     </div>
                 `;
             }).join('');
 
             return `
-                <div class="p-2.5 rounded-xl bg-white/[0.01]" style="border: 1px solid var(--border-subtle);">
-                    <div class="flex items-center gap-1.5 mb-1.5 border-b pb-1" style="border-color: rgba(255,255,255,0.04);">
-                        <span class="text-xs">${icon}</span>
-                        <span class="text-[10px] font-bold uppercase tracking-widest" style="color: ${colorHex};">${title}</span>
-                        <span class="text-[9px] font-mono ml-auto text-white/30">${players.length}</span>
+                <div class="td-squad-section" style="border-top: 2px solid ${colorHex};">
+                    <div class="td-squad-head">
+                        <span style="font-size:13px;">${icon}</span>
+                        <span class="pos" style="color: ${colorHex};">${title}</span>
+                        <span class="cnt">${players.length}</span>
                     </div>
-                    <div class="grid grid-cols-1 gap-0.5">
-                        ${playerRows}
-                    </div>
+                    <div>${playerRows}</div>
                 </div>
             `;
         };
 
-        squadContainer.innerHTML += formatSection('Bramkarze', squad["Bramkarze"], '🧤', '#fbbf24'); 
-        squadContainer.innerHTML += formatSection('Napastnicy', squad["Napastnicy"], '🎯', '#e88a5b'); 
-        squadContainer.innerHTML += formatSection('Obrońcy', squad["Obrońcy"], '🛡️', '#7dd3fc');    
-        squadContainer.innerHTML += formatSection('Pomocnicy', squad["Pomocnicy"], '👟', '#4ade80');  
+        squadContainer.innerHTML += formatSection('Bramkarze', squad["Bramkarze"], '🧤', '#fbbf24');
+        squadContainer.innerHTML += formatSection('Obrońcy', squad["Obrońcy"], '🛡️', '#7dd3fc');
+        squadContainer.innerHTML += formatSection('Pomocnicy', squad["Pomocnicy"], '👟', '#4ade80');
+        squadContainer.innerHTML += formatSection('Napastnicy', squad["Napastnicy"], '🎯', '#e88a5b');
     } else {
         squadContainer.className = "";
         squadContainer.innerHTML = `
@@ -2285,11 +2328,7 @@ const TEAM_DATA = {
             document.getElementById('fav-stat-d').textContent = d.d;
             document.getElementById('fav-stat-l').textContent = d.l;
             document.getElementById('fav-style').textContent = d.style;
-            document.getElementById('fav-odds-text').textContent = d.odds + '%';
             document.getElementById('fav-fifa-rank').textContent = `Ranking FIFA: ${d.fifa_rank}`;
-            setTimeout(() => {
-                document.getElementById('fav-odds-bar').style.width = d.odds + '%';
-            }, 50);
 
             const card = document.getElementById('favTeamCard');
             card.style.opacity = '0';
