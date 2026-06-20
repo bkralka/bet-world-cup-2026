@@ -516,6 +516,58 @@ def seed_database(db: Session = Depends(get_db)):
     db.commit()
     return {"status": "ok", "matches_added": matches_added}
 
+@app.get("/sw.js")
+def service_worker():
+    """Service Worker — serwowany z roota, by objąć całą aplikację (scope '/')."""
+    sw_code = """
+const CACHE = 'bwc-cache-v1';
+const OFFLINE_URL = '/static/offline.html';
+const PRECACHE = ['/static/offline.html', '/static/icon-192.png'];
+
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE).then((c) => c.addAll(PRECACHE)).then(() => self.skipWaiting())
+  );
+});
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((keys) => Promise.all(
+      keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))
+    )).then(() => self.clients.claim())
+  );
+});
+
+self.addEventListener('fetch', (event) => {
+  const req = event.request;
+  if (req.method !== 'GET') return;
+
+  // Nawigacja (HTML): najpierw sieć, w razie braku — strona offline
+  if (req.mode === 'navigate') {
+    event.respondWith(
+      fetch(req).catch(() => caches.match(OFFLINE_URL))
+    );
+    return;
+  }
+
+  // Ikony/statyczne: cache, a w tle aktualizacja
+  if (req.url.includes('/static/')) {
+    event.respondWith(
+      caches.match(req).then((cached) => {
+        const network = fetch(req).then((res) => {
+          const copy = res.clone();
+          caches.open(CACHE).then((c) => c.put(req, copy));
+          return res;
+        }).catch(() => cached);
+        return cached || network;
+      })
+    );
+  }
+});
+"""
+    return Response(content=sw_code, media_type="application/javascript")
+
+
 @app.get("/", response_class=HTMLResponse)
 def read_dashboard(request: Request, db: Session = Depends(get_db)):
     players = db.query(models.Player).all()

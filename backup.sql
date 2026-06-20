@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict 00aoIyEmYmyAIB4kDMUJ6GkSMESdKzx4wdtj1S6LBFfjh8mefgP8DEILjw7xvm2
+\restrict UJRKhxNDtCzLo9vT0xnWpXAgSK6tpSgN2pNiZumy3jQZc2z05ZwxTSS0WJwlDZk
 
 -- Dumped from database version 18.4 (Debian 18.4-1.pgdg12+1)
 -- Dumped by pg_dump version 18.4 (Ubuntu 18.4-1.pgdg24.04+1)
@@ -20,18 +20,20 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- Name: public; Type: SCHEMA; Schema: -; Owner: -
+-- Name: public; Type: SCHEMA; Schema: -; Owner: bet_world_cup_2026_db_live_user
 --
 
 -- *not* creating schema, since initdb creates it
 
+
+ALTER SCHEMA public OWNER TO bet_world_cup_2026_db_live_user;
 
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
 
 --
--- Name: matches; Type: TABLE; Schema: public; Owner: -
+-- Name: matches; Type: TABLE; Schema: public; Owner: bet_world_cup_2026_db_live_user
 --
 
 CREATE TABLE public.matches (
@@ -49,8 +51,10 @@ CREATE TABLE public.matches (
 );
 
 
+ALTER TABLE public.matches OWNER TO bet_world_cup_2026_db_live_user;
+
 --
--- Name: matches_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: matches_id_seq; Type: SEQUENCE; Schema: public; Owner: bet_world_cup_2026_db_live_user
 --
 
 CREATE SEQUENCE public.matches_id_seq
@@ -62,15 +66,17 @@ CREATE SEQUENCE public.matches_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.matches_id_seq OWNER TO bet_world_cup_2026_db_live_user;
+
 --
--- Name: matches_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: matches_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: bet_world_cup_2026_db_live_user
 --
 
 ALTER SEQUENCE public.matches_id_seq OWNED BY public.matches.id;
 
 
 --
--- Name: players; Type: TABLE; Schema: public; Owner: -
+-- Name: players; Type: TABLE; Schema: public; Owner: bet_world_cup_2026_db_live_user
 --
 
 CREATE TABLE public.players (
@@ -97,8 +103,10 @@ CREATE TABLE public.players (
 );
 
 
+ALTER TABLE public.players OWNER TO bet_world_cup_2026_db_live_user;
+
 --
--- Name: players_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: players_id_seq; Type: SEQUENCE; Schema: public; Owner: bet_world_cup_2026_db_live_user
 --
 
 CREATE SEQUENCE public.players_id_seq
@@ -110,15 +118,17 @@ CREATE SEQUENCE public.players_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.players_id_seq OWNER TO bet_world_cup_2026_db_live_user;
+
 --
--- Name: players_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: players_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: bet_world_cup_2026_db_live_user
 --
 
 ALTER SEQUENCE public.players_id_seq OWNED BY public.players.id;
 
 
 --
--- Name: user_picks; Type: TABLE; Schema: public; Owner: -
+-- Name: user_picks; Type: TABLE; Schema: public; Owner: bet_world_cup_2026_db_live_user
 --
 
 CREATE TABLE public.user_picks (
@@ -133,8 +143,10 @@ CREATE TABLE public.user_picks (
 );
 
 
+ALTER TABLE public.user_picks OWNER TO bet_world_cup_2026_db_live_user;
+
 --
--- Name: user_picks_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: user_picks_id_seq; Type: SEQUENCE; Schema: public; Owner: bet_world_cup_2026_db_live_user
 --
 
 CREATE SEQUENCE public.user_picks_id_seq
@@ -146,40 +158,41 @@ CREATE SEQUENCE public.user_picks_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.user_picks_id_seq OWNER TO bet_world_cup_2026_db_live_user;
+
 --
--- Name: user_picks_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: user_picks_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: bet_world_cup_2026_db_live_user
 --
 
 ALTER SEQUENCE public.user_picks_id_seq OWNED BY public.user_picks.id;
 
 
 --
--- Name: matches id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: matches id; Type: DEFAULT; Schema: public; Owner: bet_world_cup_2026_db_live_user
 --
 
 ALTER TABLE ONLY public.matches ALTER COLUMN id SET DEFAULT nextval('public.matches_id_seq'::regclass);
 
 
 --
--- Name: players id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: players id; Type: DEFAULT; Schema: public; Owner: bet_world_cup_2026_db_live_user
 --
 
 ALTER TABLE ONLY public.players ALTER COLUMN id SET DEFAULT nextval('public.players_id_seq'::regclass);
 
 
 --
--- Name: user_picks id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: user_picks id; Type: DEFAULT; Schema: public; Owner: bet_world_cup_2026_db_live_user
 --
 
 ALTER TABLE ONLY public.user_picks ALTER COLUMN id SET DEFAULT nextval('public.user_picks_id_seq'::regclass);
 
 
 --
--- Data for Name: matches; Type: TABLE DATA; Schema: public; Owner: -
+-- Data for Name: matches; Type: TABLE DATA; Schema: public; Owner: bet_world_cup_2026_db_live_user
 --
 
 COPY public.matches (id, home_team, away_team, match_date, result, penalties, is_locked, is_finished, stage, multiplier, scorers) FROM stdin;
-34	Niemcy	WKS	2026-06-20 22:00:00	\N	\N	f	f	group	1	[]
 35	Ekwador	Curacao	2026-06-21 02:00:00	\N	\N	f	f	group	1	[]
 36	Tunezja	Japonia	2026-06-21 06:00:00	\N	\N	f	f	group	1	[]
 37	Hiszpania	Arabia Saudyjska	2026-06-21 18:00:00	\N	\N	f	f	group	1	[]
@@ -251,51 +264,52 @@ COPY public.matches (id, home_team, away_team, match_date, result, penalties, is
 31	Brazylia	Haiti	2026-06-20 03:00:00	3:0	\N	t	t	group	1	[]
 32	Turcja	Paragwaj	2026-06-20 06:00:00	0:1	\N	t	t	group	1	[]
 33	Holandia	Szwecja	2026-06-20 19:00:00	5:1	\N	t	t	group	1	[]
+34	Niemcy	WKS	2026-06-20 22:00:00	2:1	\N	t	t	group	1	[]
 \.
 
 
 --
--- Data for Name: players; Type: TABLE DATA; Schema: public; Owner: -
+-- Data for Name: players; Type: TABLE DATA; Schema: public; Owner: bet_world_cup_2026_db_live_user
 --
 
 COPY public.players (id, username, full_name, email, password, is_active, is_alive, shields, total_points, correct_predictions, favorite_team, star_player, created_at, current_streak, longest_streak, comeback_points, revival_used, favorite_locked, favorite_team_points, star_player_points) FROM stdin;
-4	tomoszef997	Tomek	tomoszef997@onepick.pl	$2b$12$HKPLv2OEzeGgUFsiUfz.2OGP79R25ga2UFV/Ph4SSz0c4iryoxovu	t	t	2	29	19	Hiszpania	Lamine Yamal	2026-06-10 16:59:48.159605	1	6	0	f	t	0	0
-8	Szumi	Aleksander	Szumi@onepick.pl	$2b$12$w9EgnaXI/M84DMVT1J.suO41dMZ2nkOyQi/NlZjp42lSpg8GAMqyO	t	t	2	32	19	Francja	Kylian Mbappe	2026-06-10 17:01:10.446501	1	4	0	f	t	1	2
-9	piotrek8412	Piotrek	piotrek8412@onepick.pl	$2b$12$KfW.8T8Lhtgely.ZBZuC7enMHe4AXR9V4dViQBQ4jQP70WlMYAdP.	t	t	2	17	14	Hiszpania	Lautaro Martinez	2026-06-10 17:03:18.251893	1	4	0	f	t	0	0
-2	Makuwka	Kacper	Makuwka@onepick.pl	$2b$12$GAvzNtIKBI0fx6aNQrr6S.7qKKJtCk/kBZMvscV2y8j7I8akC48Pq	t	t	2	31	16	Francja	Kylian Mbappe	2026-06-10 16:47:37.449635	0	4	0	f	t	1	2
-10	matt	Mateusz	matt@onepick.pl	$2b$12$C2pbvxqE0PHBhqfaBLT8iO2vErrvAaII7OhWgfwMgvtfxZLunQzoW	t	t	2	26	17	Francja	Kylian Mbappe	2026-06-10 17:08:42.150127	0	4	0	f	t	1	2
-1	krala	Bartosz	krala@onepick.pl	$2b$12$.a4DNbwMdITwn1K.Aij3vOVO.lCEJsAi1tyIxYkbFNS5hngNRMr5u	t	t	2	26	18	Portugalia	Cristiano Ronaldo	2026-06-10 16:41:26.852824	1	4	0	f	t	0	0
-3	rogal99	Daniel	rogal99@onepick.pl	$2b$12$24P3OBFy8WA5sbp0Xc8Xdu.jABvk.O1Ma72eYmOzVmD5z7YeSa6se	t	t	2	33	21	Portugalia	Cristiano Ronaldo	2026-06-10 16:56:59.247783	1	4	0	f	t	0	0
-18	Mirek	Milosz	Mirek@onepick.pl	$2b$12$JoUZEsQMGHOznpimRq7RneXMtPsMUz7onnLuT8JjIoljizyPFs3Ie	t	t	2	54	23	Hiszpania	Kylian Mbappe	2026-06-10 17:31:42.949509	1	10	0	f	t	0	2
-19	Tomcio	Jakub	Tomcio@onepick.pl	$2b$12$KU88s7WN428I7akY0F7cxun2CKUPD/eoP4lVTi1q0Wza2H9sk0136	t	t	2	40	20	Francja	Kylian Mbappe	2026-06-10 17:33:51.04786	1	7	0	f	t	1	2
-21	Kryś	Krystian	Kryś@onepick.pl	$2b$12$DapO5Av.xQmv0RlIrH9dJODiagzZ6eZnIq86HiRZ2AGCRa53vom0S	t	t	2	29	17	Hiszpania	Kylian Mbappe	2026-06-10 17:44:26.45018	1	4	0	f	t	0	2
-22	Igorek2016	Igor	Igorek2016@onepick.pl	$2b$12$H3Wrvoy9kFf8t5AHORK3yOxNqNCe/x5H9Iy1onaPI7iunlxcauOlW	t	t	2	12	13	Hiszpania	Michael Olise	2026-06-10 17:44:33.355847	0	4	0	f	t	0	0
-23	Zalena	Kacper	Zalena@onepick.pl	$2b$12$nG8LDEMcGUCWxWRKNlvz5urSHynpHs0rCle2zSdyZhvFW/z19xxpa	t	t	2	31	19	Hiszpania	Kylian Mbappe	2026-06-10 17:46:12.346892	1	6	0	f	t	0	2
-24	pola	pola	pola@onepick.pl	$2b$12$G4cUu9rCaRUrK9HpMLV6Ueh3VsTdA608fqIM6k2os7U4c4GzxwoO.	t	t	2	45	20	Hiszpania	Harry Kane	2026-06-10 18:09:55.25301	1	10	0	f	t	0	2
-25	kuba4617	Kuba	kuba4617@onepick.pl	$2b$12$qWfDLHkwacCfxGPCy5pUwOL6r3JiGsTaJS4Z/S6VHP5KQq4g7//.G	t	t	2	37	21	Francja	Kylian Mbappe	2026-06-10 18:24:54.447192	1	6	0	f	t	1	2
-26	Cis	Jakub	Cis@onepick.pl	$2b$12$ZABltTWGyA3f1D4tn7GVsOabImD5x5pvAv9sX7S.XzZ6/GLeXUvgC	t	t	2	26	15	Hiszpania	Erling Haaland	2026-06-10 18:30:24.348072	5	5	0	f	t	0	2
-27	Bossman	Michał	Bossman@onepick.pl	$2b$12$ECSc/n6bMBADQwrfMuzHxOyq7MMZ/y/JPjv0USV3gDLy0atLiBsye	t	t	2	23	18	Argentyna	Ousmane Dembele	2026-06-10 20:00:13.354962	1	4	0	f	t	1	0
-28	deps	Patryk	deps@onepick.pl	$2b$12$3jHCrvNE0.bz7ctoq8t9EOTybHJlazhKSNR7PfWyGFVQcgEtargLO	t	t	2	27	17	Portugalia	Erling Haaland	2026-06-10 20:09:07.447212	1	5	0	f	t	0	2
-29	Zagkub	Jakub	Zagkub@onepick.pl	$2b$12$aaMpR8gugZNRCQ9B7bDXEuYXvJn9TZhtKeW6x6LLtxIECHbZpmyDG	t	t	2	25	18	Hiszpania	Kylian Mbappe	2026-06-10 20:11:21.146091	1	4	0	f	t	0	2
-11	Wosiu	Igor	Wosiu@onepick.pl	$2b$12$yUV1aoM1/RxlsDb0y6Znse8LGnbrV7Y9E.RCwSd0Ez5wxQimnbCcC	t	t	2	38	19	Meksyk	Harry Kane	2026-06-10 17:09:22.260296	1	6	0	f	t	2	2
-12	Arturo	Artur	Arturo@onepick.pl	$2b$12$lHBKNMd5ANfzlczHpbxvzOw/Fqlm0D8YVw6HFMUTebyPjQn.yBl32	t	t	2	31	19	Hiszpania	Kylian Mbappe	2026-06-10 17:14:21.349394	1	6	0	f	t	0	2
-14	tommy	tomasz	tommy@onepick.pl	$2b$12$S2NSwyjukqHZ6ojJcYKozOSL0aFHqobf7RTei96DYPCpjgTDFXmf6	t	t	2	30	19	Francja	Kylian Mbappe	2026-06-10 17:16:01.849347	1	4	0	f	t	1	2
-16	młody szumi	Szymon	młody szumi@onepick.pl	$2b$12$UAOiXu2N840dkpEm6kdcAOo.5Ng6Z7RCNxaFeYwAeAKUuVC2/UVsG	t	t	2	32	19	Hiszpania	Kylian Mbappe	2026-06-10 17:24:19.150629	1	4	0	f	t	0	2
-17	Mundeek	Klaudiusz	Mundeek@onepick.pl	$2b$12$cUB8MFwccLLaUdda3Vf.AeqwmsOEccOVl6sfs1jwF5Vea5zRC3b3.	t	t	2	11	11	Brazylia	Neymar	2026-06-10 17:31:07.254973	1	3	0	f	t	1	0
-33	mati_ufc	Mateusz	mati_ufc@onepick.pl	$2b$12$RISHLlo6.qhJuAzm60xZuOU2P7et3VNF1foiUnEwFbeqaZeDt.xGu	t	t	2	30	19	Francja	Kylian Mbappe	2026-06-10 21:19:04.651863	0	4	0	f	t	1	2
-39	arekfire	Arek	arekfire@onepick.pl	$2b$12$N7fq6K3I6OQlTTfCrzAC0.JdOxYtxJXrjdYi0LQu3stsVgpXWQtiW	t	t	2	31	18	Francja	Kylian Mbappe	2026-06-11 18:05:54.843428	0	6	0	f	t	1	2
-30	majkel	Michał	majkel@onepick.pl	$2b$12$kAOiD37deXNU2IAv7/.qPOBdObSpr60V9LpENQ0cM2USmMnug5j0O	t	t	2	29	18	Francja	Erling Haaland	2026-06-10 20:39:08.351214	1	5	0	f	t	1	2
-31	kralcia	Paulina	kralcia@onepick.pl	$2b$12$zh1A08U6yULLDHJx7dm7MOOrJ/6RjQ3IAK03o3hdimG4GV1AoYjfS	t	t	2	20	17	Hiszpania	Harry Kane	2026-06-10 20:46:09.452872	1	4	0	f	t	0	2
-32	Butrym6	Kuba	Butrym6@onepick.pl	$2b$12$QQxgsdt4CAUWpu3jS1WpF.XAVgOe1hZ9k2oYSKC6nECPUdLXCS1Sq	t	t	2	25	18	Brazylia	Erling Haaland	2026-06-10 20:55:45.347976	1	5	0	f	t	0	2
-35	wojciu	Wojtek	wojciu@onepick.pl	$2b$12$yVluB6WkLDpF.sDK3UZqlejaBf6YX.gSBfu4sdWJUuclOETwDO1EC	t	t	2	36	19	Argentyna	Desire Doue	2026-06-11 06:19:20.525527	1	6	0	f	t	1	0
-36	tobiking	Tobiasz	tobiking@onepick.pl	$2b$12$7KhJ61QtWwPR.6Oub2f5yetk2r1vdQySol3OiRjk7lOHFWK5ORfnu	t	t	2	29	19	Francja	Kylian Mbappe	2026-06-11 09:16:36.578686	1	6	0	f	t	1	2
-37	fificzi	Filip	fificzi@onepick.pl	$2b$12$alkoNijznbr8nK01G3FWlepXcefhIqEmPc50Jbdo518kDFkaQCJM2	t	t	2	34	19	Francja	Harry Kane	2026-06-11 11:01:39.379274	1	6	0	f	t	1	2
-38	k0meta	Mateusz	k0meta@onepick.pl	$2b$12$V3oIhztm6xrWHfW0ffNMcelWgI5lDL1jabhgCJDYJ.CChcILHt8aS	t	t	2	38	21	Francja	Kylian Mbappe	2026-06-11 17:46:49.549558	1	6	0	f	t	1	2
+1	krala	Bartosz	krala@onepick.pl	$2b$12$.a4DNbwMdITwn1K.Aij3vOVO.lCEJsAi1tyIxYkbFNS5hngNRMr5u	t	t	2	27	19	Portugalia	Cristiano Ronaldo	2026-06-10 16:41:26.852824	2	4	0	f	t	0	0
+2	Makuwka	Kacper	Makuwka@onepick.pl	$2b$12$GAvzNtIKBI0fx6aNQrr6S.7qKKJtCk/kBZMvscV2y8j7I8akC48Pq	t	t	2	32	17	Francja	Kylian Mbappe	2026-06-10 16:47:37.449635	1	4	0	f	t	1	2
+3	rogal99	Daniel	rogal99@onepick.pl	$2b$12$24P3OBFy8WA5sbp0Xc8Xdu.jABvk.O1Ma72eYmOzVmD5z7YeSa6se	t	t	2	34	22	Portugalia	Cristiano Ronaldo	2026-06-10 16:56:59.247783	2	4	0	f	t	0	0
+4	tomoszef997	Tomek	tomoszef997@onepick.pl	$2b$12$HKPLv2OEzeGgUFsiUfz.2OGP79R25ga2UFV/Ph4SSz0c4iryoxovu	t	t	2	30	20	Hiszpania	Lamine Yamal	2026-06-10 16:59:48.159605	2	6	0	f	t	0	0
+8	Szumi	Aleksander	Szumi@onepick.pl	$2b$12$w9EgnaXI/M84DMVT1J.suO41dMZ2nkOyQi/NlZjp42lSpg8GAMqyO	t	t	2	33	20	Francja	Kylian Mbappe	2026-06-10 17:01:10.446501	2	4	0	f	t	1	2
+9	piotrek8412	Piotrek	piotrek8412@onepick.pl	$2b$12$KfW.8T8Lhtgely.ZBZuC7enMHe4AXR9V4dViQBQ4jQP70WlMYAdP.	t	t	2	18	15	Hiszpania	Lautaro Martinez	2026-06-10 17:03:18.251893	2	4	0	f	t	0	0
+10	matt	Mateusz	matt@onepick.pl	$2b$12$C2pbvxqE0PHBhqfaBLT8iO2vErrvAaII7OhWgfwMgvtfxZLunQzoW	t	t	2	27	18	Francja	Kylian Mbappe	2026-06-10 17:08:42.150127	1	4	0	f	t	1	2
+19	Tomcio	Jakub	Tomcio@onepick.pl	$2b$12$KU88s7WN428I7akY0F7cxun2CKUPD/eoP4lVTi1q0Wza2H9sk0136	t	t	2	41	21	Francja	Kylian Mbappe	2026-06-10 17:33:51.04786	2	7	0	f	t	1	2
+21	Kryś	Krystian	Kryś@onepick.pl	$2b$12$DapO5Av.xQmv0RlIrH9dJODiagzZ6eZnIq86HiRZ2AGCRa53vom0S	t	t	2	30	18	Hiszpania	Kylian Mbappe	2026-06-10 17:44:26.45018	2	4	0	f	t	0	2
+22	Igorek2016	Igor	Igorek2016@onepick.pl	$2b$12$H3Wrvoy9kFf8t5AHORK3yOxNqNCe/x5H9Iy1onaPI7iunlxcauOlW	t	t	2	13	14	Hiszpania	Michael Olise	2026-06-10 17:44:33.355847	1	4	0	f	t	0	0
+23	Zalena	Kacper	Zalena@onepick.pl	$2b$12$nG8LDEMcGUCWxWRKNlvz5urSHynpHs0rCle2zSdyZhvFW/z19xxpa	t	t	2	32	20	Hiszpania	Kylian Mbappe	2026-06-10 17:46:12.346892	2	6	0	f	t	0	2
+24	pola	pola	pola@onepick.pl	$2b$12$G4cUu9rCaRUrK9HpMLV6Ueh3VsTdA608fqIM6k2os7U4c4GzxwoO.	t	t	2	46	21	Hiszpania	Harry Kane	2026-06-10 18:09:55.25301	2	10	0	f	t	0	2
+25	kuba4617	Kuba	kuba4617@onepick.pl	$2b$12$qWfDLHkwacCfxGPCy5pUwOL6r3JiGsTaJS4Z/S6VHP5KQq4g7//.G	t	t	2	38	22	Francja	Kylian Mbappe	2026-06-10 18:24:54.447192	2	6	0	f	t	1	2
+26	Cis	Jakub	Cis@onepick.pl	$2b$12$ZABltTWGyA3f1D4tn7GVsOabImD5x5pvAv9sX7S.XzZ6/GLeXUvgC	t	t	2	28	16	Hiszpania	Erling Haaland	2026-06-10 18:30:24.348072	6	6	0	f	t	0	2
+27	Bossman	Michał	Bossman@onepick.pl	$2b$12$ECSc/n6bMBADQwrfMuzHxOyq7MMZ/y/JPjv0USV3gDLy0atLiBsye	t	t	2	24	19	Argentyna	Ousmane Dembele	2026-06-10 20:00:13.354962	2	4	0	f	t	1	0
+28	deps	Patryk	deps@onepick.pl	$2b$12$3jHCrvNE0.bz7ctoq8t9EOTybHJlazhKSNR7PfWyGFVQcgEtargLO	t	t	2	28	18	Portugalia	Erling Haaland	2026-06-10 20:09:07.447212	2	5	0	f	t	0	2
+11	Wosiu	Igor	Wosiu@onepick.pl	$2b$12$yUV1aoM1/RxlsDb0y6Znse8LGnbrV7Y9E.RCwSd0Ez5wxQimnbCcC	t	t	2	39	20	Meksyk	Harry Kane	2026-06-10 17:09:22.260296	2	6	0	f	t	2	2
+29	Zagkub	Jakub	Zagkub@onepick.pl	$2b$12$aaMpR8gugZNRCQ9B7bDXEuYXvJn9TZhtKeW6x6LLtxIECHbZpmyDG	t	t	2	26	19	Hiszpania	Kylian Mbappe	2026-06-10 20:11:21.146091	2	4	0	f	t	0	2
+12	Arturo	Artur	Arturo@onepick.pl	$2b$12$lHBKNMd5ANfzlczHpbxvzOw/Fqlm0D8YVw6HFMUTebyPjQn.yBl32	t	t	2	32	20	Hiszpania	Kylian Mbappe	2026-06-10 17:14:21.349394	2	6	0	f	t	0	2
+14	tommy	tomasz	tommy@onepick.pl	$2b$12$S2NSwyjukqHZ6ojJcYKozOSL0aFHqobf7RTei96DYPCpjgTDFXmf6	t	t	2	31	20	Francja	Kylian Mbappe	2026-06-10 17:16:01.849347	2	4	0	f	t	1	2
+16	młody szumi	Szymon	młody szumi@onepick.pl	$2b$12$UAOiXu2N840dkpEm6kdcAOo.5Ng6Z7RCNxaFeYwAeAKUuVC2/UVsG	t	t	2	32	19	Hiszpania	Kylian Mbappe	2026-06-10 17:24:19.150629	0	4	0	f	t	0	2
+17	Mundeek	Klaudiusz	Mundeek@onepick.pl	$2b$12$cUB8MFwccLLaUdda3Vf.AeqwmsOEccOVl6sfs1jwF5Vea5zRC3b3.	t	t	2	11	11	Brazylia	Neymar	2026-06-10 17:31:07.254973	0	3	0	f	t	1	0
+18	Mirek	Milosz	Mirek@onepick.pl	$2b$12$JoUZEsQMGHOznpimRq7RneXMtPsMUz7onnLuT8JjIoljizyPFs3Ie	t	t	2	55	24	Hiszpania	Kylian Mbappe	2026-06-10 17:31:42.949509	2	10	0	f	t	0	2
+30	majkel	Michał	majkel@onepick.pl	$2b$12$kAOiD37deXNU2IAv7/.qPOBdObSpr60V9LpENQ0cM2USmMnug5j0O	t	t	2	30	19	Francja	Erling Haaland	2026-06-10 20:39:08.351214	2	5	0	f	t	1	2
+31	kralcia	Paulina	kralcia@onepick.pl	$2b$12$zh1A08U6yULLDHJx7dm7MOOrJ/6RjQ3IAK03o3hdimG4GV1AoYjfS	t	t	2	23	18	Hiszpania	Harry Kane	2026-06-10 20:46:09.452872	2	4	0	f	t	0	2
+32	Butrym6	Kuba	Butrym6@onepick.pl	$2b$12$QQxgsdt4CAUWpu3jS1WpF.XAVgOe1hZ9k2oYSKC6nECPUdLXCS1Sq	t	t	2	26	19	Brazylia	Erling Haaland	2026-06-10 20:55:45.347976	2	5	0	f	t	0	2
+33	mati_ufc	Mateusz	mati_ufc@onepick.pl	$2b$12$RISHLlo6.qhJuAzm60xZuOU2P7et3VNF1foiUnEwFbeqaZeDt.xGu	t	t	2	33	20	Francja	Kylian Mbappe	2026-06-10 21:19:04.651863	1	4	0	f	t	1	2
+35	wojciu	Wojtek	wojciu@onepick.pl	$2b$12$yVluB6WkLDpF.sDK3UZqlejaBf6YX.gSBfu4sdWJUuclOETwDO1EC	t	t	2	37	20	Argentyna	Desire Doue	2026-06-11 06:19:20.525527	2	6	0	f	t	1	0
+36	tobiking	Tobiasz	tobiking@onepick.pl	$2b$12$7KhJ61QtWwPR.6Oub2f5yetk2r1vdQySol3OiRjk7lOHFWK5ORfnu	t	t	2	30	20	Francja	Kylian Mbappe	2026-06-11 09:16:36.578686	2	6	0	f	t	1	2
+37	fificzi	Filip	fificzi@onepick.pl	$2b$12$alkoNijznbr8nK01G3FWlepXcefhIqEmPc50Jbdo518kDFkaQCJM2	t	t	2	35	20	Francja	Harry Kane	2026-06-11 11:01:39.379274	2	6	0	f	t	1	2
+38	k0meta	Mateusz	k0meta@onepick.pl	$2b$12$V3oIhztm6xrWHfW0ffNMcelWgI5lDL1jabhgCJDYJ.CChcILHt8aS	t	t	2	39	22	Francja	Kylian Mbappe	2026-06-11 17:46:49.549558	2	6	0	f	t	1	2
+39	arekfire	Arek	arekfire@onepick.pl	$2b$12$N7fq6K3I6OQlTTfCrzAC0.JdOxYtxJXrjdYi0LQu3stsVgpXWQtiW	t	t	2	34	19	Francja	Kylian Mbappe	2026-06-11 18:05:54.843428	1	6	0	f	t	1	2
 \.
 
 
 --
--- Data for Name: user_picks; Type: TABLE DATA; Schema: public; Owner: -
+-- Data for Name: user_picks; Type: TABLE DATA; Schema: public; Owner: bet_world_cup_2026_db_live_user
 --
 
 COPY public.user_picks (id, player_id, match_id, predicted_result, points_earned, bonus_points, points_breakdown, created_at) FROM stdin;
@@ -331,7 +345,6 @@ COPY public.user_picks (id, player_id, match_id, predicted_result, points_earned
 38	8	2	1:2	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-10 17:05:57.774121
 9	1	3	1:1	4	0	{"base": 3, "high_score": 0, "underdog": 1, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 4, "grand_total": 4}	2026-06-10 16:48:53.632814
 39	8	3	1:1	4	0	{"base": 3, "high_score": 0, "underdog": 1, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 4, "grand_total": 4}	2026-06-10 17:08:13.195883
-1074	1	34	4:1	0	0	\N	2026-06-19 21:10:33.864451
 154	29	1	2:0	3	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 3, "grand_total": 3}	2026-06-10 20:27:20.012441
 162	31	1	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-10 20:55:18.313854
 169	32	1	3:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-10 20:56:03.90727
@@ -367,7 +380,6 @@ COPY public.user_picks (id, player_id, match_id, predicted_result, points_earned
 170	31	8	0:3	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-10 20:56:04.2606
 196	16	8	1:2	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-11 09:03:13.065516
 199	26	8	0:4	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-11 09:10:05.54536
-1079	9	34	3:0	0	0	\N	2026-06-19 21:11:27.69096
 171	28	1	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-10 20:56:16.301545
 156	29	3	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 20:32:20.024635
 389	35	16	1:1	2	0	{"base": 1, "high_score": 0, "underdog": 1, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 2, "grand_total": 2}	2026-06-14 08:41:17.810244
@@ -452,7 +464,6 @@ COPY public.user_picks (id, player_id, match_id, predicted_result, points_earned
 318	21	11	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-13 11:11:26.497895
 295	17	12	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-13 05:44:02.571954
 400	29	16	1:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 09:21:52.353822
-1107	3	34	2:0	0	0	\N	2026-06-20 07:16:57.407358
 41	10	2	1:3	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-10 17:09:21.446444
 54	12	2	2:1	3	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 3, "grand_total": 3}	2026-06-10 17:20:05.746139
 79	14	2	0:1	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-10 17:37:09.90885
@@ -532,6 +543,7 @@ COPY public.user_picks (id, player_id, match_id, predicted_result, points_earned
 851	30	30	1:3	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-17 21:50:14.835653
 712	4	21	2:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-16 21:05:44.427255
 726	12	21	3:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-16 22:41:29.253089
+1201	31	36	1:3	0	0	\N	2026-06-20 22:06:35.430568
 287	3	8	0:2	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-12 20:46:29.080972
 308	28	8	0:2	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-13 09:49:44.294816
 315	12	8	1:2	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-13 11:05:39.967119
@@ -559,7 +571,6 @@ COPY public.user_picks (id, player_id, match_id, predicted_result, points_earned
 495	37	17	3:1	4	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 1, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 4, "grand_total": 4}	2026-06-14 22:18:33.242788
 525	1	17	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-15 06:55:51.812087
 105	22	6	2:2	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-10 17:45:28.171268
-1169	38	34	4:0	0	0	\N	2026-06-20 16:56:55.524287
 791	23	21	4:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-17 15:18:34.248347
 500	22	18	0:4	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-14 23:08:45.026789
 518	26	19	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-15 06:30:36.233467
@@ -662,7 +673,6 @@ COPY public.user_picks (id, player_id, match_id, predicted_result, points_earned
 1171	38	36	0:1	0	0	\N	2026-06-20 16:57:27.717298
 488	29	18	0:3	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-14 22:00:46.802758
 806	3	21	3:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	\N
-1172	28	34	3:1	0	0	\N	2026-06-20 16:57:39.545024
 1178	1	35	2:0	0	0	\N	2026-06-20 16:59:18.082631
 1179	1	36	1:3	0	0	\N	2026-06-20 16:59:25.024217
 1180	1	37	2:0	0	0	\N	2026-06-20 16:59:33.377217
@@ -744,7 +754,6 @@ COPY public.user_picks (id, player_id, match_id, predicted_result, points_earned
 491	32	12	3:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-14 22:13:23.133128
 843	38	30	0:2	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 5, "match_total": 1, "grand_total": 2}	2026-06-17 20:51:56.584774
 536	38	16	1:1	2	0	{"base": 1, "high_score": 0, "underdog": 1, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 2, "grand_total": 2}	2026-06-15 08:17:24.479705
-1175	28	36	0:2	0	0	\N	2026-06-20 16:58:01.961283
 565	30	16	2:2	4	0	{"base": 3, "high_score": 0, "underdog": 1, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 4, "grand_total": 4}	2026-06-15 16:24:58.031274
 600	32	16	1:1	2	0	{"base": 1, "high_score": 0, "underdog": 1, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 2, "grand_total": 2}	2026-06-15 20:58:07.500106
 4	1	2	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 16:48:30.374355
@@ -773,7 +782,6 @@ COPY public.user_picks (id, player_id, match_id, predicted_result, points_earned
 756	11	26	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-17 08:17:23.82434
 1176	38	38	2:1	0	0	\N	2026-06-20 16:58:03.337064
 529	1	18	0:3	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-15 06:57:30.388135
-1183	10	34	4:1	0	0	\N	2026-06-20 18:01:40.260936
 1184	10	36	0:3	0	0	\N	2026-06-20 18:01:46.915229
 225	38	2	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-11 17:51:16.339648
 229	28	2	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-11 18:49:23.92901
@@ -809,6 +817,7 @@ COPY public.user_picks (id, player_id, match_id, predicted_result, points_earned
 317	21	10	3:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-13 11:10:54.058941
 321	23	10	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-13 11:55:47.974132
 323	30	10	3:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-13 12:37:45.970724
+1175	28	36	0:3	0	0	\N	2026-06-20 16:58:01.961283
 19	3	3	1:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 16:59:04.095797
 31	9	3	1:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 17:03:57.351478
 42	10	3	1:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 17:09:29.097327
@@ -918,7 +927,6 @@ COPY public.user_picks (id, player_id, match_id, predicted_result, points_earned
 391	19	14	3:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 09:01:55.619723
 886	26	29	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-18 05:39:26.777304
 889	26	32	1:2	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 4, "match_total": 1, "grand_total": 2}	2026-06-18 06:02:25.907488
-1182	32	34	4:1	0	0	\N	2026-06-20 17:22:35.952256
 176	30	5	0:3	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-10 22:11:28.907002
 185	35	5	1:3	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-11 06:22:16.140626
 193	16	5	0:3	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-11 09:02:44.844255
@@ -993,7 +1001,7 @@ COPY public.user_picks (id, player_id, match_id, predicted_result, points_earned
 630	1	22	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-15 22:42:28.302996
 632	8	22	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-15 22:52:41.353114
 637	27	22	1:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-15 23:41:24.940265
-1190	39	34	2:1	0	0	\N	2026-06-20 19:00:55.046391
+1190	39	34	2:1	3	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 3, "grand_total": 3}	2026-06-20 19:00:55.046391
 639	30	22	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 23:45:25.500071
 366	16	13	5:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-14 01:32:05.129352
 392	19	15	1:1	4	0	{"base": 3, "high_score": 0, "underdog": 1, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 4, "grand_total": 4}	2026-06-14 09:02:03.168396
@@ -1050,7 +1058,6 @@ COPY public.user_picks (id, player_id, match_id, predicted_result, points_earned
 607	23	16	2:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 21:45:40.076806
 610	11	16	2:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-15 21:48:50.854989
 641	33	16	2:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-16 00:06:05.95028
-1193	11	34	4:0	0	0	\N	2026-06-20 19:06:02.543927
 1194	11	35	4:0	0	0	\N	2026-06-20 19:06:12.746536
 699	14	21	3:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-16 17:58:32.764283
 736	39	21	5:0	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-17 06:34:06.249664
@@ -1192,8 +1199,7 @@ COPY public.user_picks (id, player_id, match_id, predicted_result, points_earned
 1076	9	31	3:0	3	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 3, "grand_total": 3}	2026-06-19 21:11:02.546737
 1084	31	31	4:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-19 23:28:12.473996
 1114	17	40	1:3	0	0	\N	2026-06-20 09:17:36.230028
-1117	12	35	1:0	0	0	\N	2026-06-20 09:21:07.200068
-1130	23	34	3:1	0	0	\N	2026-06-20 13:40:32.881392
+1130	23	34	3:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-20 13:40:32.881392
 1166	36	36	0:2	0	0	\N	2026-06-20 16:26:39.358639
 949	29	33	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-18 18:12:03.21711
 952	38	33	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-18 18:15:18.009455
@@ -1203,6 +1209,7 @@ COPY public.user_picks (id, player_id, match_id, predicted_result, points_earned
 987	19	33	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-19 05:37:13.573944
 995	16	33	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-19 06:27:22.343654
 1129	23	33	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-20 13:40:27.559849
+1117	12	35	3:0	0	0	\N	2026-06-20 09:21:07.200068
 968	28	27	3:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-18 20:50:38.987902
 1087	29	38	2:0	0	0	\N	2026-06-20 00:05:46.08845
 885	21	32	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-18 02:05:29.026793
@@ -1233,10 +1240,8 @@ COPY public.user_picks (id, player_id, match_id, predicted_result, points_earned
 1110	18	40	0:2	0	0	\N	2026-06-20 08:11:31.484862
 1112	17	38	2:1	0	0	\N	2026-06-20 09:17:06.073998
 1113	17	39	1:1	0	0	\N	2026-06-20 09:17:25.486733
-1125	4	34	4:0	0	0	\N	2026-06-20 12:19:15.056243
 1126	4	35	3:0	0	0	\N	2026-06-20 12:19:23.308886
 1127	4	36	0:2	0	0	\N	2026-06-20 12:19:30.412746
-1144	14	34	3:1	0	0	\N	2026-06-20 15:37:58.54185
 1147	25	37	3:0	0	0	\N	2026-06-20 15:48:15.027853
 1148	25	38	1:0	0	0	\N	2026-06-20 15:48:28.759786
 1149	25	39	3:0	0	0	\N	2026-06-20 15:48:42.122966
@@ -1250,14 +1255,12 @@ COPY public.user_picks (id, player_id, match_id, predicted_result, points_earned
 1025	18	33	3:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-19 07:23:13.918447
 1032	25	33	3:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-19 12:00:17.200216
 1039	30	33	3:2	2	0	{"base": 1, "high_score": 1, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 2, "grand_total": 2}	2026-06-19 13:41:23.397728
+1125	4	34	4:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-20 12:19:15.056243
 979	24	30	0:1	5	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 2, "streak_len": 9, "match_total": 3, "grand_total": 5}	2026-06-18 22:59:17.569455
 1088	18	37	3:0	0	0	\N	2026-06-20 00:08:50.986252
 1089	18	38	2:1	0	0	\N	2026-06-20 00:09:36.565935
 973	18	32	3:1	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-18 21:07:40.658539
-977	22	34	4:1	0	0	\N	2026-06-18 22:25:14.208027
 978	22	35	1:1	0	0	\N	2026-06-18 22:26:24.246887
-1132	24	34	2:0	0	0	\N	2026-06-20 14:29:53.792106
-988	19	34	4:1	0	0	\N	2026-06-19 05:37:22.175196
 989	19	35	2:1	0	0	\N	2026-06-19 05:37:33.203592
 990	19	36	0:2	0	0	\N	2026-06-19 05:37:58.487241
 1133	24	35	1:0	0	0	\N	2026-06-20 14:30:11.199232
@@ -1291,28 +1294,27 @@ COPY public.user_picks (id, player_id, match_id, predicted_result, points_earned
 947	31	26	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-18 17:46:00.191343
 948	12	26	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-18 17:57:36.266015
 941	23	28	2:1	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-18 16:00:30.691637
-1007	17	34	2:2	0	0	\N	2026-06-19 07:01:45.184025
 1009	17	36	1:3	0	0	\N	2026-06-19 07:02:02.62288
 1135	24	37	3:1	0	0	\N	2026-06-20 14:30:30.107225
 985	2	35	6:7	0	0	\N	2026-06-18 23:01:57.095748
-1137	33	34	2:1	0	0	\N	2026-06-20 15:20:55.666097
-996	16	34	2:2	0	0	\N	2026-06-19 06:27:27.640005
+977	22	34	4:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-18 22:25:14.208027
 961	33	26	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-18 18:28:35.250385
 1008	17	35	4:1	0	0	\N	2026-06-19 07:01:53.971695
+1116	12	34	3:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-20 09:18:11.812951
 1014	3	29	3:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-19 07:09:14.41227
 1011	1	30	0:3	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-19 07:03:34.635266
 1015	3	30	0:1	3	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 3, "grand_total": 3}	2026-06-19 07:09:19.726285
+1121	35	34	5:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-20 10:44:39.401629
+1164	36	34	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-20 16:21:08.795198
 1012	1	31	4:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-19 07:03:43.686757
 1090	32	32	3:0	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-20 00:55:45.07771
 1118	29	39	2:0	0	0	\N	2026-06-20 09:46:22.228953
 1119	29	40	1:1	0	0	\N	2026-06-20 09:46:29.128043
-1121	35	34	5:1	0	0	\N	2026-06-20 10:44:39.401629
 1152	22	36	0:3	0	0	\N	2026-06-20 15:56:28.606703
 1153	22	37	4:1	0	0	\N	2026-06-20 15:56:40.104898
 1154	22	38	1:1	0	0	\N	2026-06-20 15:56:50.029144
 1160	30	38	3:1	0	0	\N	2026-06-20 16:02:09.446896
 1161	30	39	4:0	0	0	\N	2026-06-20 16:02:25.618852
-1164	36	34	2:0	0	0	\N	2026-06-20 16:21:08.795198
 1045	8	33	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-19 16:46:46.159611
 1067	21	33	2:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-19 20:34:23.907441
 1073	1	33	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-19 21:10:25.814777
@@ -1330,9 +1332,15 @@ COPY public.user_picks (id, player_id, match_id, predicted_result, points_earned
 1167	31	33	3:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-20 16:28:43.248229
 1177	28	33	3:2	2	0	{"base": 1, "high_score": 1, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 2, "grand_total": 2}	\N
 1196	12	36	0:2	0	0	\N	2026-06-20 19:19:37.609135
-1116	12	34	3:1	0	0	\N	2026-06-20 09:18:11.812951
 1197	32	35	2:0	0	0	\N	2026-06-20 19:30:07.96358
 1198	32	36	0:3	0	0	\N	2026-06-20 19:30:18.185704
+988	19	34	4:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-19 05:37:22.175196
+996	16	34	2:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-19 06:27:27.640005
+1007	17	34	2:2	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-19 07:01:45.184025
+1026	18	34	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-19 07:24:13.350653
+1029	29	34	3:2	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-19 07:55:02.715678
+1033	25	34	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-19 12:01:20.018899
+1040	30	34	3:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-19 13:41:37.809893
 743	19	27	3:1	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-17 07:25:23.059196
 754	29	27	3:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-17 08:16:53.795322
 755	11	27	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-17 08:17:09.49159
@@ -1368,7 +1376,6 @@ COPY public.user_picks (id, player_id, match_id, predicted_result, points_earned
 909	39	28	2:1	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 1, "grand_total": 2}	2026-06-18 08:31:43.759948
 916	32	28	2:3	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-18 11:47:27.881065
 917	8	28	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-18 11:54:12.965437
-1091	27	34	3:0	0	0	\N	2026-06-20 01:00:22.915654
 1092	27	35	3:1	0	0	\N	2026-06-20 01:00:32.220011
 1093	27	36	0:2	0	0	\N	2026-06-20 01:00:41.920564
 929	3	28	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-18 14:54:38.126193
@@ -1379,18 +1386,13 @@ COPY public.user_picks (id, player_id, match_id, predicted_result, points_earned
 986	31	28	2:3	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-18 23:15:56.085785
 1023	37	35	3:0	0	0	\N	2026-06-19 07:15:39.497436
 1024	37	36	0:2	0	0	\N	2026-06-19 07:15:57.481993
-1199	31	34	2:1	0	0	\N	\N
-1026	18	34	2:0	0	0	\N	2026-06-19 07:24:13.350653
 1027	18	35	3:0	0	0	\N	2026-06-19 07:24:33.164496
 1028	18	36	0:3	0	0	\N	2026-06-19 07:25:13.324615
 1122	35	35	3:0	0	0	\N	2026-06-20 10:44:50.463079
-1029	29	34	3:2	0	0	\N	2026-06-19 07:55:02.715678
 1030	29	35	3:0	0	0	\N	2026-06-19 07:55:21.964252
 1031	29	36	1:3	0	0	\N	2026-06-19 07:55:41.606802
 1034	25	35	2:0	0	0	\N	2026-06-19 12:01:28.972866
 1035	25	36	0:2	0	0	\N	2026-06-19 12:01:36.722067
-1033	25	34	2:0	0	0	\N	2026-06-19 12:01:20.018899
-1040	30	34	3:1	0	0	\N	2026-06-19 13:41:37.809893
 1013	1	32	2:0	-1	0	{"base": -1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": -1, "grand_total": -1}	2026-06-19 07:04:06.757777
 1041	2	36	6:7	0	0	\N	2026-06-19 14:45:01.207728
 1043	8	35	2:0	0	0	\N	2026-06-19 16:39:44.279122
@@ -1402,7 +1404,6 @@ COPY public.user_picks (id, player_id, match_id, predicted_result, points_earned
 1096	27	39	2:0	0	0	\N	2026-06-20 01:01:17.815666
 1004	17	31	4:0	3	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 1, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 3, "match_total": 2, "grand_total": 3}	2026-06-19 07:01:16.391214
 1017	3	32	1:1	0	0	{"base": 0, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 0, "match_total": 0, "grand_total": 0}	2026-06-19 07:09:32.893364
-1068	21	34	5:1	0	0	\N	2026-06-19 20:34:44.951734
 1070	21	35	1:2	0	0	\N	2026-06-19 20:35:14.662129
 1071	21	36	1:3	0	0	\N	2026-06-19 20:35:33.477486
 1072	21	37	1:1	0	0	\N	2026-06-19 20:35:51.014474
@@ -1421,13 +1422,12 @@ COPY public.user_picks (id, player_id, match_id, predicted_result, points_earned
 1036	23	29	2:1	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 4, "match_total": 1, "grand_total": 2}	2026-06-19 13:19:45.567017
 1123	35	36	0:2	0	0	\N	2026-06-20 10:44:59.528458
 1124	35	37	4:1	0	0	\N	2026-06-20 10:45:08.077306
-984	2	34	3:0	0	0	\N	2026-06-18 23:01:49.771245
-1042	8	34	2:0	0	0	\N	2026-06-19 16:39:29.120283
+984	2	34	3:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-18 23:01:49.771245
+1022	37	34	3:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-19 07:15:28.209846
 1145	14	35	3:0	0	0	\N	2026-06-20 15:38:54.443814
 1157	30	35	4:1	0	0	\N	2026-06-20 16:00:35.469173
 1158	30	36	0:2	0	0	\N	2026-06-20 16:00:56.928028
 1159	30	37	4:0	0	0	\N	2026-06-20 16:01:45.939095
-1022	37	34	3:0	0	0	\N	2026-06-19 07:15:28.209846
 924	24	29	3:1	3	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 2, "streak_len": 8, "match_total": 1, "grand_total": 3}	2026-06-18 13:01:27.790679
 931	25	29	2:1	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 4, "match_total": 1, "grand_total": 2}	2026-06-18 14:57:19.82935
 972	12	29	3:1	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 4, "match_total": 1, "grand_total": 2}	2026-06-18 20:55:53.542716
@@ -1438,7 +1438,6 @@ COPY public.user_picks (id, player_id, match_id, predicted_result, points_earned
 1052	14	29	1:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-19 17:26:22.822742
 1055	32	29	3:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-19 18:14:38.430673
 1057	31	29	3:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-19 18:17:09.819176
-1099	26	34	4:1	0	0	\N	2026-06-20 06:53:24.59494
 1100	26	35	1:2	0	0	\N	2026-06-20 06:53:41.524954
 1101	26	36	1:1	0	0	\N	2026-06-20 06:54:02.069924
 1102	26	37	4:1	0	0	\N	2026-06-20 06:54:16.664471
@@ -1470,32 +1469,49 @@ COPY public.user_picks (id, player_id, match_id, predicted_result, points_earned
 1066	39	31	4:0	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 6, "match_total": 1, "grand_total": 2}	2026-06-19 20:33:42.085141
 1138	33	35	3:2	0	0	\N	2026-06-20 15:21:42.669691
 1139	33	36	0:4	0	0	\N	2026-06-20 15:21:56.632496
+1042	8	34	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-19 16:39:29.120283
+1068	21	34	5:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-19 20:34:44.951734
+1074	1	34	4:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-19 21:10:33.864451
+1079	9	34	3:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-19 21:11:27.69096
+1091	27	34	3:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-20 01:00:22.915654
+1099	26	34	4:1	2	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 1, "streak_len": 6, "match_total": 1, "grand_total": 2}	2026-06-20 06:53:24.59494
+1107	3	34	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-20 07:16:57.407358
+1132	24	34	2:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-20 14:29:53.792106
+1137	33	34	2:1	3	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 3, "grand_total": 3}	2026-06-20 15:20:55.666097
+1144	14	34	3:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-20 15:37:58.54185
+1169	38	34	4:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-20 16:56:55.524287
+1172	28	34	3:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-20 16:57:39.545024
+1182	32	34	4:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-20 17:22:35.952256
+1183	10	34	4:1	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 1, "match_total": 1, "grand_total": 1}	2026-06-20 18:01:40.260936
+1193	11	34	4:0	1	0	{"base": 1, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 1, "grand_total": 1}	2026-06-20 19:06:02.543927
+1199	31	34	2:1	3	0	{"base": 3, "high_score": 0, "underdog": 0, "favorite": 0, "star": 0, "multiplier": 1, "streak_bonus": 0, "streak_len": 2, "match_total": 3, "grand_total": 3}	\N
+1200	31	35	3:0	0	0	\N	2026-06-20 22:03:15.149359
 \.
 
 
 --
--- Name: matches_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+-- Name: matches_id_seq; Type: SEQUENCE SET; Schema: public; Owner: bet_world_cup_2026_db_live_user
 --
 
 SELECT pg_catalog.setval('public.matches_id_seq', 72, true);
 
 
 --
--- Name: players_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+-- Name: players_id_seq; Type: SEQUENCE SET; Schema: public; Owner: bet_world_cup_2026_db_live_user
 --
 
 SELECT pg_catalog.setval('public.players_id_seq', 39, true);
 
 
 --
--- Name: user_picks_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+-- Name: user_picks_id_seq; Type: SEQUENCE SET; Schema: public; Owner: bet_world_cup_2026_db_live_user
 --
 
-SELECT pg_catalog.setval('public.user_picks_id_seq', 1199, true);
+SELECT pg_catalog.setval('public.user_picks_id_seq', 1201, true);
 
 
 --
--- Name: matches matches_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: matches matches_pkey; Type: CONSTRAINT; Schema: public; Owner: bet_world_cup_2026_db_live_user
 --
 
 ALTER TABLE ONLY public.matches
@@ -1503,7 +1519,7 @@ ALTER TABLE ONLY public.matches
 
 
 --
--- Name: players players_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: players players_pkey; Type: CONSTRAINT; Schema: public; Owner: bet_world_cup_2026_db_live_user
 --
 
 ALTER TABLE ONLY public.players
@@ -1511,7 +1527,7 @@ ALTER TABLE ONLY public.players
 
 
 --
--- Name: user_picks user_picks_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: user_picks user_picks_pkey; Type: CONSTRAINT; Schema: public; Owner: bet_world_cup_2026_db_live_user
 --
 
 ALTER TABLE ONLY public.user_picks
@@ -1519,42 +1535,42 @@ ALTER TABLE ONLY public.user_picks
 
 
 --
--- Name: ix_matches_id; Type: INDEX; Schema: public; Owner: -
+-- Name: ix_matches_id; Type: INDEX; Schema: public; Owner: bet_world_cup_2026_db_live_user
 --
 
 CREATE INDEX ix_matches_id ON public.matches USING btree (id);
 
 
 --
--- Name: ix_players_email; Type: INDEX; Schema: public; Owner: -
+-- Name: ix_players_email; Type: INDEX; Schema: public; Owner: bet_world_cup_2026_db_live_user
 --
 
 CREATE UNIQUE INDEX ix_players_email ON public.players USING btree (email);
 
 
 --
--- Name: ix_players_id; Type: INDEX; Schema: public; Owner: -
+-- Name: ix_players_id; Type: INDEX; Schema: public; Owner: bet_world_cup_2026_db_live_user
 --
 
 CREATE INDEX ix_players_id ON public.players USING btree (id);
 
 
 --
--- Name: ix_players_username; Type: INDEX; Schema: public; Owner: -
+-- Name: ix_players_username; Type: INDEX; Schema: public; Owner: bet_world_cup_2026_db_live_user
 --
 
 CREATE UNIQUE INDEX ix_players_username ON public.players USING btree (username);
 
 
 --
--- Name: ix_user_picks_id; Type: INDEX; Schema: public; Owner: -
+-- Name: ix_user_picks_id; Type: INDEX; Schema: public; Owner: bet_world_cup_2026_db_live_user
 --
 
 CREATE INDEX ix_user_picks_id ON public.user_picks USING btree (id);
 
 
 --
--- Name: user_picks user_picks_match_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: user_picks user_picks_match_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: bet_world_cup_2026_db_live_user
 --
 
 ALTER TABLE ONLY public.user_picks
@@ -1562,7 +1578,7 @@ ALTER TABLE ONLY public.user_picks
 
 
 --
--- Name: user_picks user_picks_player_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: user_picks user_picks_player_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: bet_world_cup_2026_db_live_user
 --
 
 ALTER TABLE ONLY public.user_picks
@@ -1570,8 +1586,36 @@ ALTER TABLE ONLY public.user_picks
 
 
 --
+-- Name: DEFAULT PRIVILEGES FOR SEQUENCES; Type: DEFAULT ACL; Schema: -; Owner: postgres
+--
+
+ALTER DEFAULT PRIVILEGES FOR ROLE postgres GRANT ALL ON SEQUENCES TO bet_world_cup_2026_db_live_user;
+
+
+--
+-- Name: DEFAULT PRIVILEGES FOR TYPES; Type: DEFAULT ACL; Schema: -; Owner: postgres
+--
+
+ALTER DEFAULT PRIVILEGES FOR ROLE postgres GRANT ALL ON TYPES TO bet_world_cup_2026_db_live_user;
+
+
+--
+-- Name: DEFAULT PRIVILEGES FOR FUNCTIONS; Type: DEFAULT ACL; Schema: -; Owner: postgres
+--
+
+ALTER DEFAULT PRIVILEGES FOR ROLE postgres GRANT ALL ON FUNCTIONS TO bet_world_cup_2026_db_live_user;
+
+
+--
+-- Name: DEFAULT PRIVILEGES FOR TABLES; Type: DEFAULT ACL; Schema: -; Owner: postgres
+--
+
+ALTER DEFAULT PRIVILEGES FOR ROLE postgres GRANT ALL ON TABLES TO bet_world_cup_2026_db_live_user;
+
+
+--
 -- PostgreSQL database dump complete
 --
 
-\unrestrict 00aoIyEmYmyAIB4kDMUJ6GkSMESdKzx4wdtj1S6LBFfjh8mefgP8DEILjw7xvm2
+\unrestrict UJRKhxNDtCzLo9vT0xnWpXAgSK6tpSgN2pNiZumy3jQZc2z05ZwxTSS0WJwlDZk
 
