@@ -47,6 +47,8 @@ class Match(Base):
     
     # FIX: brakująca kolumna z logów
     scorers = Column(JSON, default=list) 
+    # Równoległa do scorers lista krajów (ten sam indeks = ten sam gol). Pozwala znać reprezentację strzelca.
+    scorer_teams = Column(JSON, default=list)
 
     picks = relationship("UserPick", back_populates="match")
 

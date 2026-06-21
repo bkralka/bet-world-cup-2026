@@ -421,7 +421,7 @@
 
     <div class="flex flex-wrap gap-x-4 gap-y-1 sm:gap-6 border-b mb-8 px-1" style="border-color: var(--border-subtle);">
         <button class="tab-btn active pb-3 transition" data-tab="home">Home</button>
-        <button class="tab-btn pb-3 transition" data-tab="groups">Grupy</button>
+        <button class="tab-btn pb-3 transition" data-tab="groups">Tabele</button>
         <button class="tab-btn pb-3 transition" data-tab="matches">Mecze</button>
         <button class="tab-btn pb-3 transition" data-tab="knockouts">Drabinka</button>
         <button class="tab-btn pb-3 transition" data-tab="teams">Drużyny</button>
@@ -641,6 +641,13 @@
 </div>
 
         <div id="tab-groups" class="tab-content">
+            <div class="flex flex-wrap gap-1.5 sm:gap-2 mb-4">
+                <button class="match-subtab-btn group-subtab-btn active" data-gcat="groups" onclick="switchGroupTab('groups')">📊 Grupy</button>
+                <button class="match-subtab-btn group-subtab-btn" data-gcat="thirds" onclick="switchGroupTab('thirds')">🥉 Klasyfikacja z 3. miejsca</button>
+                <button class="match-subtab-btn group-subtab-btn" data-gcat="scorers" onclick="switchGroupTab('scorers')">⚽ Strzelcy</button>
+            </div>
+
+            <div class="group-panel" data-gcat="groups">
             <div class="grid lg:grid-cols-2 gap-6">
                 {% for group, teams in group_standings.items() %}
                 <div class="table-wrapper p-1">
@@ -658,7 +665,7 @@
                         <tbody>
                             {% for team in teams %}
                             <tr>
-                                <td class="font-medium whitespace-nowrap overflow-hidden text-ellipsis pl-4 pr-1"><span class="team-name" data-team="{{ team.name }}">{{ team.name }}</span></td>
+                                <td class="font-medium whitespace-nowrap overflow-hidden text-ellipsis pl-4 pr-1" style="border-left: 3px solid {% if loop.index <= 2 %}var(--success){% elif loop.index == 3 %}var(--accent){% else %}transparent{% endif %};"><span class="team-name" data-team="{{ team.name }}">{{ team.name }}</span></td>
                                 <td class="text-center" style="color: var(--text-muted);">{{ team.played }}</td>
                                 <td class="text-center font-semibold" style="color: var(--success);">{{ team.points }}</td>
                                 <td class="text-center font-mono text-xs" style="color: var(--text-muted);">{{ team.goals_for }}:{{ team.goals_against }}</td>
@@ -671,6 +678,83 @@
                 </div>
                 {% endfor %}
             </div>
+            </div><!-- /panel groups -->
+
+            <!-- PANEL: Klasyfikacja z 3. miejsca -->
+            <div class="group-panel" data-gcat="thirds" style="display:none;">
+                <div class="table-wrapper p-1">
+                    <table class="w-full min-table">
+                        <thead>
+                            <tr>
+                                <th class="text-center pl-3">#</th>
+                                <th class="text-left">Drużyna</th>
+                                <th class="text-center">Gr.</th>
+                                <th class="text-center">M</th>
+                                <th class="text-center">Pkt</th>
+                                <th class="text-center hidden sm:table-cell">B</th>
+                                <th class="text-center">G+/-</th>
+                                <th class="text-center pr-3">Awans</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for t in third_place_ranking %}
+                            <tr style="{% if t.advances %}background: rgba(74,222,128,0.06);{% endif %}">
+                                <td class="text-center pl-3 font-semibold" style="color: {% if t.advances %}var(--success){% else %}var(--text-faint){% endif %};">{{ t.rank }}</td>
+                                <td class="font-medium whitespace-nowrap overflow-hidden text-ellipsis"><span class="team-name" data-team="{{ t.name }}">{{ t.name }}</span></td>
+                                <td class="text-center text-xs" style="color: var(--text-faint);">{{ t.group }}</td>
+                                <td class="text-center" style="color: var(--text-muted);">{{ t.played }}</td>
+                                <td class="text-center font-semibold" style="color: var(--success);">{{ t.points }}</td>
+                                <td class="text-center font-mono text-xs hidden sm:table-cell" style="color: var(--text-muted);">{{ t.goals_for }}:{{ t.goals_against }}</td>
+                                <td class="text-center font-medium" style="color: {% if t.goal_diff >= 0 %}var(--success){% else %}var(--danger){% endif %};">{{ t.goal_diff }}</td>
+                                <td class="text-center pr-3">{% if t.advances %}<span style="color: var(--success); font-weight:700;">✓</span>{% else %}<span style="color: var(--text-faint);">—</span>{% endif %}</td>
+                            </tr>
+                            {% if loop.index == 8 %}
+                            <tr><td colspan="8" style="padding:0;"><div style="border-top: 2px dashed var(--accent); opacity:0.45; margin:1px 0;"></div></td></tr>
+                            {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <p class="text-[11px] px-3 py-2.5" style="color: var(--text-faint);">8 najlepszych z 12 drużyn z 3. miejsca awansuje do 1/16 finału. Kryteria: punkty → różnica bramek → bramki zdobyte.</p>
+                </div>
+            </div><!-- /panel thirds -->
+
+            <!-- PANEL: Strzelcy -->
+            <div class="group-panel" data-gcat="scorers" style="display:none;">
+                <div class="table-wrapper p-1">
+                    {% if top_scorers %}
+                    <table class="w-full min-table">
+                        <thead>
+                            <tr>
+                                <th class="text-center pl-3">#</th>
+                                <th class="text-left">Zawodnik</th>
+                                <th class="text-left">Reprezentacja</th>
+                                <th class="text-center pr-3">Gole</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for s in top_scorers %}
+                            <tr style="{% if loop.index == 1 %}background: rgba(251,191,36,0.08);{% endif %}">
+                                <td class="text-center pl-3 font-bold" style="color: {% if loop.index == 1 %}var(--gold){% else %}var(--text-faint){% endif %};">{{ loop.index }}</td>
+                                <td class="font-medium">
+                                    {% set is_my_star = current_player and current_player.star_player and s.name == current_player.star_player %}
+                                    <span style="display:inline-flex; align-items:center; gap:7px; min-width:0;">
+                                        {% if s.flag_code %}<img src="https://cdn.jsdelivr.net/npm/flag-icons@6.6.6/flags/4x3/{{ s.flag_code }}.svg" class="flag-icon" alt="{{ s.team }}" onerror="this.style.display='none'">{% endif %}
+                                        <span class="whitespace-nowrap overflow-hidden text-ellipsis"{% if loop.index == 1 %} style="color: var(--gold); font-weight:700;"{% elif is_my_star %} style="color: var(--gold); font-weight:600;"{% endif %}>{{ s.name }}</span>
+                                        {% if is_my_star %}<span title="Twoja gwiazda" style="flex-shrink:0;">⭐</span>{% endif %}
+                                    </span>
+                                </td>
+                                <td class="text-xs" style="color: var(--text-muted);">{% if s.team %}{{ s.team }}{% else %}<span style="color: var(--text-faint);">—</span>{% endif %}</td>
+                                <td class="text-center pr-3"><span class="font-display font-bold text-base" style="color: {% if loop.index == 1 %}var(--gold){% else %}var(--accent){% endif %};">{{ s.goals }}</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <p class="text-[11px] px-3 py-2.5" style="color: var(--text-faint);">Reprezentacja zgadywana automatycznie z meczów strzelca — „—" gdy jeszcze niejednoznaczna. Gole samobójcze nie są liczone.</p>
+                    {% else %}
+                    <p class="text-sm py-10 text-center" style="color: var(--text-faint);">Brak strzelców.<br>Pojawią się tu po wpisaniu nazwisk w zakończonych meczach.</p>
+                    {% endif %}
+                </div>
+            </div><!-- /panel scorers -->
         </div>
 
         <div id="tab-matches" class="tab-content">
@@ -711,7 +795,11 @@
                             {% if match.is_finished and match.scorers %}
                             <div class="flex flex-wrap justify-center gap-1.5 mt-2">
                                 {% for s in match.scorers %}
-                                <span class="text-[10px] px-2 py-0.5 rounded-full" style="background: var(--bg-elevated); color: var(--text-muted);">⚽ {{ s }}</span>
+                                {% if (s or '')|trim|lower in ['samobój','samoboj','samobója','samobojka','og','own goal'] %}
+                                <span class="text-[10px] px-2 py-0.5 rounded-full" style="background: rgba(248,113,113,0.12); color: var(--danger);" title="Gol samobójczy — nie liczy się do klasyfikacji strzelców">❌ samobój</span>
+                                {% else %}
+                                <span class="scorer-pill text-[10px] px-2 py-0.5 rounded-full inline-flex items-center gap-1" data-team="{{ match.scorer_teams[loop.index0] if (match.scorer_teams and loop.index0 < match.scorer_teams|length) else '' }}" style="background: var(--bg-elevated); color: var(--text-muted);"><span class="sc-ico">⚽</span> {{ s }}</span>
+                                {% endif %}
                                 {% endfor %}
                             </div>
                             {% endif %}
@@ -1546,6 +1634,24 @@
             });
         }
 
+        // Zamienia ikonkę piłki na małą flagę reprezentacji strzelca (w "Mecze → Zakończone").
+        function addScorerFlags() {
+            document.querySelectorAll('.scorer-pill').forEach(pill => {
+                const team = pill.getAttribute('data-team');
+                const ico = pill.querySelector('.sc-ico');
+                if (!team || !ico) return;
+                const code = FLAG_CODES[team];
+                if (!code) return;  // brak kraju (stare dane) → zostaje piłka
+                const img = document.createElement('img');
+                img.src = `${FLAG_BASE_URL}${code}.svg`;
+                img.alt = team;
+                img.title = team;
+                img.style.cssText = 'width:15px;height:11px;border-radius:2px;object-fit:cover;display:inline-block;flex-shrink:0;';
+                img.onerror = function() { this.replaceWith(document.createTextNode('⚽')); };
+                ico.replaceWith(img);
+            });
+        }
+
         async function addFavoriteBadges() {
             const playerId = {{ current_player.id if current_player else 0 }};
             if (!playerId) return;
@@ -1744,6 +1850,15 @@ async function loadHistory() {
             if (empty) empty.classList.toggle('hidden', visible > 0);
         }
         window.switchMatchTab = switchMatchTab;
+
+        // ===== Pod-zakładki w "Grupy": Grupy / Z 3. miejsca / Strzelcy =====
+        function switchGroupTab(cat) {
+            document.querySelectorAll('.group-subtab-btn').forEach(b => b.classList.toggle('active', b.dataset.gcat === cat));
+            document.querySelectorAll('.group-panel').forEach(p => {
+                p.style.display = (p.dataset.gcat === cat) ? '' : 'none';
+            });
+        }
+        window.switchGroupTab = switchGroupTab;
 
         function initMatchSubtabs() {
             const counts = { pool: 0, soon: 0, done: 0 };
@@ -2644,6 +2759,7 @@ const TEAM_DATA = {
 
         document.addEventListener('DOMContentLoaded', () => {
             addAllFlags();
+            addScorerFlags();
             addFavoriteBadges();
             updateSidebarFlag();
             updateSidebarStar();

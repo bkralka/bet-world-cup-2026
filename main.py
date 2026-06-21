@@ -12,7 +12,7 @@ from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 from sqlalchemy import text, inspect
 from pydantic import BaseModel, validator
-from collections import defaultdict
+from collections import defaultdict, Counter
 import models
 from database import engine, get_db
 from typing import Optional
@@ -56,6 +56,7 @@ def ensure_columns():
         ],
         "matches": [
             ("scorers", "JSON DEFAULT '[]'::json"),
+            ("scorer_teams", "JSON DEFAULT '[]'::json"),
             ("multiplier", "INTEGER DEFAULT 1"),
             ("penalties", "VARCHAR"),
         ],
@@ -124,6 +125,7 @@ class UserPickCreate(BaseModel):
 class MatchResultUpdate(BaseModel):
     result: str
     scorers: List[str] = []
+    scorer_teams: List[str] = []
     penalties: Optional[str] = None
 
     @validator('result')
@@ -282,6 +284,28 @@ TEAM_TO_GROUP = {
 
 GROUPS_LIST = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"]
 
+# Kody flag (port z FLAG_CODES w index.html) — do renderowania flag po stronie serwera.
+TEAM_FLAG_CODES = {
+    "Meksyk": "mx", "Korea Południowa": "kr", "RPA": "za", "Czechy": "cz",
+    "Kanada": "ca", "Szwajcaria": "ch", "Katar": "qa", "Bośnia i Hercegowina": "ba",
+    "Brazylia": "br", "Maroko": "ma", "Szkocja": "gb-sct", "Haiti": "ht",
+    "USA": "us", "Australia": "au", "Paragwaj": "py", "Turcja": "tr",
+    "Niemcy": "de", "Ekwador": "ec", "WKS": "ci", "Curacao": "cw",
+    "Holandia": "nl", "Japonia": "jp", "Tunezja": "tn", "Szwecja": "se",
+    "Belgia": "be", "Iran": "ir", "Egipt": "eg", "Nowa Zelandia": "nz",
+    "Hiszpania": "es", "Urugwaj": "uy", "Arabia Saudyjska": "sa", "RZP": "cv",
+    "Francja": "fr", "Senegal": "sn", "Norwegia": "no", "Irak": "iq",
+    "Argentyna": "ar", "Austria": "at", "Algieria": "dz", "Jordania": "jo",
+    "Portugalia": "pt", "Kolumbia": "co", "Uzbekistan": "uz", "DR Konga": "cd",
+    "Anglia": "gb-eng", "Chorwacja": "hr", "Panama": "pa", "Ghana": "gh"
+}
+
+# Wpisy traktowane jako gol samobójczy — NIE liczą się do klasyfikacji strzelców.
+OWN_GOAL_ALIASES = {"samobój", "samoboj", "samobója", "samobojka", "og", "own goal"}
+
+def is_own_goal(name) -> bool:
+    return (name or "").strip().lower() in OWN_GOAL_ALIASES
+
 def calculate_group_standings(db: Session):
     matches = db.query(models.Match).filter(
         models.Match.is_finished == True,
@@ -343,6 +367,70 @@ def calculate_group_standings(db: Session):
         groups_data[group] = group_teams
 
     return groups_data
+
+def calculate_third_place_ranking(db: Session):
+    """Klasyfikacja drużyn z 3. miejsca (format WC 2026: awansuje 8 najlepszych z 12).
+    Kryteria FIFA, po kolei: punkty -> różnica bramek -> bramki zdobyte.
+    (Dalsze kryteria — fair-play, ranking FIFA — nie są tu liczone, bo brak danych.)"""
+    standings = calculate_group_standings(db)
+    thirds = []
+    for group in GROUPS_LIST:
+        teams = standings.get(group, [])
+        if len(teams) >= 3:
+            t = dict(teams[2])          # 3. miejsce w grupie
+            t["group"] = group
+            thirds.append(t)
+
+    thirds.sort(key=lambda x: (x["points"], x["goal_diff"], x["goals_for"]), reverse=True)
+    for i, t in enumerate(thirds):
+        t["rank"] = i + 1
+        t["advances"] = i < 8           # 8 najlepszych awansuje
+    return thirds
+
+def calculate_top_scorers(db: Session):
+    """Lista strzelców z ręcznie wpisywanych Match.scorers (każde wystąpienie = 1 gol).
+    Reprezentacja jest zgadywana z części wspólnej drużyn meczów, w których strzelał —
+    pokazywana tylko gdy jednoznaczna."""
+    matches = db.query(models.Match).filter(models.Match.is_finished == True).all()
+    goals = defaultdict(int)
+    team_sets = defaultdict(list)       # strzelec -> lista zbiorów {gosp, gość} z jego meczów (fallback)
+    explicit_team = {}                  # strzelec -> kraj wpisany wprost w panelu (priorytet)
+
+    for m in matches:
+        if not m.scorers:
+            continue
+        sc = m.scorers
+        st = m.scorer_teams or []
+        has_teams = len(st) == len(sc)   # czy mamy równoległą listę krajów
+        match_teams = {m.home_team, m.away_team}
+        for idx, name in enumerate(sc):
+            key = (name or "").strip()
+            if not key or is_own_goal(key):     # samobóje nie liczą się do strzelców
+                continue
+            goals[key] += 1
+            if has_teams and st[idx]:
+                explicit_team[key] = st[idx]    # jawny kraj — nadpisuje
+            team_sets[key].append(match_teams)
+
+    scorers = []
+    for name, count in goals.items():
+        team = explicit_team.get(name)          # 1) kraj wpisany w panelu
+        if not team:                            # 2) fallback: część wspólna meczów
+            sets = team_sets[name]
+            if sets:
+                common = set.intersection(*sets)
+                if len(common) == 1:
+                    team = next(iter(common))
+        scorers.append({
+            "name": name,
+            "goals": count,
+            "team": team,
+            "flag_code": TEAM_FLAG_CODES.get(team) if team else None,
+        })
+
+    scorers.sort(key=lambda x: x["name"].lower())          # alfabetycznie...
+    scorers.sort(key=lambda x: x["goals"], reverse=True)   # ...a potem wg goli malejąco (stabilne)
+    return scorers
 
 def build_knockout_bracket(db: Session):
     bracket = {
@@ -679,6 +767,8 @@ def read_dashboard(request: Request, db: Session = Depends(get_db)):
     star_ranking = sorted(star_stats.values(), key=lambda x: (-x["goals"], -x["points"], -x["chosen_by"]))
 
     group_standings = calculate_group_standings(db)
+    third_place_ranking = calculate_third_place_ranking(db)
+    top_scorers = calculate_top_scorers(db)
     knockout_bracket = build_knockout_bracket(db)
     upcoming_match_ids = get_upcoming_matches(db, 8)
 
@@ -709,7 +799,7 @@ def read_dashboard(request: Request, db: Session = Depends(get_db)):
             "current_rank": current_rank,  # <--- Wysłanie do HTML'a
             "active_picks": active_picks,
             "recent_picks": recent_picks,
-            "group_standings": group_standings, "knockout_bracket": knockout_bracket,
+            "group_standings": group_standings, "third_place_ranking": third_place_ranking, "top_scorers": top_scorers, "knockout_bracket": knockout_bracket,
             "pick_stats": pick_stats, "match_summary": match_summary, "star_ranking": star_ranking, "now": now_utc, "timedelta": timedelta, "upcoming_match_ids": upcoming_match_ids,
             "team_positions": team_positions
         }
@@ -1048,6 +1138,7 @@ def update_match_result(match_id: int, result: MatchResultUpdate, db: Session = 
 
     match.result = result.result
     match.scorers = result.scorers
+    match.scorer_teams = result.scorer_teams
     match.penalties = result.penalties
     match.is_finished = True
     match.is_locked = True
@@ -1261,6 +1352,18 @@ def admin_panel(request: Request, db: Session = Depends(get_db)):
 
     for m in matches:
         scorers_val = ", ".join(m.scorers) if m.scorers else ""
+
+        # Podział istniejących strzelców na gospodarza/gościa (do dwóch pól w panelu).
+        _home_sc, _away_sc = [], []
+        _sc = m.scorers or []
+        _st = m.scorer_teams or []
+        if _st and len(_st) == len(_sc):
+            for _n, _t in zip(_sc, _st):
+                (_away_sc if _t == m.away_team else _home_sc).append(_n)
+        else:
+            _home_sc = list(_sc)  # stare dane bez krajów — wszystko w polu gospodarza, admin rozdzieli
+        home_scorers_val = ", ".join(_home_sc)
+        away_scorers_val = ", ".join(_away_sc)
         is_ko = m.stage != "group"
         pen_input = f'<input type="text" id="pen-{m.id}" value="{m.penalties or ""}" placeholder="Karne (np. 4:3)" class="w-full bg-[#1a1e26] border border-white/10 rounded-lg px-3 py-2 text-xs text-amber-300 focus:outline-none focus:border-amber-500 mb-2">' if is_ko else ""
         
@@ -1284,7 +1387,10 @@ def admin_panel(request: Request, db: Session = Depends(get_db)):
                     <p class="text-[10px] text-gray-500 mb-1.5 italic">Popraw wynik / bramki:</p>
                     <div class="flex gap-2 mb-2">
                         <input type="text" id="res-{m.id}" value="{m.result or ''}" class="w-16 text-center bg-[#1a1e26] border border-white/10 rounded-lg px-2 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
-                        <input type="text" id="sc-{m.id}" value="{scorers_val}" placeholder="Strzelcy (np. Mbappe, Kane)" class="flex-1 bg-[#1a1e26] border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+                        <div class="flex-1 flex flex-col gap-1.5">
+                            <input type="text" id="sch-{m.id}" data-team="{m.home_team}" value="{home_scorers_val}" placeholder="⚽ Strzelcy {m.home_team}" class="w-full bg-[#1a1e26] border border-emerald-500/30 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+                            <input type="text" id="sca-{m.id}" data-team="{m.away_team}" value="{away_scorers_val}" placeholder="⚽ Strzelcy {m.away_team}" class="w-full bg-[#1a1e26] border border-sky-500/30 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-500">
+                        </div>
                     </div>
                     {pen_input}
                     <button onclick="saveMatch({m.id})" class="w-full bg-white/10 hover:bg-white/20 text-white font-bold text-xs py-2 rounded-lg transition">Aktualizuj wynik</button>
@@ -1305,7 +1411,10 @@ def admin_panel(request: Request, db: Session = Depends(get_db)):
                 <div class="mt-auto pt-2">
                     <div class="flex gap-2 mb-2">
                         <input type="text" id="res-{m.id}" placeholder="Wynik" class="w-16 text-center bg-[#1a1e26] border border-amber-500/40 rounded-lg px-2 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
-                        <input type="text" id="sc-{m.id}" placeholder="Strzelcy (po przecinku)" class="flex-1 bg-[#1a1e26] border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+                        <div class="flex-1 flex flex-col gap-1.5">
+                            <input type="text" id="sch-{m.id}" data-team="{m.home_team}" placeholder="⚽ Strzelcy {m.home_team}" class="w-full bg-[#1a1e26] border border-emerald-500/30 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+                            <input type="text" id="sca-{m.id}" data-team="{m.away_team}" placeholder="⚽ Strzelcy {m.away_team}" class="w-full bg-[#1a1e26] border border-sky-500/30 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-500">
+                        </div>
                     </div>
                     {pen_input}
                     <button onclick="saveMatch({m.id})" class="w-full bg-amber-500 hover:bg-amber-600 text-gray-900 font-bold text-xs py-2.5 rounded-lg transition shadow-md">Rozlicz Punkty</button>
@@ -1535,7 +1644,8 @@ def admin_panel(request: Request, db: Session = Depends(get_db)):
                 if (!secret) return alert('Błąd: Musisz podać ADMIN_SECRET na górze!');
 
                 const resultString = document.getElementById('res-' + matchId).value.trim();
-                const scorersString = document.getElementById('sc-' + matchId).value.trim();
+                const homeEl = document.getElementById('sch-' + matchId);
+                const awayEl = document.getElementById('sca-' + matchId);
                 const penEl = document.getElementById('pen-' + matchId);
                 const penString = penEl ? penEl.value.trim() : '';
 
@@ -1548,7 +1658,12 @@ def admin_panel(request: Request, db: Session = Depends(get_db)):
                     }}
                 }}
 
-                const scorersArray = scorersString ? scorersString.split(',').map(s => s.trim()).filter(s => s.length > 0) : [];
+                const homeTeam = homeEl ? (homeEl.dataset.team || '') : '';
+                const awayTeam = awayEl ? (awayEl.dataset.team || '') : '';
+                const homeNames = (homeEl && homeEl.value.trim()) ? homeEl.value.split(',').map(s => s.trim()).filter(s => s.length > 0) : [];
+                const awayNames = (awayEl && awayEl.value.trim()) ? awayEl.value.split(',').map(s => s.trim()).filter(s => s.length > 0) : [];
+                const scorersArray = homeNames.concat(awayNames);
+                const scorerTeamsArray = homeNames.map(() => homeTeam).concat(awayNames.map(() => awayTeam));
 
                 if (!confirm('Zapisać wynik ' + resultString + (penString ? ' (k.' + penString + ')' : '') + ' i rozliczyć punkty graczy?')) return;
 
@@ -1556,7 +1671,7 @@ def admin_panel(request: Request, db: Session = Depends(get_db)):
                     const response = await fetch('/matches/' + matchId + '/result', {{
                         method: 'PUT',
                         headers: {{ 'Content-Type': 'application/json', 'x-admin-secret': secret }},
-                        body: JSON.stringify({{ result: resultString, scorers: scorersArray, penalties: penString || null }})
+                        body: JSON.stringify({{ result: resultString, scorers: scorersArray, scorer_teams: scorerTeamsArray, penalties: penString || null }})
                     }});
 
                     if (response.ok) {{
