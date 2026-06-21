@@ -643,7 +643,7 @@
         <div id="tab-groups" class="tab-content">
             <div class="flex flex-wrap gap-1.5 sm:gap-2 mb-4">
                 <button class="match-subtab-btn group-subtab-btn active" data-gcat="groups" onclick="switchGroupTab('groups')">📊 Grupy</button>
-                <button class="match-subtab-btn group-subtab-btn" data-gcat="thirds" onclick="switchGroupTab('thirds')">🥉 Klasyfikacja z 3. miejsca</button>
+                <button class="match-subtab-btn group-subtab-btn" data-gcat="thirds" onclick="switchGroupTab('thirds')">🥉 z 3. miejsca</button>
                 <button class="match-subtab-btn group-subtab-btn" data-gcat="scorers" onclick="switchGroupTab('scorers')">⚽ Strzelcy</button>
             </div>
 
@@ -693,7 +693,6 @@
                                 <th class="text-center">Pkt</th>
                                 <th class="text-center hidden sm:table-cell">B</th>
                                 <th class="text-center">G+/-</th>
-                                <th class="text-center pr-3">Awans</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -706,10 +705,9 @@
                                 <td class="text-center font-semibold" style="color: var(--success);">{{ t.points }}</td>
                                 <td class="text-center font-mono text-xs hidden sm:table-cell" style="color: var(--text-muted);">{{ t.goals_for }}:{{ t.goals_against }}</td>
                                 <td class="text-center font-medium" style="color: {% if t.goal_diff >= 0 %}var(--success){% else %}var(--danger){% endif %};">{{ t.goal_diff }}</td>
-                                <td class="text-center pr-3">{% if t.advances %}<span style="color: var(--success); font-weight:700;">✓</span>{% else %}<span style="color: var(--text-faint);">—</span>{% endif %}</td>
                             </tr>
                             {% if loop.index == 8 %}
-                            <tr><td colspan="8" style="padding:0;"><div style="border-top: 2px dashed var(--accent); opacity:0.45; margin:1px 0;"></div></td></tr>
+                            <tr><td colspan="7" style="padding:0;"><div style="border-top: 2px dashed var(--accent); opacity:0.45; margin:1px 0;"></div></td></tr>
                             {% endif %}
                             {% endfor %}
                         </tbody>
