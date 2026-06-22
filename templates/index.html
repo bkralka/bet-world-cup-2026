@@ -777,8 +777,8 @@
                         <span class="text-[10px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full" style="{% if match.stage == 'final' %}background: rgba(251,191,36,0.12); color: var(--gold);{% else %}background: var(--accent-soft); color: var(--accent);{% endif %}">{% if match.stage == 'final' %}🏆 {% endif %}{{ stage_labels.get(match.stage, 'Faza pucharowa') }}{% if match.multiplier and match.multiplier > 1 %} · ×{{ match.multiplier }}{% endif %}</span>
                     </div>
                     {% endif %}
-                    <div class="flex flex-wrap items-start sm:items-center gap-3 sm:gap-4">
-                        <div class="flex-1 min-w-0 sm:min-w-[280px]">
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+                        <div class="flex-1 min-w-0 w-full">
                             <div class="flex items-center gap-2 sm:gap-3 justify-between">
                                 <div class="font-semibold text-xs sm:text-sm flex-1 min-w-0 overflow-hidden whitespace-nowrap text-ellipsis text-right"><span class="team-name" data-team="{{ match.home_team }}">{{ match.home_team }}</span></div>
                                 {% if match.is_finished and match.result %}
@@ -834,7 +834,7 @@
                             </div>
                             {% endif %}
                         </div>
-                        <div class="text-right flex-shrink-0 self-start sm:self-auto" style="min-width:110px;">
+                        <div class="w-full sm:w-auto sm:min-w-[110px] flex items-center justify-between sm:block border-t border-white/5 sm:border-0 pt-3 sm:pt-0 mt-2 sm:mt-0 text-right">
                             {% set ns = namespace(pick=none) %}
                             {% if current_player %}
                                 {% for pick in picks %}
@@ -845,25 +845,25 @@
                             {% if match.is_finished %}
                                 {% if current_player and ns.pick %}
                                     {% set pts = ns.pick.points_earned %}
-                                    <div class="text-[11px]" style="color: var(--text-faint);">Twój typ: <span style="color: var(--text-muted); font-weight:600;">{{ ns.pick.predicted_result }}</span></div>
-                                    <div class="font-display font-bold text-lg mt-0.5" style="color: {% if pts > 0 %}var(--success){% elif pts < 0 %}var(--danger){% else %}var(--text-muted){% endif %};">{{ '+' if pts > 0 else '' }}{{ pts }} pkt</div>
+                                    <div class="text-[12px] text-left sm:text-right" style="color: var(--text-faint);">Twój typ: <span style="color: var(--text-muted); font-weight:600;">{{ ns.pick.predicted_result }}</span></div>
+                                    <div class="font-display font-bold text-xl sm:text-lg sm:mt-0.5" style="color: {% if pts > 0 %}var(--success){% elif pts < 0 %}var(--danger){% else %}var(--text-muted){% endif %};">{{ '+' if pts > 0 else '' }}{{ pts }} pkt</div>
                                 {% else %}
-                                    <span class="text-xs" style="color: var(--text-faint);">Zakończony</span>
+                                    <span class="text-xs w-full text-center sm:text-right block" style="color: var(--text-faint);">Zakończony</span>
                                 {% endif %}
                             {% elif current_player %}
                                 {% set betting_closed = match.match_date - timedelta(minutes=10) <= now() %}
                                 {% if ns.pick and betting_closed %}
-                                    <span class="text-xs font-semibold px-3 py-1.5 rounded-lg inline-block" style="background: var(--bg-elevated); color: var(--text-muted);">🔒 Twój typ: {{ ns.pick.predicted_result }}</span>
+                                    <span class="text-xs font-semibold px-3 py-2 sm:py-1.5 rounded-lg w-full text-center sm:text-right block" style="background: var(--bg-elevated); color: var(--text-muted);">🔒 Twój typ: {{ ns.pick.predicted_result }}</span>
                                 {% elif ns.pick and match.id in upcoming_match_ids %}
-                                    <button onclick="openPickModal({{ match.id }}, '{{ match.home_team }}', '{{ match.away_team }}', '{{ ns.pick.predicted_result }}')" class="text-xs font-semibold px-3 py-1.5 rounded-lg transition" style="background: var(--success-soft); color: var(--success); border: 1px solid rgba(74,222,128,0.3);">✏️ Edytuj ({{ ns.pick.predicted_result }})</button>
+                                    <button onclick="openPickModal({{ match.id }}, '{{ match.home_team }}', '{{ match.away_team }}', '{{ ns.pick.predicted_result }}')" class="w-full sm:w-auto text-xs font-semibold px-4 py-2.5 sm:px-3 sm:py-1.5 rounded-lg transition" style="background: var(--success-soft); color: var(--success); border: 1px solid rgba(74,222,128,0.3);">✏️ Edytuj ({{ ns.pick.predicted_result }})</button>
                                 {% elif ns.pick %}
-                                    <span class="text-xs font-semibold px-3 py-1.5 rounded-lg inline-block" style="background: var(--bg-elevated); color: var(--text-muted);">Twój typ: {{ ns.pick.predicted_result }}</span>
+                                    <span class="text-xs font-semibold px-3 py-2 sm:py-1.5 rounded-lg w-full text-center sm:text-right block" style="background: var(--bg-elevated); color: var(--text-muted);">Twój typ: {{ ns.pick.predicted_result }}</span>
                                 {% elif match.id in upcoming_match_ids %}
-                                    <button onclick="openPickModal({{ match.id }}, '{{ match.home_team }}', '{{ match.away_team }}')" class="pick-btn px-5 py-2 rounded-lg text-xs transition">Typuj</button>
+                                    <button onclick="openPickModal({{ match.id }}, '{{ match.home_team }}', '{{ match.away_team }}')" class="pick-btn w-full sm:w-auto px-5 py-2.5 sm:py-2 rounded-lg text-xs transition">Typuj</button>
                                 {% elif betting_closed %}
-                                    <span class="text-xs" style="color: var(--text-faint);">Obstawianie zamknięte</span>
+                                    <span class="text-xs w-full text-center sm:text-right block" style="color: var(--text-faint);">Obstawianie zamknięte</span>
                                 {% else %}
-                                    <span class="text-xs" style="color: var(--text-faint);">Poza pulą</span>
+                                    <span class="text-xs w-full text-center sm:text-right block" style="color: var(--text-faint);">Poza pulą</span>
                                 {% endif %}
                             {% endif %}
                         </div>
