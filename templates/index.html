@@ -855,12 +855,10 @@
                                 {% if ns.pick and betting_closed %}
                                     <span class="text-xs font-semibold px-3 py-2 sm:py-1.5 rounded-lg w-full text-center sm:text-right block" style="background: var(--bg-elevated); color: var(--text-muted);">🔒 Twój typ: {{ ns.pick.predicted_result }}</span>
                                 {% elif ns.pick and match.id in upcoming_match_ids %}
-                                    <button onclick="openPickModal({{ match.id }}, '{{ match.home_team }}', '{{ match.away_team }}', '{{ ns.pick.predicted_result }}')" class="text-xs font-semibold px-6 py-2.5 sm:px-3 sm:py-1.5 rounded-lg transition" style="background: var(--success-soft); color: var(--success); border: 1px solid rgba(74,222,128,0.3);">✏️ Edytuj ({{ ns.pick.predicted_result }})</button>
-                                {% elif ns.pick %}
+                                    <button onclick="openPickModal({{ match.id }}, '{{ match.home_team }}', '{{ match.away_team }}', '{{ ns.pick.predicted_result }}')" class="mx-auto sm:mx-0 text-xs font-semibold px-6 py-2.5 sm:px-3 sm:py-1.5 rounded-lg transition" style="background: var(--success-soft); color: var(--success); border: 1px solid rgba(74,222,128,0.3);">✏️ Edytuj ({{ ns.pick.predicted_result }})</button>                                {% elif ns.pick %}
                                     <span class="text-xs font-semibold px-3 py-2 sm:py-1.5 rounded-lg w-full text-center sm:text-right block" style="background: var(--bg-elevated); color: var(--text-muted);">Twój typ: {{ ns.pick.predicted_result }}</span>
                                 {% elif match.id in upcoming_match_ids %}
-                                    <button onclick="openPickModal({{ match.id }}, '{{ match.home_team }}', '{{ match.away_team }}')" class="pick-btn px-8 py-2.5 sm:px-5 sm:py-2 rounded-lg text-xs transition">Typuj</button>                                {% elif betting_closed %}
-                                    <span class="text-xs w-full text-center sm:text-right block" style="color: var(--text-faint);">Obstawianie zamknięte</span>
+                                <button onclick="openPickModal({{ match.id }}, '{{ match.home_team }}', '{{ match.away_team }}')" class="pick-btn mx-auto sm:mx-0 px-8 py-2.5 sm:px-5 sm:py-2 rounded-lg text-xs transition">Typuj</button>                                    <span class="text-xs w-full text-center sm:text-right block" style="color: var(--text-faint);">Obstawianie zamknięte</span>
                                 {% else %}
                                     <span class="text-xs w-full text-center sm:text-right block" style="color: var(--text-faint);">Poza pulą</span>
                                 {% endif %}
