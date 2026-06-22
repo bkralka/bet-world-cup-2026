@@ -834,7 +834,15 @@
                             </div>
                             {% endif %}
                         </div>
-                                {% if match.is_finished %}
+                        <div class="w-full sm:w-auto sm:min-w-[110px] flex items-center justify-between sm:block border-t border-white/5 sm:border-0 pt-3 sm:pt-0 mt-2 sm:mt-0 text-right">
+                            {% set ns = namespace(pick=none) %}
+                            {% if current_player %}
+                                {% for pick in picks %}
+                                    {% if pick.player_id == current_player.id and pick.match_id == match.id %}{% set ns.pick = pick %}{% endif %}
+                                {% endfor %}
+                            {% endif %}
+
+                            {% if match.is_finished %}
                                 {% if current_player and ns.pick %}
                                     {% set pts = ns.pick.points_earned %}
                                     <div class="text-[12px] text-left sm:text-right" style="color: var(--text-faint);">Twój typ: <span style="color: var(--text-muted); font-weight:600;">{{ ns.pick.predicted_result }}</span></div>
@@ -847,11 +855,15 @@
                                 {% if ns.pick and betting_closed %}
                                     <span class="text-xs font-semibold px-3 py-2 sm:py-1.5 rounded-lg w-full text-center sm:text-right block" style="background: var(--bg-elevated); color: var(--text-muted);">🔒 Twój typ: {{ ns.pick.predicted_result }}</span>
                                 {% elif ns.pick and match.id in upcoming_match_ids %}
-                                    <button onclick="openPickModal({{ match.id }}, '{{ match.home_team }}', '{{ match.away_team }}', '{{ ns.pick.predicted_result }}')" class="mx-auto sm:mx-0 text-xs font-semibold px-6 py-2.5 sm:px-3 sm:py-1.5 rounded-lg transition" style="background: var(--success-soft); color: var(--success); border: 1px solid rgba(74,222,128,0.3);">✏️ Edytuj ({{ ns.pick.predicted_result }})</button>                                
+                                    <div class="w-full flex justify-center sm:justify-end">
+                                        <button onclick="openPickModal({{ match.id }}, '{{ match.home_team }}', '{{ match.away_team }}', '{{ ns.pick.predicted_result }}')" class="text-xs font-semibold px-6 py-2.5 sm:px-3 sm:py-1.5 rounded-lg transition" style="background: var(--success-soft); color: var(--success); border: 1px solid rgba(74,222,128,0.3);">✏️ Edytuj ({{ ns.pick.predicted_result }})</button>
+                                    </div>
                                 {% elif ns.pick %}
                                     <span class="text-xs font-semibold px-3 py-2 sm:py-1.5 rounded-lg w-full text-center sm:text-right block" style="background: var(--bg-elevated); color: var(--text-muted);">Twój typ: {{ ns.pick.predicted_result }}</span>
                                 {% elif match.id in upcoming_match_ids %}
-                                    <button onclick="openPickModal({{ match.id }}, '{{ match.home_team }}', '{{ match.away_team }}')" class="pick-btn mx-auto sm:mx-0 px-8 py-2.5 sm:px-5 sm:py-2 rounded-lg text-xs transition">Typuj</button>
+                                    <div class="w-full flex justify-center sm:justify-end">
+                                        <button onclick="openPickModal({{ match.id }}, '{{ match.home_team }}', '{{ match.away_team }}')" class="pick-btn px-8 py-2.5 sm:px-5 sm:py-2 rounded-lg text-xs transition">Typuj</button>
+                                    </div>
                                 {% elif betting_closed %}
                                     <span class="text-xs w-full text-center sm:text-right block" style="color: var(--text-faint);">Obstawianie zamknięte</span>
                                 {% else %}
