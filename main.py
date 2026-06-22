@@ -11,6 +11,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 from sqlalchemy import text, inspect
+from sqlalchemy.exc import IntegrityError
 from pydantic import BaseModel, validator
 from collections import defaultdict, Counter
 import models
@@ -79,12 +80,41 @@ def ensure_columns():
     except Exception as e:
         print(f"⚠️ ensure_columns: {e}", flush=True)
 
+def ensure_pick_uniqueness():
+    """Usuwa zduplikowane typy (ten sam gracz + mecz) i zakłada unikalny indeks,
+    żeby duplikaty nie mogły już powstać (np. przez podwójne kliknięcie / race condition).
+    Zostawiamy najnowszy typ (największe id) dla każdej pary (player_id, match_id)."""
+    try:
+        insp = inspect(engine)
+        if "user_picks" not in insp.get_table_names():
+            return
+        with engine.begin() as conn:
+            # 1) Usuń duplikaty — zostaw najnowszy wpis na parę (gracz, mecz)
+            res = conn.execute(text("""
+                DELETE FROM user_picks
+                WHERE id NOT IN (
+                    SELECT MAX(id) FROM user_picks GROUP BY player_id, match_id
+                )
+            """))
+            removed = res.rowcount if res.rowcount is not None else 0
+            # 2) Załóż unikalny indeks (idempotentnie) — twardo blokuje przyszłe duplikaty
+            conn.execute(text("""
+                CREATE UNIQUE INDEX IF NOT EXISTS uq_user_picks_player_match
+                ON user_picks (player_id, match_id)
+            """))
+        if removed:
+            print(f"🔒 user_picks: usunięto {removed} zduplikowanych typów", flush=True)
+        print("🔒 user_picks: unikalny indeks (player_id, match_id) zapewniony", flush=True)
+    except Exception as e:
+        print(f"⚠️ ensure_pick_uniqueness: {e}", flush=True)
+
 @app.on_event("startup")
 def startup_event():
     print("⏳ Otwieram port i próbuję połączyć się z bazą...", flush=True)
     try:
         models.Base.metadata.create_all(bind=engine)
         ensure_columns()
+        ensure_pick_uniqueness()
         print("⚽ CONNECTED TO DATABASE!", flush=True)
     except Exception as e:
         print(f"❌ BŁĄD BAZY DANYCH: {e}", flush=True)
@@ -926,7 +956,22 @@ def create_pick(
 
     new_pick = models.UserPick(player_id=pick.player_id, match_id=pick.match_id, predicted_result=pick.predicted_result)
     db.add(new_pick)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        # Wyścig: równoległy request (np. podwójne kliknięcie) zdążył już utworzyć typ.
+        # Zamiast tworzyć duplikat — zaktualizuj istniejący.
+        db.rollback()
+        existing = db.query(models.UserPick).filter(
+            models.UserPick.player_id == pick.player_id,
+            models.UserPick.match_id == pick.match_id
+        ).first()
+        if existing:
+            existing.predicted_result = pick.predicted_result
+            db.commit()
+            return existing
+        raise
+    db.refresh(new_pick)
     return new_pick
 
 KO_DATES = {

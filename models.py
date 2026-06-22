@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, JSON
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, JSON, UniqueConstraint
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from database import Base
@@ -54,6 +54,8 @@ class Match(Base):
 
 class UserPick(Base):
     __tablename__ = "user_picks"
+    # Jeden typ na parę (gracz, mecz) — twarda blokada duplikatów na poziomie bazy.
+    __table_args__ = (UniqueConstraint("player_id", "match_id", name="uq_user_picks_player_match"),)
     id = Column(Integer, primary_key=True, index=True)
     player_id = Column(Integer, ForeignKey("players.id"))
     match_id = Column(Integer, ForeignKey("matches.id"))

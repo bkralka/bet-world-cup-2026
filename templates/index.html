@@ -2117,6 +2117,8 @@ function openTeamDetail(name) {
         document.getElementById('closeModal').onclick = () => pickModal.classList.add('hidden');
         document.getElementById('confirmPick').onclick = async () => {
             if(!selectedMatchId) return;
+            const btn = document.getElementById('confirmPick');
+            if (btn.disabled) return;  // zapis już trwa — ignoruj kolejne kliknięcia
             const predicted = scoreInput.value.trim();
             if(!predicted.match(/^\d{1,2}:\d{1,2}$/)) {
                 alert("Format: 2:1 (maks. dwie cyfry)"); return;
@@ -2128,19 +2130,31 @@ function openTeamDetail(name) {
             const playerId = {{ current_player.id if current_player else 0 }};
             if(!playerId) return;
 
-            const res = await fetch("/picks/", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ player_id: playerId, match_id: parseInt(selectedMatchId), predicted_result: predicted })
-            });
-            if(res.ok) {
-                const activeTab = document.querySelector('.tab-btn.active')?.dataset.tab;
-                if (activeTab) history.replaceState(null, '', '#' + activeTab);
-                location.reload();
-            }
-            else {
-                const err = await res.json();
-                alert("Błąd: " + JSON.stringify(err.detail || err));
+            const origLabel = btn.textContent;
+            btn.disabled = true;
+            btn.style.opacity = '0.6';
+            btn.style.cursor = 'not-allowed';
+            btn.textContent = 'Zapisywanie…';
+
+            try {
+                const res = await fetch("/picks/", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ player_id: playerId, match_id: parseInt(selectedMatchId), predicted_result: predicted })
+                });
+                if(res.ok) {
+                    const activeTab = document.querySelector('.tab-btn.active')?.dataset.tab;
+                    if (activeTab) history.replaceState(null, '', '#' + activeTab);
+                    location.reload();  // sukces → przeładowanie (przycisk i tak zniknie)
+                }
+                else {
+                    const err = await res.json();
+                    alert("Błąd: " + JSON.stringify(err.detail || err));
+                    btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer'; btn.textContent = origLabel;
+                }
+            } catch (e) {
+                alert("Błąd połączenia — spróbuj ponownie za chwilę.");
+                btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer'; btn.textContent = origLabel;
             }
         };
 
