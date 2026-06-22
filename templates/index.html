@@ -790,16 +790,32 @@
                             </div>
                             <p class="text-center text-xs mt-2.5" style="color: var(--text-muted);">{{ match.match_date.strftime('%d.%m.%Y · %H:%M') }}{% if match.is_finished and match.penalties %} · <span style="color: var(--gold);">karne {{ match.penalties }}</span>{% endif %}</p>
 
-                            {% if match.is_finished and match.scorers %}
-                            <div class="flex flex-wrap justify-center gap-1.5 mt-2">
-                                {% for s in match.scorers %}
-                                {% if (s or '')|trim|lower in ['samobój','samoboj','samobója','samobojka','og','own goal'] %}
-                                <span class="text-[10px] px-2 py-0.5 rounded-full" style="background: rgba(248,113,113,0.12); color: var(--danger);" title="Gol samobójczy — nie liczy się do klasyfikacji strzelców">❌ samobój</span>
-                                {% else %}
-                                <span class="scorer-pill text-[10px] px-2 py-0.5 rounded-full inline-flex items-center gap-1" data-team="{{ match.scorer_teams[loop.index0] if (match.scorer_teams and loop.index0 < match.scorer_teams|length) else '' }}" style="background: var(--bg-elevated); color: var(--text-muted);"><span class="sc-ico">⚽</span> {{ s }}</span>
-                                {% endif %}
+                            {% if match.is_finished and match.goal_sides.rows %}
+                            {% if match.goal_sides.has_sides %}
+                            <div class="mt-2.5 text-[11px]" style="position:relative;">
+                                <div style="position:absolute; left:50%; top:0; bottom:0; width:1px; background:var(--border-subtle);"></div>
+                                {% for g in match.goal_sides.rows %}
+                                <div class="grid grid-cols-2 gap-3 py-0.5">
+                                    <div class="flex justify-center items-baseline gap-1.5">
+                                        {% if g.side == 'home' %}
+                                        {% if g.minute %}<span class="font-mono" style="color: var(--accent); flex-shrink:0;">{{ g.minute }}'</span>{% endif %}
+                                        <span style="color: {% if g.is_own_goal %}var(--danger){% else %}var(--text){% endif %};">{% if g.is_own_goal %}❌ samobój{% else %}{{ g.name }}{% endif %}</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="flex justify-center items-baseline gap-1.5">
+                                        {% if g.side == 'away' %}
+                                        {% if g.minute %}<span class="font-mono" style="color: var(--accent); flex-shrink:0;">{{ g.minute }}'</span>{% endif %}
+                                        <span style="color: {% if g.is_own_goal %}var(--danger){% else %}var(--text){% endif %};">{% if g.is_own_goal %}❌ samobój{% else %}{{ g.name }}{% endif %}</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
                                 {% endfor %}
                             </div>
+                            {% else %}
+                            <div class="mt-2 text-center text-[11px]" style="color: var(--text-muted);">
+                                {% for g in match.goal_sides.rows %}<span>{% if g.is_own_goal %}<span style="color: var(--danger);">❌ samobój</span>{% else %}{{ g.name }}{% endif %}{% if g.minute %} {{ g.minute }}'{% endif %}</span>{% if not loop.last %} · {% endif %}{% endfor %}
+                            </div>
+                            {% endif %}
                             {% endif %}
 
                             {% set stats = pick_stats.get(match.id, {'home': 0, 'draw': 0, 'away': 0, 'total': 0}) %}

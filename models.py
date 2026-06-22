@@ -49,6 +49,8 @@ class Match(Base):
     scorers = Column(JSON, default=list) 
     # Równoległa do scorers lista krajów (ten sam indeks = ten sam gol). Pozwala znać reprezentację strzelca.
     scorer_teams = Column(JSON, default=list)
+    # Równoległa do scorers lista minut strzelenia gola (np. "23", "45+2" lub None).
+    scorer_minutes = Column(JSON, default=list)
 
     picks = relationship("UserPick", back_populates="match")
 

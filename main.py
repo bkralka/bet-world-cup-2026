@@ -58,6 +58,7 @@ def ensure_columns():
         "matches": [
             ("scorers", "JSON DEFAULT '[]'::json"),
             ("scorer_teams", "JSON DEFAULT '[]'::json"),
+            ("scorer_minutes", "JSON DEFAULT '[]'::json"),
             ("multiplier", "INTEGER DEFAULT 1"),
             ("penalties", "VARCHAR"),
         ],
@@ -156,6 +157,7 @@ class MatchResultUpdate(BaseModel):
     result: str
     scorers: List[str] = []
     scorer_teams: List[str] = []
+    scorer_minutes: List[Optional[str]] = []
     penalties: Optional[str] = None
 
     @validator('result')
@@ -335,6 +337,77 @@ OWN_GOAL_ALIASES = {"samobój", "samoboj", "samobója", "samobojka", "og", "own 
 
 def is_own_goal(name) -> bool:
     return (name or "").strip().lower() in OWN_GOAL_ALIASES
+
+def _minute_sort_key(minute):
+    """Klucz sortowania: "45+2" -> 45.02, "12" -> 12, brak -> na koniec."""
+    if not minute:
+        return 9999.0
+    s = str(minute).strip().replace("'", "")
+    if "+" in s:
+        base, _, extra = s.partition("+")
+        try:
+            return int(base) + (int(extra or 0) / 100.0)
+        except ValueError:
+            return 9999.0
+    try:
+        return float(int(s))
+    except ValueError:
+        return 9999.0
+
+def build_goal_timeline(m):
+    """Chronologiczna lista goli meczu: [{name, team, flag_code, minute, is_own_goal}]."""
+    sc = m.scorers or []
+    st = m.scorer_teams or []
+    mins = m.scorer_minutes or []
+    goals = []
+    for i, name in enumerate(sc):
+        nm = (name or "").strip()
+        if not nm:
+            continue
+        team = st[i] if i < len(st) else None
+        minute = mins[i] if i < len(mins) else None
+        og = is_own_goal(nm)
+        goals.append({
+            "name": nm,
+            "team": None if og else team,
+            "flag_code": (TEAM_FLAG_CODES.get(team) if (team and not og) else None),
+            "minute": minute,
+            "is_own_goal": og,
+            "_sort": _minute_sort_key(minute),
+        })
+    goals.sort(key=lambda g: g["_sort"])
+    return goals
+
+def build_goal_sides(m):
+    """Gole jako jedna lista posortowana po minucie, każdy z oznaczeniem strony.
+    Zwraca {'rows': [{name, minute, is_own_goal, side}], 'has_sides': bool}.
+    side: 'home' | 'away' | 'unknown' (stare dane bez kraju)."""
+    sc = m.scorers or []
+    st = m.scorer_teams or []
+    mins = m.scorer_minutes or []
+    rows = []
+    has_sides = False
+    for i, name in enumerate(sc):
+        nm = (name or "").strip()
+        if not nm:
+            continue
+        minute = mins[i] if i < len(mins) else None
+        team = st[i] if i < len(st) else None
+        if team == m.home_team:
+            side = "home"; has_sides = True
+        elif team == m.away_team:
+            side = "away"; has_sides = True
+        else:
+            side = "unknown"
+        rows.append({
+            "name": nm,
+            "minute": minute,
+            "is_own_goal": is_own_goal(nm),
+            "side": side,
+            "_sort": _minute_sort_key(minute),
+        })
+    rows.sort(key=lambda g: g["_sort"])
+    return {"rows": rows, "has_sides": has_sides}
 
 def calculate_group_standings(db: Session):
     matches = db.query(models.Match).filter(
@@ -690,6 +763,9 @@ self.addEventListener('fetch', (event) => {
 def read_dashboard(request: Request, db: Session = Depends(get_db)):
     players = db.query(models.Player).all()
     matches = db.query(models.Match).order_by(models.Match.match_date).all()
+    # Gole podzielone na strony (gospodarz/gość) do "Mecze → Zakończone"
+    for _m in matches:
+        _m.goal_sides = build_goal_sides(_m) if _m.is_finished else {"rows": [], "has_sides": False}
     picks = db.query(models.UserPick).all()
 
     leaderboard = db.query(models.Player).order_by(models.Player.total_points.desc()).limit(10).all()
@@ -1184,6 +1260,7 @@ def update_match_result(match_id: int, result: MatchResultUpdate, db: Session = 
     match.result = result.result
     match.scorers = result.scorers
     match.scorer_teams = result.scorer_teams
+    match.scorer_minutes = result.scorer_minutes
     match.penalties = result.penalties
     match.is_finished = True
     match.is_locked = True
@@ -1398,15 +1475,19 @@ def admin_panel(request: Request, db: Session = Depends(get_db)):
     for m in matches:
         scorers_val = ", ".join(m.scorers) if m.scorers else ""
 
-        # Podział istniejących strzelców na gospodarza/gościa (do dwóch pól w panelu).
+        # Podział istniejących strzelców na gospodarza/gościa (do dwóch pól w panelu), z minutą.
         _home_sc, _away_sc = [], []
         _sc = m.scorers or []
         _st = m.scorer_teams or []
+        _mn = m.scorer_minutes or []
+        def _label(_i, _n):
+            _min = _mn[_i] if _i < len(_mn) else None
+            return f"{_n} {_min}" if _min else _n
         if _st and len(_st) == len(_sc):
-            for _n, _t in zip(_sc, _st):
-                (_away_sc if _t == m.away_team else _home_sc).append(_n)
+            for _i, (_n, _t) in enumerate(zip(_sc, _st)):
+                (_away_sc if _t == m.away_team else _home_sc).append(_label(_i, _n))
         else:
-            _home_sc = list(_sc)  # stare dane bez krajów — wszystko w polu gospodarza, admin rozdzieli
+            _home_sc = [_label(_i, _n) for _i, _n in enumerate(_sc)]  # stare dane — admin rozdzieli
         home_scorers_val = ", ".join(_home_sc)
         away_scorers_val = ", ".join(_away_sc)
         is_ko = m.stage != "group"
@@ -1433,8 +1514,8 @@ def admin_panel(request: Request, db: Session = Depends(get_db)):
                     <div class="flex gap-2 mb-2">
                         <input type="text" id="res-{m.id}" value="{m.result or ''}" class="w-16 text-center bg-[#1a1e26] border border-white/10 rounded-lg px-2 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
                         <div class="flex-1 flex flex-col gap-1.5">
-                            <input type="text" id="sch-{m.id}" data-team="{m.home_team}" value="{home_scorers_val}" placeholder="⚽ Strzelcy {m.home_team}" class="w-full bg-[#1a1e26] border border-emerald-500/30 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
-                            <input type="text" id="sca-{m.id}" data-team="{m.away_team}" value="{away_scorers_val}" placeholder="⚽ Strzelcy {m.away_team}" class="w-full bg-[#1a1e26] border border-sky-500/30 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-500">
+                            <input type="text" id="sch-{m.id}" data-team="{m.home_team}" value="{home_scorers_val}" placeholder="⚽ {m.home_team} — np. Müller 23" class="w-full bg-[#1a1e26] border border-emerald-500/30 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+                            <input type="text" id="sca-{m.id}" data-team="{m.away_team}" value="{away_scorers_val}" placeholder="⚽ {m.away_team} — np. Džeko 78" class="w-full bg-[#1a1e26] border border-sky-500/30 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-500">
                         </div>
                     </div>
                     {pen_input}
@@ -1457,8 +1538,8 @@ def admin_panel(request: Request, db: Session = Depends(get_db)):
                     <div class="flex gap-2 mb-2">
                         <input type="text" id="res-{m.id}" placeholder="Wynik" class="w-16 text-center bg-[#1a1e26] border border-amber-500/40 rounded-lg px-2 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
                         <div class="flex-1 flex flex-col gap-1.5">
-                            <input type="text" id="sch-{m.id}" data-team="{m.home_team}" placeholder="⚽ Strzelcy {m.home_team}" class="w-full bg-[#1a1e26] border border-emerald-500/30 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
-                            <input type="text" id="sca-{m.id}" data-team="{m.away_team}" placeholder="⚽ Strzelcy {m.away_team}" class="w-full bg-[#1a1e26] border border-sky-500/30 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-500">
+                            <input type="text" id="sch-{m.id}" data-team="{m.home_team}" placeholder="⚽ {m.home_team} — np. Müller 23" class="w-full bg-[#1a1e26] border border-emerald-500/30 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+                            <input type="text" id="sca-{m.id}" data-team="{m.away_team}" placeholder="⚽ {m.away_team} — np. Džeko 78" class="w-full bg-[#1a1e26] border border-sky-500/30 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-500">
                         </div>
                     </div>
                     {pen_input}
@@ -1705,10 +1786,21 @@ def admin_panel(request: Request, db: Session = Depends(get_db)):
 
                 const homeTeam = homeEl ? (homeEl.dataset.team || '') : '';
                 const awayTeam = awayEl ? (awayEl.dataset.team || '') : '';
-                const homeNames = (homeEl && homeEl.value.trim()) ? homeEl.value.split(',').map(s => s.trim()).filter(s => s.length > 0) : [];
-                const awayNames = (awayEl && awayEl.value.trim()) ? awayEl.value.split(',').map(s => s.trim()).filter(s => s.length > 0) : [];
-                const scorersArray = homeNames.concat(awayNames);
-                const scorerTeamsArray = homeNames.map(() => homeTeam).concat(awayNames.map(() => awayTeam));
+                const splitField = (el) => (el && el.value.trim()) ? el.value.split(',').map(s => s.trim()).filter(s => s.length > 0) : [];
+                const parseEntry = (raw) => {{
+                    const parts = raw.trim().split(/\\s+/);
+                    const last = parts[parts.length - 1];
+                    if (parts.length > 1 && /^\\d+(\\+\\d+)?$/.test(last)) {{
+                        return {{ name: parts.slice(0, -1).join(' '), minute: last }};
+                    }}
+                    return {{ name: raw.trim(), minute: null }};
+                }};
+                const homeParsed = splitField(homeEl).map(parseEntry);
+                const awayParsed = splitField(awayEl).map(parseEntry);
+                const allParsed = homeParsed.concat(awayParsed);
+                const scorersArray = allParsed.map(x => x.name);
+                const scorerTeamsArray = homeParsed.map(() => homeTeam).concat(awayParsed.map(() => awayTeam));
+                const scorerMinutesArray = allParsed.map(x => x.minute);
 
                 if (!confirm('Zapisać wynik ' + resultString + (penString ? ' (k.' + penString + ')' : '') + ' i rozliczyć punkty graczy?')) return;
 
@@ -1716,7 +1808,7 @@ def admin_panel(request: Request, db: Session = Depends(get_db)):
                     const response = await fetch('/matches/' + matchId + '/result', {{
                         method: 'PUT',
                         headers: {{ 'Content-Type': 'application/json', 'x-admin-secret': secret }},
-                        body: JSON.stringify({{ result: resultString, scorers: scorersArray, scorer_teams: scorerTeamsArray, penalties: penString || null }})
+                        body: JSON.stringify({{ result: resultString, scorers: scorersArray, scorer_teams: scorerTeamsArray, scorer_minutes: scorerMinutesArray, penalties: penString || null }})
                     }});
 
                     if (response.ok) {{
