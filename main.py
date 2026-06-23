@@ -1288,10 +1288,16 @@ def update_match_result(match_id: int, result: MatchResultUpdate, db: Session = 
                 # KOREKTA
                 bd = dict(pick.points_breakdown or {})
                 old_sb = bd.get("streak_bonus", 0)
+                old_fav = bd.get("favorite", 0)
+                old_star = bd.get("star", 0)
                 new_sb = old_sb if pd["base_points"] > 0 else 0
                 grand_total = match_total + new_sb
 
                 player.total_points += (grand_total - (pick.points_earned or 0))
+                # FIX: agregaty reprezentacji i gwiazdy też muszą iść o RÓŻNICĘ
+                # (np. gdy strzelcy zostali dopisani już po zapisaniu samego wyniku).
+                player.favorite_team_points += (pd["favorite_bonus"] - old_fav)
+                player.star_player_points += (pd["star_player_bonus"] - old_star)
                 pick.points_earned = grand_total
                 
                 bd.update({
