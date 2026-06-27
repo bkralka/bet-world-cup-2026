@@ -1129,42 +1129,87 @@ def advance_tournament_if_ready(db):
             runners = {g: n for n, g, p in q if p == 2}
             third_list = [(n, g) for n, g, p in q if p == 3]
 
-            assigned_thirds = {}
+            # ===== Oficjalna tabela FIFA: które 3. miejsce może trafić na danego zwycięzcę =====
+            # (zwycięzca grupy nie może trafić na 3. miejsce z własnej grupy)
+            THIRD_ALLOWED = {
+                "A": {"C", "E", "F", "H", "I"},
+                "B": {"E", "F", "G", "I", "J"},
+                "E": {"A", "B", "C", "D", "F"},
+                "G": {"A", "E", "H", "I", "J"},
+                "I": {"C", "D", "F", "G", "H"},
+                "K": {"D", "E", "I", "J", "L"},
+                "L": {"E", "H", "I", "J", "K"},
+                # D nie ma w mediach pełnego 5-zestawu (zwykle rozstrzygnięte) — bierze resztę:
+                "D": {"A", "B", "C", "E", "F", "G", "H", "I", "J", "K", "L"},
+            }
+            winner_groups = ["A", "B", "D", "E", "G", "I", "K", "L"]
+            third_groups = [g for _, g in third_list]            # grupy 8 zakwalifikowanych 3. miejsc
+            third_name_by_group = {g: n for n, g in third_list}
+
+            # Wymuszone, potwierdzone przypisania wg oficjalnej tabeli FIFA / FlashScore
+            # (stosowane tylko jeśli dana grupa 3. miejsca faktycznie się zakwalifikowała):
+            #   Niemcy(E1)→3.(D) · Francja(I1)→3.(F) · USA(D1)→3.(B)
+            FORCED_THIRD = {"E": "D", "I": "F", "D": "B"}
+            assigned_group = {}   # third_group -> winner_group
+            for _wg, _tg in FORCED_THIRD.items():
+                if _tg in third_groups:
+                    assigned_group[_tg] = _wg
+            forced_winners = {wg for wg, tg in FORCED_THIRD.items() if tg in third_groups}
+            remaining_winners = [w for w in winner_groups if w not in forced_winners]
+            remaining_thirds = [g for g in third_groups if g not in assigned_group]
+
+            # Pozostałe przypisania: dopasowanie dwudzielne (augmenting path) w ramach dozwolonych grup FIFA.
+            def _try_assign(wg, visited):
+                for tg in remaining_thirds:
+                    if tg in THIRD_ALLOWED.get(wg, set()) and tg not in visited:
+                        visited.add(tg)
+                        cur = assigned_group.get(tg)
+                        if cur is None or (cur in remaining_winners and _try_assign(cur, visited)):
+                            assigned_group[tg] = wg
+                            return True
+                return False
+            for wg in sorted(remaining_winners, key=lambda w: len([g for g in remaining_thirds if g in THIRD_ALLOWED.get(w, set())])):
+                _try_assign(wg, set())
+
+            assigned_thirds = {}   # winner_group -> nazwa drużyny 3. miejsca
             used_thirds = set()
-            
-            # Bezpieczne przypisanie 3. miejsc z fallbackiem
-            for wg in ["A", "B", "D", "E", "G", "I", "K", "L"]:
-                chosen = None
-                # Próba 1: Szukamy drużyny z innej grupy
-                for tn, tg in third_list:
-                    if tn not in used_thirds and tg != wg:
-                        chosen = tn
-                        break
-                # Próba 2 (Fallback): Jeśli się nie da, bierzemy pierwszą wolną
-                if not chosen:
-                    for tn, tg in third_list:
-                        if tn not in used_thirds:
-                            chosen = tn
-                            break
-                assigned_thirds[wg] = chosen
-                if chosen:
-                    used_thirds.add(chosen)
+            wg_to_tg = {wg: tg for tg, wg in assigned_group.items()}
+            for wg in winner_groups:
+                tg = wg_to_tg.get(wg)
+                if tg is None:
+                    # Fallback (gdyby dopasowanie nie pokryło wszystkich) — pierwsze wolne z innej grupy
+                    for tn, tgg in third_list:
+                        if tn not in used_thirds and tgg != wg:
+                            assigned_thirds[wg] = tn; used_thirds.add(tn); break
+                else:
+                    nm = third_name_by_group.get(tg)
+                    assigned_thirds[wg] = nm
+                    if nm:
+                        used_thirds.add(nm)
 
             # Pomocnicze funkcje pobierające drużyny do drabinki
             def W(g): return winners.get(g, f"Brak 1{g}")
             def R(g): return runners.get(g, f"Brak 2{g}")
             def T(g): return assigned_thirds.get(g, f"Brak 3{g}")
 
-            # Oficjalny krzyżowy układ par (zapobiega szybkim rewanżom i dzieli siły)
+            # Oficjalny układ par 1/16 (kolejność od góry wg FlashScore/FIFA — winner = gospodarz)
             bracket_order = [
-                (W('A'), T('A')),   (R('C'), W('F')),
-                (W('E'), T('E')),   (R('A'), R('B')),
-                (W('I'), T('I')),   (R('D'), R('G')),
-                (W('C'), R('F')),   (W('L'), T('L')),
-                (W('B'), T('B')),   (R('H'), W('J')),
-                (W('G'), T('G')),   (R('E'), R('I')),
-                (W('K'), T('K')),   (R('K'), R('L')),
-                (W('H'), R('J')),   (W('D'), T('D'))
+                (W('E'), T('E')),   # 1.  E1 vs 3.(D)
+                (W('I'), T('I')),   # 2.  I1 vs 3.(F)
+                (R('A'), R('B')),   # 3.  A2 vs B2
+                (W('F'), R('C')),   # 4.  F1 vs C2
+                (R('K'), R('L')),   # 5.  K2 vs L2
+                (W('H'), R('J')),   # 6.  H1 vs J2  (Hiszpania)
+                (W('D'), T('D')),   # 7.  D1 vs 3.(B)
+                (W('G'), T('G')),   # 8.  G1 vs 3.   (Belgia)
+                (W('C'), R('F')),   # 9.  C1 vs F2
+                (R('E'), R('I')),   # 10. E2 vs I2
+                (W('A'), T('A')),   # 11. A1 vs 3.   (Meksyk)
+                (W('L'), T('L')),   # 12. L1 vs 3.
+                (W('J'), R('H')),   # 13. J1 vs H2
+                (R('D'), R('G')),   # 14. D2 vs G2
+                (W('B'), T('B')),   # 15. B1 vs 3.   (Szwajcaria)
+                (W('K'), T('K')),   # 16. K1 vs 3.
             ]
 
             base = KO_DATES["round_32"]

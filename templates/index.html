@@ -772,13 +772,13 @@
                 {% set cat = 'done' if match.is_finished else ('pool' if match.id in upcoming_match_ids else 'soon') %}
                 <div class="match-card p-4 sm:p-5 match-item" data-cat="{{ cat }}">
                     {% set stage_labels = {'round_32':'1/16 finału','round_16':'1/8 finału','quarter':'Ćwierćfinał','semi':'Półfinał','third_place':'Mecz o 3. miejsce','final':'Finał'} %}
-                    {% if match.stage and match.stage != 'group' %}
-                    <div class="text-center mb-3">
-                        <span class="text-[10px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full" style="{% if match.stage == 'final' %}background: rgba(251,191,36,0.12); color: var(--gold);{% else %}background: var(--accent-soft); color: var(--accent);{% endif %}">{% if match.stage == 'final' %}🏆 {% endif %}{{ stage_labels.get(match.stage, 'Faza pucharowa') }}{% if match.multiplier and match.multiplier > 1 %} · ×{{ match.multiplier }}{% endif %}</span>
-                    </div>
-                    {% endif %}
                     <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
                         <div class="flex-1 min-w-0 w-full">
+                            {% if match.stage and match.stage != 'group' %}
+                            <div class="text-center mb-3">
+                                <span class="text-[10px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full" style="{% if match.stage == 'final' %}background: rgba(251,191,36,0.12); color: var(--gold);{% else %}background: var(--accent-soft); color: var(--accent);{% endif %}">{% if match.stage == 'final' %}🏆 {% endif %}{{ stage_labels.get(match.stage, 'Faza pucharowa') }}{% if match.multiplier and match.multiplier > 1 %} · ×{{ match.multiplier }}{% endif %}</span>
+                            </div>
+                            {% endif %}
                             <div class="flex items-center gap-2 sm:gap-3 justify-between">
                                 <div class="font-semibold text-xs sm:text-sm flex-1 min-w-0 overflow-hidden whitespace-nowrap text-ellipsis text-right"><span class="team-name" data-team="{{ match.home_team }}">{{ match.home_team }}</span></div>
                                 {% if match.is_finished and match.result %}
@@ -969,33 +969,76 @@
             {% endif %}
 
             {% if knockout_bracket.round_of_32 or knockout_bracket.round_of_16 or knockout_bracket.final %}
-            <div class="px-6 pt-5 pb-1">
-                <p class="text-[11px]" style="color: var(--text-faint);">Oznaczenia: <span class="ko-pos">1A</span> = zwycięzca grupy A, <span class="ko-pos">2B</span> = drugie miejsce grupy B, <span class="ko-pos">3C</span> = trzecie miejsce grupy C.</p>
-            </div>
-            <div class="bracket-wrap px-4">
-                <div class="bracket">
-                    {% if knockout_bracket.round_of_32 %}
-                    <div class="ko-round">
-                        <div class="ko-round-title">1/16 finału</div>
-                        <div class="ko-round-body">{% for match in knockout_bracket.round_of_32 %}{{ ko_match(match, team_positions) }}{% endfor %}</div>
+            <div class="px-4 sm:px-6 pt-4 pb-6">
+                <p class="text-[11px] mb-3" style="color: var(--text-faint);">Oznaczenia: <span class="ko-pos">1A</span> = zwycięzca grupy A, <span class="ko-pos">2B</span> = drugie miejsce grupy B, <span class="ko-pos">3C</span> = trzecie miejsce grupy C.</p>
+
+                <div class="flex flex-wrap gap-1.5 sm:gap-2 mb-5">
+                    <button class="match-subtab-btn ko-subtab-btn active" data-kocat="r32" onclick="switchKoTab('r32')">1/16</button>
+                    <button class="match-subtab-btn ko-subtab-btn" data-kocat="r16" onclick="switchKoTab('r16')">1/8</button>
+                    <button class="match-subtab-btn ko-subtab-btn" data-kocat="qf" onclick="switchKoTab('qf')">Ćwierćfinał</button>
+                    <button class="match-subtab-btn ko-subtab-btn" data-kocat="sf" onclick="switchKoTab('sf')">Półfinał</button>
+                    <button class="match-subtab-btn ko-subtab-btn" data-kocat="final" onclick="switchKoTab('final')">Finał</button>
+                </div>
+
+                {% set ko_empty %}
+                <div class="text-center py-12">
+                    <div class="text-3xl mb-3">⏳</div>
+                    <p class="text-sm" style="color: var(--text-muted);">Pary tej rundy wyłonią się po rozegraniu poprzedniej.</p>
+                </div>
+                {% endset %}
+                {% set ko_grid = "display:flex; flex-direction:column; gap:10px; max-width:460px; margin:0 auto;" %}
+
+                <div class="ko-panel" data-kocat="r32">
+                    {% if knockout_bracket.round_of_32 %}<div style="{{ ko_grid }}">{% for match in knockout_bracket.round_of_32 %}{{ ko_match(match, team_positions) }}{% endfor %}</div>{% else %}{{ ko_empty }}{% endif %}
+                </div>
+                <div class="ko-panel" data-kocat="r16" style="display:none;">
+                    {% if knockout_bracket.round_of_16 %}<div style="{{ ko_grid }}">{% for match in knockout_bracket.round_of_16 %}{{ ko_match(match, team_positions) }}{% endfor %}</div>{% else %}{{ ko_empty }}{% endif %}
+                </div>
+                <div class="ko-panel" data-kocat="qf" style="display:none;">
+                    {% if knockout_bracket.quarterfinals %}<div style="{{ ko_grid }}">{% for match in knockout_bracket.quarterfinals %}{{ ko_match(match, team_positions) }}{% endfor %}</div>{% else %}{{ ko_empty }}{% endif %}
+                </div>
+                <div class="ko-panel" data-kocat="sf" style="display:none;">
+                    {% if knockout_bracket.semifinals %}<div style="{{ ko_grid }}">{% for match in knockout_bracket.semifinals %}{{ ko_match(match, team_positions) }}{% endfor %}</div>{% else %}{{ ko_empty }}{% endif %}
+                </div>
+                <div class="ko-panel" data-kocat="final" style="display:none;">
+                    {% if knockout_bracket.final %}
+                    <div class="max-w-md mx-auto rounded-2xl p-4 sm:p-5 mb-2" style="background: linear-gradient(135deg, rgba(251,191,36,0.14), rgba(251,191,36,0.03)); border: 1.5px solid rgba(251,191,36,0.5); box-shadow: 0 0 24px rgba(251,191,36,0.12);">
+                        <p class="text-center text-sm font-display font-bold uppercase tracking-[0.2em] mb-3 flex items-center justify-center gap-2" style="color: var(--gold);">🏆 Wielki Finał 🏆</p>
+                        {% for match in knockout_bracket.final %}{{ ko_match(match, team_positions, gold=true) }}{% endfor %}
+                    </div>
+                    {% else %}{{ ko_empty }}{% endif %}
+
+                    {% if champion %}
+                    <div class="mt-4 rounded-2xl p-6 flex items-center gap-4" style="background: linear-gradient(135deg, rgba(251,191,36,0.16), rgba(251,191,36,0.04)); border: 1px solid rgba(251,191,36,0.4);">
+                        <div class="text-4xl">🏆</div>
+                        <div>
+                            <p class="text-[10px] font-bold uppercase tracking-widest mb-1" style="color: var(--gold);">Mistrz Świata 2026</p>
+                            <p class="team-name font-display font-bold text-2xl" data-team="{{ champion }}" style="color: var(--gold);">{{ champion }}</p>
+                            <p class="text-xs mt-1" style="color: var(--text-faint);">Finalista: <span class="team-name" data-team="{{ runnerup }}">{{ runnerup }}</span></p>
+                        </div>
                     </div>
                     {% endif %}
-                    <div class="ko-round">
-                        <div class="ko-round-title">1/8 finału</div>
-                        <div class="ko-round-body">{% for match in knockout_bracket.round_of_16 %}{{ ko_match(match, team_positions) }}{% endfor %}</div>
+
+                    {% if knockout_bracket.third_place %}
+                    {% set tp = knockout_bracket.third_place[0] %}
+                    <div class="mt-4 max-w-md rounded-2xl p-5" style="background: rgba(205,127,50,0.08); border: 1px solid rgba(205,127,50,0.3);">
+                        <p class="text-[10px] font-bold uppercase tracking-widest mb-3 flex items-center gap-1.5" style="color: #cd7f32;">🥉 Mecz o 3. miejsce</p>
+                        {% if tp.result %}
+                        {% set tpp = tp.result.split(':') %}
+                        <div class="flex justify-between items-center text-sm mb-1.5">
+                            <span class="team-name" data-team="{{ tp.home_team }}" style="{% if tpp[0]|int > tpp[1]|int %}color: var(--success); font-weight:700;{% else %}font-weight:500;{% endif %}">{{ tp.home_team }}</span>
+                            <span class="font-mono">{{ tpp[0] }}</span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="team-name" data-team="{{ tp.away_team }}" style="{% if tpp[1]|int > tpp[0]|int %}color: var(--success); font-weight:700;{% else %}font-weight:500;{% endif %}">{{ tp.away_team }}</span>
+                            <span class="font-mono">{{ tpp[1] }}</span>
+                        </div>
+                        {% else %}
+                        <div class="flex justify-between items-center text-sm mb-1.5"><span class="team-name" data-team="{{ tp.home_team }}">{{ tp.home_team }}</span><span style="color: var(--text-faint);">—</span></div>
+                        <div class="flex justify-between items-center text-sm"><span class="team-name" data-team="{{ tp.away_team }}">{{ tp.away_team }}</span><span style="color: var(--text-faint);">—</span></div>
+                        {% endif %}
                     </div>
-                    <div class="ko-round">
-                        <div class="ko-round-title">Ćwierćfinał</div>
-                        <div class="ko-round-body">{% for match in knockout_bracket.quarterfinals %}{{ ko_match(match, team_positions) }}{% endfor %}</div>
-                    </div>
-                    <div class="ko-round">
-                        <div class="ko-round-title">Półfinał</div>
-                        <div class="ko-round-body">{% for match in knockout_bracket.semifinals %}{{ ko_match(match, team_positions) }}{% endfor %}</div>
-                    </div>
-                    <div class="ko-round">
-                        <div class="ko-round-title final">Finał</div>
-                        <div class="ko-round-body">{% for match in knockout_bracket.final %}{{ ko_match(match, team_positions, gold=true) }}{% endfor %}</div>
-                    </div>
+                    {% endif %}
                 </div>
             </div>
             {% else %}
@@ -1005,35 +1048,6 @@
                 <p class="text-sm max-w-md mx-auto" style="color: var(--text-muted);">Pary 1/16 finału powstaną po rozegraniu wszystkich meczów grupowych. Drabinka wypełni się drużynami i wynikami automatycznie.</p>
             </div>
             {% endif %}
-
-            <div class="px-6 pb-6 flex flex-col md:flex-row gap-4 justify-center items-stretch">
-                {% if champion %}
-                <div id="champion-box" class="flex-1 max-w-md rounded-2xl p-6 flex items-center gap-4" style="background: linear-gradient(135deg, rgba(251,191,36,0.16), rgba(251,191,36,0.04)); border: 1px solid rgba(251,191,36,0.4);">
-                    <div class="text-4xl">🏆</div>
-                    <div>
-                        <p class="text-[10px] font-bold uppercase tracking-widest mb-1" style="color: var(--gold);">Mistrz Świata 2026</p>
-                        <p class="team-name font-display font-bold text-2xl" data-team="{{ champion }}" style="color: var(--gold);">{{ champion }}</p>
-                        <p class="text-xs mt-1" style="color: var(--text-faint);">Finalista: <span class="team-name" data-team="{{ runnerup }}">{{ runnerup }}</span></p>
-                    </div>
-                </div>
-                {% endif %}
-
-                {% if knockout_bracket.third_place and knockout_bracket.third_place[0].result %}
-                {% set tp = knockout_bracket.third_place[0] %}
-                {% set tpp = tp.result.split(':') %}
-                <div class="flex-1 max-w-md rounded-2xl p-5" style="background: rgba(205,127,50,0.08); border: 1px solid rgba(205,127,50,0.3);">
-                    <p class="text-[10px] font-bold uppercase tracking-widest mb-3 flex items-center gap-1.5" style="color: #cd7f32;">🥉 Mecz o 3. miejsce</p>
-                    <div class="flex justify-between items-center text-sm mb-1.5">
-                        <span class="team-name" data-team="{{ tp.home_team }}" style="{% if tpp[0]|int > tpp[1]|int %}color: var(--success); font-weight:700;{% else %}font-weight:500;{% endif %}">{{ tp.home_team }}</span>
-                        <span class="font-mono">{{ tpp[0] }}</span>
-                    </div>
-                    <div class="flex justify-between items-center text-sm">
-                        <span class="team-name" data-team="{{ tp.away_team }}" style="{% if tpp[1]|int > tpp[0]|int %}color: var(--success); font-weight:700;{% else %}font-weight:500;{% endif %}">{{ tp.away_team }}</span>
-                        <span class="font-mono">{{ tpp[1] }}</span>
-                    </div>
-                </div>
-                {% endif %}
-            </div>
         </div>
 
         <div id="tab-teams" class="tab-content">
@@ -1877,6 +1891,14 @@ async function loadHistory() {
             });
         }
         window.switchGroupTab = switchGroupTab;
+
+        function switchKoTab(cat) {
+            document.querySelectorAll('.ko-subtab-btn').forEach(b => b.classList.toggle('active', b.dataset.kocat === cat));
+            document.querySelectorAll('.ko-panel').forEach(p => {
+                p.style.display = (p.dataset.kocat === cat) ? '' : 'none';
+            });
+        }
+        window.switchKoTab = switchKoTab;
 
         function initMatchSubtabs() {
             const counts = { pool: 0, soon: 0, done: 0 };
