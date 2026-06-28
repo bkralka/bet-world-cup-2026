@@ -185,10 +185,10 @@ UNDERDOG_TEAMS = {
 STAGE_MULTIPLIERS = {
     "group": 1,
     "round_32": 1,
-    "round_16": 1.5,
+    "round_16": 2,
     "quarter": 2,
-    "semi": 2.5,
-    "final": 3
+    "semi": 3,
+    "final": 4
 }
 
 def streak_bonus(streak: int) -> int:
