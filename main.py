@@ -1148,8 +1148,9 @@ def advance_tournament_if_ready(db):
 
             # Wymuszone, potwierdzone przypisania wg oficjalnej tabeli FIFA / FlashScore
             # (stosowane tylko jeśli dana grupa 3. miejsca faktycznie się zakwalifikowała):
-            #   Niemcy(E1)→3.(D) · Francja(I1)→3.(F) · USA(D1)→3.(B)
-            FORCED_THIRD = {"E": "D", "I": "F", "D": "B"}
+            #   E1→D(Paragwaj) · I1→F(Szwecja) · D1→B(Bośnia) · A1→E(Ekwador)
+            #   G1→I(Senegal) · B1→J(Algieria) · L1→K(DR Konga) · K1→L(Ghana)
+            FORCED_THIRD = {"E": "D", "I": "F", "D": "B", "A": "E", "G": "I", "B": "J", "L": "K", "K": "L"}
             assigned_group = {}   # third_group -> winner_group
             for _wg, _tg in FORCED_THIRD.items():
                 if _tg in third_groups:
@@ -1212,9 +1213,28 @@ def advance_tournament_if_ready(db):
                 (W('K'), T('K')),   # 16. K1 vs 3.
             ]
 
-            base = KO_DATES["round_32"]
+            # Konkretne daty meczów 1/16 — kolejność dokładnie jak bracket_order powyżej
+            R32_DATES = [
+                datetime(2026, 6, 29, 22, 30),  # 1.  Niemcy vs Paragwaj
+                datetime(2026, 6, 30, 23, 0),   # 2.  Francja vs Szwecja
+                datetime(2026, 6, 28, 21, 0),   # 3.  RPA vs Kanada
+                datetime(2026, 6, 30, 3, 0),    # 4.  Holandia vs Maroko
+                datetime(2026, 7, 3, 1, 0),     # 5.  Portugalia vs Chorwacja
+                datetime(2026, 7, 2, 21, 0),    # 6.  Hiszpania vs Austria
+                datetime(2026, 7, 2, 2, 0),     # 7.  USA vs Bośnia
+                datetime(2026, 7, 1, 22, 0),    # 8.  Belgia vs Senegal
+                datetime(2026, 6, 29, 19, 0),   # 9.  Brazylia vs Japonia
+                datetime(2026, 6, 30, 19, 0),   # 10. WKS vs Norwegia
+                datetime(2026, 7, 1, 3, 0),     # 11. Meksyk vs Ekwador
+                datetime(2026, 7, 1, 18, 0),    # 12. Anglia vs DR Konga
+                datetime(2026, 7, 4, 0, 0),     # 13. Argentyna vs RZP
+                datetime(2026, 7, 3, 20, 0),    # 14. Australia vs Egipt
+                datetime(2026, 7, 3, 5, 0),     # 15. Szwajcaria vs Algieria
+                datetime(2026, 7, 4, 3, 30),    # 16. Kolumbia vs Ghana
+            ]
             for i, (home, away) in enumerate(bracket_order):
-                _ko_create(db, home, away, "round_32", base + timedelta(days=i//4, hours=(i%4)*3))
+                when = R32_DATES[i] if i < len(R32_DATES) else KO_DATES["round_32"] + timedelta(days=i//4, hours=(i%4)*3)
+                _ko_create(db, home, away, "round_32", when)
 
     # 2) Kolejne rundy — buduj/aktualizuj na bieżąco
     TBD = "—"
@@ -1293,6 +1313,31 @@ def admin_advance(db: Session = Depends(get_db)):
         "round_32_przed": before,
         "round_32_po": after,
         "grupy_niekompletne": incomplete,
+    }
+
+@app.post("/admin/rebuild-bracket", dependencies=[Depends(verify_admin)])
+def admin_rebuild_bracket(db: Session = Depends(get_db)):
+    """Kasuje całą drabinkę pucharową i buduje ją od nowa z aktualnym przypisaniem 3. miejsc i datami.
+    Lekkie — NIE przelicza punktów graczy (brak ryzyka OOM). Nie rusza fazy grupowej."""
+    ko_stages = ["round_32", "round_16", "quarter", "semi", "final", "third_place"]
+    ko_matches = db.query(models.Match).filter(models.Match.stage.in_(ko_stages)).all()
+    ko_ids = [m.id for m in ko_matches]
+    removed_picks = 0
+    if ko_ids:
+        removed_picks = db.query(models.UserPick).filter(
+            models.UserPick.match_id.in_(ko_ids)
+        ).delete(synchronize_session=False)
+        db.query(models.Match).filter(
+            models.Match.id.in_(ko_ids)
+        ).delete(synchronize_session=False)
+        db.commit()
+    advance_tournament_if_ready(db)
+    built = db.query(models.Match).filter(models.Match.stage == "round_32").count()
+    return {
+        "status": "ok",
+        "usuniete_mecze_pucharowe": len(ko_ids),
+        "usuniete_typy_pucharowe": removed_picks,
+        "round_32_po_przebudowie": built,
     }
 
 @app.put("/matches/{match_id}/result", dependencies=[Depends(verify_admin)])
@@ -1636,6 +1681,7 @@ def admin_panel(request: Request, db: Session = Depends(get_db)):
                     <input type="password" id="admin-secret-input" placeholder="Klucz ADMIN_SECRET" class="bg-[#1a1e26] border border-white/5 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500 w-40">
                     <button onclick="saveSecret()" class="bg-white/10 hover:bg-white/20 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition">Zapisz</button>
                     <button onclick="buildKnockout()" class="bg-emerald-600/20 text-emerald-400 border border-emerald-600/30 hover:bg-emerald-600 hover:text-white text-xs font-bold px-3 py-1.5 rounded-lg transition">🏆 Zbuduj Drabinkę</button>
+                    <button onclick="rebuildKnockout()" class="bg-amber-600/20 text-amber-400 border border-amber-600/30 hover:bg-amber-600 hover:text-white text-xs font-bold px-3 py-1.5 rounded-lg transition">♻️ Przebuduj Drabinkę</button>
                     <button onclick="recalculateAll()" class="bg-rose-600/20 text-rose-400 border border-rose-600/30 hover:bg-rose-600 hover:text-white text-xs font-bold px-3 py-1.5 rounded-lg transition">⚠️ Przelicz wszystko</button>
                 </div>
             </div>
@@ -1802,6 +1848,17 @@ def admin_panel(request: Request, db: Session = Depends(get_db)):
                 try {{
                     const r = await fetch('/admin/advance', {{ method: 'POST', headers: {{ 'x-admin-secret': secret }} }});
                     if (r.ok) {{ alert('Gotowe! Drabinka zaktualizowana.'); location.reload(); }}
+                    else {{ const e = await r.json(); alert('Błąd: ' + JSON.stringify(e.detail || e)); }}
+                }} catch (err) {{ alert('Błąd: ' + err); }}
+            }}
+
+            async function rebuildKnockout() {{
+                const secret = document.getElementById('admin-secret-input').value.trim();
+                if (!secret) return alert('Najpierw podaj ADMIN_SECRET!');
+                if (!confirm('Przebudować drabinkę OD NOWA? Skasuje obecną drabinkę (i ewentualne typy na mecze pucharowe) i zbuduje ją ponownie z poprawnym przypisaniem 3. miejsc i datami. Faza grupowa, punkty i typy grupowe NIE są ruszane.')) return;
+                try {{
+                    const r = await fetch('/admin/rebuild-bracket', {{ method: 'POST', headers: {{ 'x-admin-secret': secret }} }});
+                    if (r.ok) {{ const d = await r.json(); alert('Gotowe! Drabinka przebudowana. Mecze 1/16: ' + d.round_32_po_przebudowie + ', usunięte stare: ' + d.usuniete_mecze_pucharowe); location.reload(); }}
                     else {{ const e = await r.json(); alert('Błąd: ' + JSON.stringify(e.detail || e)); }}
                 }} catch (err) {{ alert('Błąd: ' + err); }}
             }}
