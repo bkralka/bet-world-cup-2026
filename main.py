@@ -541,7 +541,7 @@ def build_knockout_bracket(db: Session):
     }
     knockout_matches = db.query(models.Match).filter(
         models.Match.stage.in_(["round_32", "round_16", "quarter", "semi", "final", "third_place"])
-    ).order_by(models.Match.match_date).all()
+    ).order_by(models.Match.id).all()
 
     for match in knockout_matches:
         if match.stage == "round_32": bracket["round_of_32"].append(match)
@@ -1055,8 +1055,32 @@ KO_DATES = {
     "round_16": datetime(2026, 7, 4, 18, 0),
     "quarter": datetime(2026, 7, 9, 18, 0),
     "semi": datetime(2026, 7, 14, 18, 0),
-    "third_place": datetime(2026, 7, 18, 18, 0),
-    "final": datetime(2026, 7, 19, 18, 0),
+    "third_place": datetime(2026, 7, 18, 23, 0),
+    "final": datetime(2026, 7, 19, 21, 0),
+}
+
+# Konkretne daty meczów dalszych rund — kolejność = kolejność PAR w drabince (NIE chronologiczna).
+KO_ROUND_DATES = {
+    "round_16": [
+        datetime(2026, 7, 4, 23, 0),   # 1  Niemcy/Paragwaj – Francja/Szwecja
+        datetime(2026, 7, 4, 19, 0),   # 2  RPA/Kanada – Holandia/Maroko
+        datetime(2026, 7, 6, 21, 0),   # 3  Portugalia/Chorwacja – Hiszpania/Austria
+        datetime(2026, 7, 7, 2, 0),    # 4  USA/Bośnia – Belgia/Senegal
+        datetime(2026, 7, 5, 22, 0),   # 5  Brazylia/Japonia – WKS/Norwegia
+        datetime(2026, 7, 6, 2, 0),    # 6  Meksyk/Ekwador – Anglia/DR Konga
+        datetime(2026, 7, 7, 18, 0),   # 7  Argentyna/RZP – Australia/Egipt
+        datetime(2026, 7, 7, 22, 0),   # 8  Szwajcaria/Algieria – Kolumbia/Ghana
+    ],
+    "quarter": [
+        datetime(2026, 7, 9, 22, 0),   # 1
+        datetime(2026, 7, 10, 21, 0),  # 2
+        datetime(2026, 7, 11, 23, 0),  # 3
+        datetime(2026, 7, 12, 3, 0),   # 4
+    ],
+    "semi": [
+        datetime(2026, 7, 14, 21, 0),  # 1
+        datetime(2026, 7, 15, 21, 0),  # 2
+    ],
 }
 
 def _ko_winner(match):
@@ -1244,28 +1268,32 @@ def advance_tournament_if_ready(db):
     for stage, nxt in [("round_32", "round_16"), ("round_16", "quarter"), ("quarter", "semi")]:
         if not has(stage):
             continue
-        prev = db.query(models.Match).filter(models.Match.stage == stage).order_by(models.Match.match_date, models.Match.id).all()
+        # WAŻNE: kolejność wg id (kolejność tworzenia = kolejność par w drabince),
+        # NIE wg match_date — bo daty nie są chronologiczne i zepsułyby parowanie.
+        prev = db.query(models.Match).filter(models.Match.stage == stage).order_by(models.Match.id).all()
         n_pairs = len(prev) // 2
         if n_pairs == 0:
             continue
-        existing = db.query(models.Match).filter(models.Match.stage == nxt).order_by(models.Match.match_date, models.Match.id).all()
-        base = KO_DATES[nxt]
+        existing = db.query(models.Match).filter(models.Match.stage == nxt).order_by(models.Match.id).all()
+        date_list = KO_ROUND_DATES.get(nxt, [])
         for i in range(n_pairs):
             home = slot_winner(prev[2*i])
             away = slot_winner(prev[2*i+1])
+            when = date_list[i] if i < len(date_list) else KO_DATES[nxt] + timedelta(days=i//2)
             if i < len(existing):
                 nm = existing[i]
                 if not nm.is_finished:
                     nm.home_team = home
                     nm.away_team = away
+                    nm.match_date = when
             else:
-                db.add(models.Match(home_team=home, away_team=away, match_date=base + timedelta(days=i//2),
+                db.add(models.Match(home_team=home, away_team=away, match_date=when,
                                     stage=nxt, multiplier=STAGE_MULTIPLIERS.get(nxt, 1), is_locked=False, is_finished=False, result=None))
         db.commit()
 
     # 3) Półfinały → finał + mecz o 3. miejsce
     if has("semi"):
-        sm = db.query(models.Match).filter(models.Match.stage == "semi").order_by(models.Match.match_date, models.Match.id).all()
+        sm = db.query(models.Match).filter(models.Match.stage == "semi").order_by(models.Match.id).all()
         if len(sm) >= 2:
             fh, fa = slot_winner(sm[0]), slot_winner(sm[1])
             lh, la = (_ko_loser(sm[0]) or TBD), (_ko_loser(sm[1]) or TBD)
