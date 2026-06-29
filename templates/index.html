@@ -788,7 +788,7 @@
                                 {% endif %}
                                 <div class="font-semibold text-xs sm:text-sm flex-1 min-w-0 overflow-hidden whitespace-nowrap text-ellipsis text-left"><span class="team-name" data-team="{{ match.away_team }}">{{ match.away_team }}</span></div>
                             </div>
-                            <p class="text-center text-xs mt-2.5" style="color: var(--text-muted);">{{ match.match_date.strftime('%d.%m.%Y · %H:%M') }}{% if match.is_finished and match.penalties %} · <span style="color: var(--gold);">karne {{ match.penalties }}</span>{% endif %}</p>
+                            <p class="text-center text-xs mt-2.5" style="color: var(--text-muted);">{{ match.match_date.strftime('%d.%m.%Y · %H:%M') }}{% if match.is_finished and match.penalties %} · <span style="color: var(--gold);">karne {{ match.penalties }}</span>{% elif match.is_finished and match.ko_advance %} · <span style="color: var(--gold);">po dogrywce → {{ match.ko_advance }}</span>{% endif %}</p>
 
                             {% if match.is_finished and match.goal_sides.rows %}
                             {% if match.goal_sides.has_sides %}
@@ -933,7 +933,7 @@
                 {% set apos = positions.get(match.away_team) %}
                 <div class="ko-match">
                     <div class="ko-card2" {% if gold %}style="border-color: rgba(251,191,36,0.4);"{% endif %}>
-                        {% if match.match_date %}<div class="ko-date">{{ match.match_date.strftime('%d.%m · %H:%M') }}{% if pen %}  ·  <span style="color: var(--gold);">karne {{ match.penalties }}</span>{% endif %}</div>{% endif %}
+                        {% if match.match_date %}<div class="ko-date">{{ match.match_date.strftime('%d.%m · %H:%M') }}{% if pen %}  ·  <span style="color: var(--gold);">karne {{ match.penalties }}</span>{% elif match.ko_advance %}  ·  <span style="color: var(--gold);">po dogrywce → {{ match.ko_advance }}</span>{% endif %}</div>{% endif %}
                         <div class="ko-row">
                             <span class="flex items-center gap-1.5 min-w-0">
                                 {% if hpos %}<span class="ko-pos">{{ hpos }}</span>{% endif %}

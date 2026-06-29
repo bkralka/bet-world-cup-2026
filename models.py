@@ -40,6 +40,9 @@ class Match(Base):
     match_date = Column(DateTime)
     result = Column(String, nullable=True) 
     penalties = Column(String, nullable=True)  # wynik karnych przy remisie w fazie pucharowej, np. "4:3"
+    # Kto awansował przy remisie po 90 min (dogrywka LUB karne) — nazwa drużyny.
+    # WAŻNE: 'result' zawsze trzyma wynik po 90 min (do punktów); to pole tylko rozstrzyga drabinkę.
+    ko_advance = Column(String, nullable=True)
     is_locked = Column(Boolean, default=False)
     is_finished = Column(Boolean, default=False)
     stage = Column(String, default="group") 

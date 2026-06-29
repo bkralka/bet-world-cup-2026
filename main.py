@@ -61,6 +61,7 @@ def ensure_columns():
             ("scorer_minutes", "JSON DEFAULT '[]'::json"),
             ("multiplier", "INTEGER DEFAULT 1"),
             ("penalties", "VARCHAR"),
+            ("ko_advance", "VARCHAR"),
         ],
         "user_picks": [
             ("points_breakdown", "JSON"),
@@ -159,6 +160,7 @@ class MatchResultUpdate(BaseModel):
     scorer_teams: List[str] = []
     scorer_minutes: List[Optional[str]] = []
     penalties: Optional[str] = None
+    ko_advance: Optional[str] = None  # nazwa drużyny, która awansowała przy remisie po 90 min (dogrywka/karne)
 
     @validator('result')
     def validate_result_format(cls, v):
@@ -940,6 +942,7 @@ def get_player_picks_public(player_id: int, db: Session = Depends(get_db)):
             "hidden": False,
             "actual_result": m.result,
             "penalties": m.penalties if m.is_finished else None,
+            "ko_advance": m.ko_advance if m.is_finished else None,
             "scorers": m.scorers or [],
             "star_player": star,
             "points_earned": pick.points_earned,
@@ -1084,19 +1087,23 @@ KO_ROUND_DATES = {
 }
 
 def _ko_winner(match):
-    """Zwycięzca meczu pucharowego. Przy remisie po 90 min decydują karne (pole penalties)."""
+    """Zwycięzca meczu pucharowego (do drabinki). 'result' to wynik po 90 min (do punktów).
+    Przy remisie po 90 min o awansie decyduje ko_advance (dogrywka/karne) lub pole penalties."""
     if not match.result: return None
     h, a = map(int, match.result.split(":"))
     if h > a: return match.home_team
     if a > h: return match.away_team
-    # remis — rozstrzygają karne
+    # remis po 90 min — najpierw jawnie wskazany awans (dogrywka lub karne)
+    if match.ko_advance:
+        return match.ko_advance
+    # zgodność wstecz: jeśli podano tylko karne, wylicz z nich
     if match.penalties:
         try:
             ph, pa = map(int, match.penalties.split(":"))
             return match.home_team if ph > pa else match.away_team
         except (ValueError, AttributeError):
             return None
-    return None  # remis bez karnych — nie można wyłonić zwycięzcy
+    return None  # remis bez wskazania awansu — nie można wyłonić zwycięzcy
 
 def _ko_loser(match):
     if not match.result: return None
@@ -1380,6 +1387,12 @@ def update_match_result(match_id: int, result: MatchResultUpdate, db: Session = 
     match.scorer_teams = result.scorer_teams
     match.scorer_minutes = result.scorer_minutes
     match.penalties = result.penalties
+    # Awans przy remisie po 90 min (dogrywka/karne). Gdy wynik nie jest remisem, czyścimy.
+    try:
+        _rh, _ra = map(int, result.result.split(":"))
+        match.ko_advance = result.ko_advance if _rh == _ra else None
+    except (ValueError, AttributeError):
+        match.ko_advance = result.ko_advance
     match.is_finished = True
     match.is_locked = True
     db.commit()
@@ -1517,6 +1530,7 @@ def get_player_history(player_id: int, db: Session = Depends(get_db)):
             "predicted_result": pick.predicted_result,
             "actual_result": match.result if match.is_finished else None,
             "penalties": match.penalties if match.is_finished else None,
+            "ko_advance": match.ko_advance if match.is_finished else None,
             "scorers": match.scorers or [],
             "star_player": star,
             "stage": match.stage,
@@ -1616,6 +1630,14 @@ def admin_panel(request: Request, db: Session = Depends(get_db)):
         away_scorers_val = ", ".join(_away_sc)
         is_ko = m.stage != "group"
         pen_input = f'<input type="text" id="pen-{m.id}" value="{m.penalties or ""}" placeholder="Karne (np. 4:3)" class="w-full bg-[#1a1e26] border border-white/10 rounded-lg px-3 py-2 text-xs text-amber-300 focus:outline-none focus:border-amber-500 mb-2">' if is_ko else ""
+        adv_input = (
+            f'<select id="adv-{m.id}" class="w-full bg-[#1a1e26] border border-white/10 rounded-lg px-3 py-2 text-xs text-amber-300 focus:outline-none focus:border-amber-500 mb-2">'
+            f'<option value="">Awans: automatycznie (zwycięzca 90 min)</option>'
+            f'<option value="{m.home_team}"{" selected" if m.ko_advance == m.home_team else ""}>Awans po remisie: {m.home_team}</option>'
+            f'<option value="{m.away_team}"{" selected" if m.ko_advance == m.away_team else ""}>Awans po remisie: {m.away_team}</option>'
+            f'</select>'
+            f'<p class="text-[10px] text-gray-500 mb-2 leading-snug">Wynik wpisuj zawsze po 90 min (do punktów). Jeśli remis i ktoś awansował w dogrywce/karnych — wybierz go wyżej. Karne wpisz tylko gdy chcesz pokazać ich wynik.</p>'
+        ) if is_ko else ""
         
         date_str = m.match_date.strftime("%d.%m %H:%M") if m.match_date else ""
         card_class = "match-card p-4 rounded-xl border bg-[#14171d] flex flex-col gap-3 shadow-sm transition hover:border-white/20"
@@ -1623,7 +1645,12 @@ def admin_panel(request: Request, db: Session = Depends(get_db)):
 
         if m.is_finished:
             finished_count += 1
-            pen_label = f' <span class="text-amber-500 text-xs">(k. {m.penalties})</span>' if m.penalties else ''
+            if m.penalties:
+                pen_label = f' <span class="text-amber-500 text-xs">(k. {m.penalties})</span>'
+            elif m.ko_advance:
+                pen_label = f' <span class="text-amber-500 text-xs">(po dogr. → {m.ko_advance})</span>'
+            else:
+                pen_label = ''
             finished_html += f"""
             <div class="{card_class} border-white/5" data-teams="{search_data}">
                 <div class="flex items-center justify-between border-b border-white/5 pb-2">
@@ -1643,6 +1670,7 @@ def admin_panel(request: Request, db: Session = Depends(get_db)):
                         </div>
                     </div>
                     {pen_input}
+                    {adv_input}
                     <button onclick="saveMatch({m.id})" class="w-full bg-white/10 hover:bg-white/20 text-white font-bold text-xs py-2 rounded-lg transition">Aktualizuj wynik</button>
                 </div>
             </div>
@@ -1667,6 +1695,7 @@ def admin_panel(request: Request, db: Session = Depends(get_db)):
                         </div>
                     </div>
                     {pen_input}
+                    {adv_input}
                     <button onclick="saveMatch({m.id})" class="w-full bg-amber-500 hover:bg-amber-600 text-gray-900 font-bold text-xs py-2.5 rounded-lg transition shadow-md">Rozlicz Punkty</button>
                 </div>
             </div>
@@ -1910,13 +1939,15 @@ def admin_panel(request: Request, db: Session = Depends(get_db)):
                 const awayEl = document.getElementById('sca-' + matchId);
                 const penEl = document.getElementById('pen-' + matchId);
                 const penString = penEl ? penEl.value.trim() : '';
+                const advEl = document.getElementById('adv-' + matchId);
+                const advString = advEl ? advEl.value.trim() : '';
 
-                if (!resultString) return alert('Błąd: Podaj ostateczny wynik (np. 2:1)');
+                if (!resultString) return alert('Błąd: Podaj wynik po 90 min (np. 2:1)');
 
                 if (penEl) {{
                     const rp = resultString.split(':');
-                    if (rp.length === 2 && rp[0].trim() === rp[1].trim() && !penString) {{
-                        return alert('To mecz pucharowy z remisem — podaj wynik karnych (np. 4:3).');
+                    if (rp.length === 2 && rp[0].trim() === rp[1].trim() && !penString && !advString) {{
+                        return alert('To mecz pucharowy zakończony remisem po 90 min — wybierz kto awansował (dogrywka/karne) lub podaj wynik karnych.');
                     }}
                 }}
 
@@ -1944,7 +1975,7 @@ def admin_panel(request: Request, db: Session = Depends(get_db)):
                     const response = await fetch('/matches/' + matchId + '/result', {{
                         method: 'PUT',
                         headers: {{ 'Content-Type': 'application/json', 'x-admin-secret': secret }},
-                        body: JSON.stringify({{ result: resultString, scorers: scorersArray, scorer_teams: scorerTeamsArray, scorer_minutes: scorerMinutesArray, penalties: penString || null }})
+                        body: JSON.stringify({{ result: resultString, scorers: scorersArray, scorer_teams: scorerTeamsArray, scorer_minutes: scorerMinutesArray, penalties: penString || null, ko_advance: advString || null }})
                     }});
 
                     if (response.ok) {{
