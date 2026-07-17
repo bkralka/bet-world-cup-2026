@@ -190,6 +190,7 @@ STAGE_MULTIPLIERS = {
     "round_16": 2,
     "quarter": 2,
     "semi": 3,
+    "third_place": 3,
     "final": 4
 }
 
@@ -1319,7 +1320,7 @@ def advance_tournament_if_ready(db):
                     et.home_team, et.away_team = lh, la
             else:
                 db.add(models.Match(home_team=lh, away_team=la, match_date=KO_DATES["third_place"], stage="third_place",
-                                    multiplier=STAGE_MULTIPLIERS.get("third_place", 2), is_locked=False, is_finished=False, result=None))
+                                    multiplier=STAGE_MULTIPLIERS.get("third_place", 3), is_locked=False, is_finished=False, result=None))
             db.commit()
 
     db.commit()
